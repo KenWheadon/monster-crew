@@ -130,16 +130,40 @@
             align-items: center;
             z-index: 1000;
             backdrop-filter: blur(8px);
+            perspective: 1500px;
         }
 
-        .inspector-content {
+        .inspector-inner {
+            width: 450px;
+            height: 600px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .inspector-front, .inspector-back {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            backface-visibility: hidden;
             background: var(--accent-color);
-            width: 500px;
-            padding: 40px;
             border-radius: 20px;
             border: 4px solid var(--text-color);
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .inspector-front {
+            padding: 30px;
+            align-items: center;
+        }
+
+        .inspector-back {
+            transform: rotateY(180deg);
+            padding: 30px;
             text-align: center;
-            position: relative;
+            justify-content: center;
         }
 
         .ins-type { text-transform: uppercase; letter-spacing: 2px; color: #aaa; margin-bottom: 10px; }
@@ -237,17 +261,17 @@
             </div>
 
             <div id="squad-view">
-                <div class="slot" onclick="inspectSlot('squad', 0)"></div>
-                <div class="slot" onclick="inspectSlot('squad', 1)"></div>
-                <div class="slot" onclick="inspectSlot('squad', 2)"></div>
-                <div class="slot" onclick="inspectSlot('squad', 3)"></div>
-                <div class="slot" onclick="inspectSlot('squad', 4)"></div>
+                <div class="slot" onclick="inspectSlot('squad', 0, this)"></div>
+                <div class="slot" onclick="inspectSlot('squad', 1, this)"></div>
+                <div class="slot" onclick="inspectSlot('squad', 2, this)"></div>
+                <div class="slot" onclick="inspectSlot('squad', 3, this)"></div>
+                <div class="slot" onclick="inspectSlot('squad', 4, this)"></div>
             </div>
 
             <div id="shop-view">
-                <div class="slot" onclick="inspectSlot('shop', 0)"></div>
-                <div class="slot" onclick="inspectSlot('shop', 1)"></div>
-                <div class="slot" onclick="inspectSlot('shop', 2)"></div>
+                <div class="slot" onclick="inspectSlot('shop', 0, this)"></div>
+                <div class="slot" onclick="inspectSlot('shop', 1, this)"></div>
+                <div class="slot" onclick="inspectSlot('shop', 2, this)"></div>
             </div>
         </main>
 
@@ -258,21 +282,31 @@
     </div>
 
     <div id="inspector" onclick="closeInspector()">
-        <div class="inspector-content" onclick="event.stopPropagation()">
-            <div id="ins-type" class="ins-type">Human</div>
-            <h1 id="ins-name">Soldier</h1>
-            <img id="ins-image" class="ins-image" src="" alt="Monster Inspector Image">
-            <div id="ins-stats" style="font-size: 2em; font-weight: bold;">
-                <span class="c-atk" id="ins-atk">2</span> / <span class="c-hp" id="ins-hp">3</span>
+        <div class="inspector-inner" id="inspector-inner" onclick="event.stopPropagation()">
+            <div class="inspector-front">
+                <div class="card-level" id="ins-front-level" style="font-size: 1.5em; padding: 10px 20px; top: -15px; right: -15px;">LVL 1</div>
+                <img id="ins-front-image" src="" alt="Monster" style="width: 100%; height: 60%; object-fit: contain; margin: auto 0;">
+                <div class="card-stats" style="width: 100%; font-size: 2.5em; display: flex; justify-content: space-between; margin-top: auto;">
+                    <span class="c-atk" id="ins-front-atk">⚔️ 0</span>
+                    <span class="c-hp" id="ins-front-hp">🛡️ 0</span>
+                </div>
             </div>
-            <div id="ins-effect" class="ins-effect">TEAM: +1/+1 for each Human.</div>
-            <div id="ins-flavor" class="ins-flavor">He just wants to go home and nap.</div>
-            
-            <div id="ins-actions" style="margin-top: 30px; display:flex; justify-content: center; gap: 15px;">
-                <button class="btn-main" id="ins-buy-btn">BUY (5💰)</button>
-                <button class="btn-sec" id="ins-sac-btn">SACRIFICE</button>
-                <button class="btn-sec" id="ins-merge-btn" style="background: var(--gold-color); color: black;">MERGE</button>
-                <button class="btn-sec" onclick="closeInspector()">CLOSE</button>
+            <div class="inspector-back">
+                <div id="ins-type" class="ins-type">Human</div>
+                <h1 id="ins-name" style="margin: 10px 0;">Soldier</h1>
+                <img id="ins-image" class="ins-image" src="" alt="Monster Inspector Image" style="margin: 10px auto; max-height: 120px;">
+                <div id="ins-stats" style="font-size: 2em; font-weight: bold;">
+                    <span class="c-atk" id="ins-atk">2</span> / <span class="c-hp" id="ins-hp">3</span>
+                </div>
+                <div id="ins-effect" class="ins-effect">TEAM: +1/+1 for each Human.</div>
+                <div id="ins-flavor" class="ins-flavor">He just wants to go home and nap.</div>
+                
+                <div id="ins-actions" style="margin-top: auto; display:flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-main" id="ins-buy-btn">BUY (5💰)</button>
+                    <button class="btn-sec" id="ins-sac-btn">SACRIFICE</button>
+                    <button class="btn-sec" id="ins-merge-btn" style="background: var(--gold-color); color: black;">MERGE</button>
+                    <button class="btn-sec" onclick="closeInspector()">CLOSE</button>
+                </div>
             </div>
         </div>
     </div>
@@ -359,26 +393,39 @@
         /**
          * INSPECTOR & MODAL LOGIC
          */
-        function inspectSlot(type, index) {
+        function inspectSlot(type, index, element) {
             const monster = type === 'shop' ? state.shop[index] : state.squad[index];
             if (!monster) return;
 
+            openInspector(monster, type, index, element);
+        }
+
+        function openInspector(monster, type, index, element) {
             state.currentlyInspecting = { monster, type, index };
             state.isPaused = true;
 
-            // Fill Modal
+            const lvl = monster.level || 1;
+            const atk = monster.cAtk !== undefined ? monster.cAtk : monster.atk;
+            const hp = monster.cHp !== undefined ? monster.cHp : monster.hp;
+
+            // Fill Front
+            document.getElementById('ins-front-level').innerText = `LVL ${lvl}`;
+            document.getElementById('ins-front-image').src = monster.image;
+            document.getElementById('ins-front-atk').innerText = `⚔️ ${atk}`;
+            document.getElementById('ins-front-hp').innerText = `🛡️ ${hp}`;
+
+            // Fill Back
             document.getElementById('ins-type').innerText = monster.type;
             document.getElementById('ins-name').innerText = monster.name;
             document.getElementById('ins-image').src = monster.image;
-            document.getElementById('ins-atk').innerText = monster.atk;
-            document.getElementById('ins-hp').innerText = monster.hp;
+            document.getElementById('ins-atk').innerText = atk;
+            document.getElementById('ins-hp').innerText = hp;
             document.getElementById('ins-effect').innerText = monster.effectDesc;
             document.getElementById('ins-flavor').innerText = `"${monster.flavor}"`;
 
             // Buttons
             const buyBtn = document.getElementById('ins-buy-btn');
             const sacBtn = document.getElementById('ins-sac-btn');
-            
             const mergeBtn = document.getElementById('ins-merge-btn');
 
             buyBtn.style.display = type === 'shop' ? 'block' : 'none';
@@ -388,32 +435,63 @@
             sacBtn.style.display = type === 'squad' ? 'block' : 'none';
             sacBtn.onclick = () => sacrificeMonster(index);
 
-            // Check if mergeable
             let canMerge = false;
             let mergeTargets = [];
             if (type === 'squad') {
-                const lvl = monster.level || 1;
                 for (let i = 0; i < state.squad.length; i++) {
                     const sm = state.squad[i];
                     if (sm && sm.id === monster.id && (sm.level || 1) === lvl && i !== index) {
                         mergeTargets.push(i);
                     }
                 }
-                if (mergeTargets.length >= 2) {
-                    canMerge = true;
-                }
+                if (mergeTargets.length >= 2) canMerge = true;
             }
-
             mergeBtn.style.display = canMerge ? 'block' : 'none';
             mergeBtn.onclick = () => mergeMonster(index, mergeTargets.slice(0, 2));
 
-            document.getElementById('inspector').style.display = 'flex';
+            // Animation
+            const inspector = document.getElementById('inspector');
+            const inner = document.getElementById('inspector-inner');
+            
+            inspector.style.display = 'flex';
+            inspector.style.opacity = '0';
+            
+            if (element) {
+                const rect = element.getBoundingClientRect();
+                const scaleX = rect.width / 450;
+                const tx = (rect.left + rect.width / 2) - (window.innerWidth / 2);
+                const ty = (rect.top + rect.height / 2) - (window.innerHeight / 2);
+                
+                inner.style.transition = 'none';
+                inner.style.transform = `translate(${tx}px, ${ty}px) scale(${scaleX}) rotateY(0deg)`;
+                
+                // Force reflow
+                void inner.offsetWidth;
+            } else {
+                inner.style.transition = 'none';
+                inner.style.transform = 'scale(0.5) rotateY(0deg)';
+                void inner.offsetWidth;
+            }
+            
+            inspector.style.transition = 'opacity 0.3s';
+            inspector.style.opacity = '1';
+            
+            inner.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            inner.style.transform = 'translate(0, 0) scale(1) rotateY(180deg)';
         }
 
         function closeInspector() {
-            document.getElementById('inspector').style.display = 'none';
-            state.isPaused = false;
-            state.currentlyInspecting = null;
+            const inspector = document.getElementById('inspector');
+            const inner = document.getElementById('inspector-inner');
+            
+            inspector.style.opacity = '0';
+            inner.style.transform = 'scale(0.8) rotateY(180deg)';
+            
+            setTimeout(() => {
+                inspector.style.display = 'none';
+                state.isPaused = false;
+                state.currentlyInspecting = null;
+            }, 300);
         }
 
         function buyMonster(index) {
@@ -598,9 +676,9 @@
             battleData.ally.forEach(m => {
                 const div = document.createElement('div');
                 div.className = 'slot filled';
-                div.onclick = () => {
+                div.onclick = function() {
                     // Custom inspect for battle
-                    inspectMonsterOnly(m);
+                    inspectMonsterOnly(m, this);
                 }
                 renderCard(div, { ...m, atk: m.cAtk, hp: m.cHp });
                 allyLine.appendChild(div);
@@ -609,26 +687,16 @@
             battleData.enemy.forEach(m => {
                 const div = document.createElement('div');
                 div.className = 'slot filled';
-                div.onclick = () => {
-                    inspectMonsterOnly(m);
+                div.onclick = function() {
+                    inspectMonsterOnly(m, this);
                 }
                 renderCard(div, { ...m, atk: m.cAtk, hp: m.cHp });
                 enemyLine.appendChild(div);
             });
         }
 
-        function inspectMonsterOnly(m) {
-            state.isPaused = true;
-            document.getElementById('ins-type').innerText = m.type;
-            document.getElementById('ins-name').innerText = m.name;
-            document.getElementById('ins-image').src = m.image;
-            document.getElementById('ins-atk').innerText = m.cAtk;
-            document.getElementById('ins-hp').innerText = m.cHp;
-            document.getElementById('ins-effect').innerText = m.effectDesc;
-            document.getElementById('ins-flavor').innerText = `"${m.flavor}"`;
-            document.getElementById('ins-buy-btn').style.display = 'none';
-            document.getElementById('ins-sac-btn').style.display = 'none';
-            document.getElementById('inspector').style.display = 'flex';
+        function inspectMonsterOnly(m, element) {
+            openInspector(m, 'battle', null, element);
         }
 
         init();
