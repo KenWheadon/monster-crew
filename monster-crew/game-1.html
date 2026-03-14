@@ -1064,14 +1064,15 @@
             }
             
             if (state.characters) {
-                state.characters.forEach(c => {
-                    if (c.id !== state.character?.id && c.id !== state.currentOpponent?.id && c.hp > 0) {
-                        if (Math.random() < 0.4) {
-                            c.hp -= (state.round + Math.floor(Math.random() * 3));
-                            if (c.hp <= 0) c.hp = 0;
-                        }
+                let bystanders = state.characters.filter(c => c.id !== state.character?.id && c.id !== state.currentOpponent?.id && c.hp > 0);
+                
+                for (let i = 0; i < bystanders.length; i += 2) {
+                    if (i + 1 < bystanders.length) {
+                        let loser = Math.random() < 0.5 ? bystanders[i] : bystanders[i + 1];
+                        loser.hp -= (state.round + Math.floor(Math.random() * 3));
+                        if (loser.hp <= 0) loser.hp = 0;
                     }
-                });
+                }
             }
 
             state.round++;
