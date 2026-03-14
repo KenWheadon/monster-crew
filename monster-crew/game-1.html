@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Squad: Collector's Edition</title>
+    <style>
+        :root {
+            --bg-color: #0f0c29;
+            --panel-color: #302b63;
+            --accent-color: #24243e;
+            --text-color: #ff0055;
+            --gold-color: #ffd700;
+            --health-color: #ff4b2b;
+            --human-color: #3498db;
+            --undead-color: #9b59b6;
+            --monster-color: #2ecc71;
+            --modal-bg: rgba(0, 0, 0, 0.9);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #game-container {
+            width: 1100px;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        /* STATS BAR */
+        header {
+            background: rgba(0,0,0,0.5);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--text-color);
+        }
+
+        .stat { font-size: 1.4em; font-weight: bold; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        #player-hp { color: var(--health-color); }
+        #player-gold { color: var(--gold-color); }
+
+        /* PLAY AREA */
+        main { display: flex; flex-direction: column; flex: 1; }
+
+        #battle-view {
+            flex: 2;
+            background: radial-gradient(circle, #1a1a2e 0%, #000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .shake { animation: shake 0.2s ease-in-out; }
+
+        #squad-view, #shop-view {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        #shop-view { border-top: 1px solid rgba(255,255,255,0.1); }
+
+        /* MONSTER CARDS */
+        .slot {
+            width: 130px;
+            height: 180px;
+            border: 2px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .slot.filled { box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .slot:hover { transform: scale(1.05); border-color: var(--text-color); }
+
+        .card {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            padding: 8px; box-sizing: border-box;
+        }
+
+        .card-emoji { font-size: 3.5rem; text-align: center; margin: 10px 0; }
+        .card-stats {
+            display: flex; justify-content: space-between;
+            margin-top: auto; font-weight: bold; font-size: 1.1em;
+        }
+        .c-atk { color: var(--gold-color); }
+        .c-hp { color: var(--health-color); }
+
+        /* INSPECTOR MODAL */
+        #inspector {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--modal-bg);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+        }
+
+        .inspector-content {
+            background: var(--accent-color);
+            width: 500px;
+            padding: 40px;
+            border-radius: 20px;
+            border: 4px solid var(--text-color);
+            text-align: center;
+            position: relative;
+        }
+
+        .ins-type { text-transform: uppercase; letter-spacing: 2px; color: #aaa; margin-bottom: 10px; }
+        .ins-emoji { font-size: 6rem; margin: 20px 0; }
+        .ins-effect { color: var(--gold-color); font-style: italic; margin: 20px 0; line-height: 1.6; }
+        .ins-flavor { color: #888; font-size: 0.9em; border-top: 1px solid #444; padding-top: 15px; }
+
+        /* CONTROLS */
+        #controls {
+            padding: 20px;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            border-radius: 30px;
+            transition: 0.2s;
+        }
+
+        .btn-main { background: var(--text-color); color: white; }
+        .btn-main:hover { transform: scale(1.1); filter: brightness(1.2); }
+        .btn-sec { background: #444; color: white; }
+
+        /* ANIMATIONS */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 2em;
+            pointer-events: none;
+            animation: floatUp 1s forwards;
+            z-index: 500;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-100px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <header>
+            <div class="stat" id="round-display">ROUND 1</div>
+            <div class="stat" id="player-hp">❤️ 20</div>
+            <div class="stat" id="player-gold">💰 15</div>
+        </header>
+
+        <main>
+            <div id="battle-view" style="display: none;">
+                <div id="enemy-line" style="display:flex; gap:15px; margin-bottom:40px;"></div>
+                <div id="ally-line" style="display:flex; gap:15px;"></div>
+            </div>
+
+            <div id="squad-view">
+                <div class="slot" onclick="inspectSlot('squad', 0)"></div>
+                <div class="slot" onclick="inspectSlot('squad', 1)"></div>
+                <div class="slot" onclick="inspectSlot('squad', 2)"></div>
+                <div class="slot" onclick="inspectSlot('squad', 3)"></div>
+                <div class="slot" onclick="inspectSlot('squad', 4)"></div>
+            </div>
+
+            <div id="shop-view">
+                <div class="slot" onclick="inspectSlot('shop', 0)"></div>
+                <div class="slot" onclick="inspectSlot('shop', 1)"></div>
+                <div class="slot" onclick="inspectSlot('shop', 2)"></div>
+            </div>
+        </main>
+
+        <footer id="controls">
+            <button class="btn-sec" onclick="rerollShop()">Reroll (1💰)</button>
+            <button class="btn-main" id="btn-battle" onclick="startBattle()">Fight!</button>
+        </footer>
+    </div>
+
+    <div id="inspector" onclick="closeInspector()">
+        <div class="inspector-content" onclick="event.stopPropagation()">
+            <div id="ins-type" class="ins-type">Human</div>
+            <h1 id="ins-name">Soldier</h1>
+            <div id="ins-emoji" class="ins-emoji">👨‍✈️</div>
+            <div id="ins-stats" style="font-size: 2em; font-weight: bold;">
+                <span class="c-atk" id="ins-atk">2</span> / <span class="c-hp" id="ins-hp">3</span>
+            </div>
+            <div id="ins-effect" class="ins-effect">TEAM: +1/+1 for each Human.</div>
+            <div id="ins-flavor" class="ins-flavor">He just wants to go home and nap.</div>
+            
+            <div id="ins-actions" style="margin-top: 30px; display:flex; justify-content: center; gap: 15px;">
+                <button class="btn-main" id="ins-buy-btn">BUY (5💰)</button>
+                <button class="btn-sec" id="ins-sac-btn">SACRIFICE</button>
+                <button class="btn-sec" onclick="closeInspector()">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * MONSTER REGISTRY (The Backbone)
+         */
+        const MONSTER_REGISTRY = [
+            { id: "m1", name: "Recruit", emoji: "👨‍✈️", tier: 1, type: "human", atk: 2, hp: 4, cost: 5, 
+              effectDesc: "TEAM: +1 ATK and +1 HP for every other Human ally.", 
+              flavor: "Basic training lasted two hours. He's mostly here for the free soup." },
+            
+            { id: "m2", name: "Angry Wisp", emoji: "👻", tier: 1, type: "undead", atk: 4, hp: 1, cost: 5, 
+              effectDesc: "AFTER: Give a random ally +3 HP when this dies.", 
+              flavor: "Local ghost too angry to stop existing." },
+
+            { id: "m3", name: "Slime Pup", emoji: "🐶", tier: 1, type: "monster", atk: 2, hp: 2, cost: 5, 
+              effectDesc: "SOLO: +3 ATK and +2 HP if it's the only Monster.", 
+              flavor: "Is it a dog? Is it a puddle? Yes." },
+
+            { id: "m4", name: "Grave Knight", emoji: "🛡️", tier: 2, type: "undead", atk: 4, hp: 6, cost: 8, 
+              effectDesc: "TEAM: +2 HP for every other Undead ally.", 
+              flavor: "Being dead is no excuse for poor posture." },
+
+            { id: "m5", name: "Wild Owlbear", emoji: "🦉", tier: 2, type: "monster", atk: 6, hp: 4, cost: 8, 
+              effectDesc: "SOLO: +4 ATK if no other monsters present.", 
+              flavor: "Twice the head turns, twice the carnage." },
+
+            { id: "m6", name: "Village Hero", emoji: "⚔️", tier: 3, type: "human", atk: 8, hp: 8, cost: 12, 
+              effectDesc: "TEAM: All Humans gain +2/+2 at start of battle.", 
+              flavor: "He's got the shiny hair, the big sword, and no dental insurance." }
+        ];
+
+        let state = {
+            round: 1, gold: 15, hp: 20, 
+            squad: [null, null, null, null, null],
+            shop: [null, null, null],
+            isPaused: false,
+            currentlyInspecting: null
+        };
+
+        let battleData = { ally: [], enemy: [] };
+
+        /**
+         * CORE ENGINE
+         */
+        function init() {
+            refreshShop();
+            updateUI();
+        }
+
+        function refreshShop() {
+            state.shop = state.shop.map(() => {
+                const pool = MONSTER_REGISTRY.filter(m => m.tier <= (state.round > 3 ? 3 : state.round > 1 ? 2 : 1));
+                return { ...pool[Math.floor(Math.random() * pool.length)], instId: Math.random() };
+            });
+            updateUI();
+        }
+
+        function rerollShop() {
+            if (state.gold >= 1) {
+                state.gold--;
+                refreshShop();
+            }
+        }
+
+        /**
+         * INSPECTOR & MODAL LOGIC
+         */
+        function inspectSlot(type, index) {
+            const monster = type === 'shop' ? state.shop[index] : state.squad[index];
+            if (!monster) return;
+
+            state.currentlyInspecting = { monster, type, index };
+            state.isPaused = true;
+
+            // Fill Modal
+            document.getElementById('ins-type').innerText = monster.type;
+            document.getElementById('ins-name').innerText = monster.name;
+            document.getElementById('ins-emoji').innerText = monster.emoji;
+            document.getElementById('ins-atk').innerText = monster.atk;
+            document.getElementById('ins-hp').innerText = monster.hp;
+            document.getElementById('ins-effect').innerText = monster.effectDesc;
+            document.getElementById('ins-flavor').innerText = `"${monster.flavor}"`;
+
+            // Buttons
+            const buyBtn = document.getElementById('ins-buy-btn');
+            const sacBtn = document.getElementById('ins-sac-btn');
+            
+            buyBtn.style.display = type === 'shop' ? 'block' : 'none';
+            buyBtn.innerText = `BUY (${monster.cost}💰)`;
+            buyBtn.onclick = () => buyMonster(index);
+
+            sacBtn.style.display = type === 'squad' ? 'block' : 'none';
+            sacBtn.onclick = () => sacrificeMonster(index);
+
+            document.getElementById('inspector').style.display = 'flex';
+        }
+
+        function closeInspector() {
+            document.getElementById('inspector').style.display = 'none';
+            state.isPaused = false;
+            state.currentlyInspecting = null;
+        }
+
+        function buyMonster(index) {
+            const monster = state.shop[index];
+            if (state.gold >= monster.cost) {
+                const emptyIdx = state.squad.indexOf(null);
+                if (emptyIdx !== -1) {
+                    state.gold -= monster.cost;
+                    state.squad[emptyIdx] = { ...monster, cAtk: monster.atk, cHp: monster.hp };
+                    state.shop[index] = null;
+                    closeInspector();
+                    updateUI();
+                } else { alert("Squad full!"); }
+            } else { alert("Not enough gold!"); }
+        }
+
+        function sacrificeMonster(index) {
+            state.squad[index] = null;
+            state.gold += 2; // Refund 2 gold
+            closeInspector();
+            updateUI();
+        }
+
+        /**
+         * BATTLE SYSTEM
+         */
+        function startBattle() {
+            if (state.squad.every(s => s === null)) return alert("Need a squad!");
+            
+            document.getElementById('battle-view').style.display = 'flex';
+            document.getElementById('squad-view').style.display = 'none';
+            document.getElementById('shop-view').style.display = 'none';
+            document.getElementById('controls').style.display = 'none';
+
+            // Clone squad and generate enemies
+            battleData.ally = state.squad.filter(s => s !== null).map(s => ({ ...s, cHp: s.hp, cAtk: s.atk }));
+            battleData.enemy = [0,1].map(() => {
+                const m = MONSTER_REGISTRY[Math.floor(Math.random() * MONSTER_REGISTRY.length)];
+                return { ...m, cHp: m.hp, cAtk: m.atk };
+            });
+
+            renderBattle();
+            setTimeout(battleStep, 1000);
+        }
+
+        function battleStep() {
+            if (state.isPaused) {
+                setTimeout(battleStep, 100);
+                return;
+            }
+
+            if (battleData.ally.length === 0 || battleData.enemy.length === 0) {
+                endBattle();
+                return;
+            }
+
+            const a = battleData.ally[0];
+            const e = battleData.enemy[0];
+
+            // Visual Damage
+            showEffect('ally-line', `-${e.cAtk}`, 'var(--health-color)');
+            showEffect('enemy-line', `-${a.cAtk}`, 'var(--health-color)');
+            document.getElementById('battle-view').classList.add('shake');
+            setTimeout(() => document.getElementById('battle-view').classList.remove('shake'), 200);
+
+            a.cHp -= e.cAtk;
+            e.cHp -= a.cAtk;
+
+            if (a.cHp <= 0) {
+                const dead = battleData.ally.shift();
+                if (dead.id === "m2") handleAfterDeathEffect('ally');
+            }
+            if (e.cHp <= 0) battleData.enemy.shift();
+
+            renderBattle();
+            setTimeout(battleStep, 1200);
+        }
+
+        function handleAfterDeathEffect(side) {
+            const targets = side === 'ally' ? battleData.ally : battleData.enemy;
+            if (targets.length > 0) {
+                targets[0].cHp += 3;
+                showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', `+3 HP`, 'var(--monster-color)');
+            }
+        }
+
+        function endBattle() {
+            const win = battleData.ally.length > 0;
+            if (!win) state.hp -= 5;
+            
+            state.round++;
+            state.gold = 10 + state.round;
+            
+            alert(win ? "VICTORY!" : "DEFEAT! -5 HP");
+            
+            document.getElementById('battle-view').style.display = 'none';
+            document.getElementById('squad-view').style.display = 'flex';
+            document.getElementById('shop-view').style.display = 'flex';
+            document.getElementById('controls').style.display = 'flex';
+            
+            refreshShop();
+            updateUI();
+        }
+
+        /**
+         * VISUALS
+         */
+        function showEffect(containerId, text, color) {
+            const container = document.getElementById(containerId);
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.innerText = text;
+            el.style.color = color;
+            el.style.left = "50%";
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+
+        function updateUI() {
+            document.getElementById('round-display').innerText = `ROUND ${state.round}`;
+            document.getElementById('player-hp').innerText = `❤️ ${state.hp}`;
+            document.getElementById('player-gold').innerText = `💰 ${state.gold}`;
+
+            // Render Slots
+            const squadSlots = document.querySelectorAll('#squad-view .slot');
+            state.squad.forEach((m, i) => renderCard(squadSlots[i], m));
+
+            const shopSlots = document.querySelectorAll('#shop-view .slot');
+            state.shop.forEach((m, i) => renderCard(shopSlots[i], m));
+        }
+
+        function renderCard(slot, m) {
+            slot.innerHTML = '';
+            slot.classList.toggle('filled', !!m);
+            if (!m) return;
+            slot.innerHTML = `
+                <div class="card">
+                    <div class="card-emoji">${m.emoji}</div>
+                    <div class="card-stats">
+                        <span class="c-atk">⚔️ ${m.atk}</span>
+                        <span class="c-hp">🛡️ ${m.hp}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBattle() {
+            const allyLine = document.getElementById('ally-line');
+            const enemyLine = document.getElementById('enemy-line');
+            allyLine.innerHTML = ''; enemyLine.innerHTML = '';
+
+            battleData.ally.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'slot filled';
+                div.onclick = () => {
+                    // Custom inspect for battle
+                    inspectMonsterOnly(m);
+                }
+                renderCard(div, { ...m, atk: m.cAtk, hp: m.cHp });
+                allyLine.appendChild(div);
+            });
+
+            battleData.enemy.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'slot filled';
+                renderCard(div, { ...m, atk: m.cAtk, hp: m.cHp });
+                enemyLine.appendChild(div);
+            });
+        }
+
+        function inspectMonsterOnly(m) {
+            state.isPaused = true;
+            document.getElementById('ins-type').innerText = m.type;
+            document.getElementById('ins-name').innerText = m.name;
+            document.getElementById('ins-emoji').innerText = m.emoji;
+            document.getElementById('ins-atk').innerText = m.cAtk;
+            document.getElementById('ins-hp').innerText = m.cHp;
+            document.getElementById('ins-effect').innerText = m.effectDesc;
+            document.getElementById('ins-flavor').innerText = `"${m.flavor}"`;
+            document.getElementById('ins-buy-btn').style.display = 'none';
+            document.getElementById('ins-sac-btn').style.display = 'none';
+            document.getElementById('inspector').style.display = 'flex';
+        }
+
+        init();
+    </script>
+</body>
+</html>

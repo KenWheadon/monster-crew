@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Squad Auto-Battler Core</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --panel-color: #16213e;
+            --accent-color: #0f3460;
+            --text-color: #e94560;
+            --gold-color: #f7b731;
+            --health-color: #fc5c65;
+            --human-color: #4b7bec;
+            --undead-color: #a55eea;
+            --monster-color: #20bf6b;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #game-container {
+            width: 1000px;
+            max-width: 100%;
+            border: 4px solid var(--accent-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        /* STATS BAR */
+        header {
+            background-color: #000;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .stat { font-size: 1.2em; font-weight: bold; }
+        .stat span { margin-left: 5px; }
+        #player-hp { color: var(--health-color); }
+        #player-gold { color: var(--gold-color); }
+        #current-round { color: white; }
+
+        /* MAIN PLAY AREA */
+        main { display: flex; flex-direction: column; height: 600px; }
+
+        #battle-view {
+            flex: 2;
+            background-color: #080810;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-color);
+            position: relative;
+        }
+
+        #battle-log {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            height: 80px;
+            background: rgba(0,0,0,0.7);
+            color: #aaa;
+            font-size: 0.9em;
+            overflow-y: scroll;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        #squad-view {
+            flex: 1;
+            background-color: var(--panel-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            gap: 15px;
+        }
+
+        #shop-view {
+            flex: 1;
+            background-color: var(--panel-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 2px solid var(--accent-color);
+            padding: 10px;
+        }
+
+        /* MONSTER SLOTS AND CARDS */
+        .slot {
+            width: 120px;
+            height: 160px;
+            border: 3px dashed var(--accent-color);
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slot.filled { border-style: solid; border-color: #555; }
+        .slot.enemy-slot { border-color: #900; }
+
+        .monster-card {
+            width: 100%;
+            height: 100%;
+            background: #222;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px;
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .monster-card:hover { transform: translateY(-5px) scale(1.05); }
+
+        .m-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .m-body {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+        }
+
+        .m-footer {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0,0,0,0.5);
+            border-radius: 5px;
+            padding: 3px;
+        }
+
+        .m-stat { font-weight: bold; display: flex; align-items: center; gap: 2px;}
+        .m-atk { color: #f0932b; }
+        .m-hp { color: var(--health-color); }
+
+        .m-type-icon { width: 15px; height: 15px; border-radius: 50%; }
+        .type-human { background-color: var(--human-color); border: 1px solid #fff; }
+        .type-undead { background-color: var(--undead-color); border: 1px solid #fff; }
+        .type-monster { background-color: var(--monster-color); border: 1px solid #fff; }
+
+        /* BUTTONS */
+        #controls {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background-color: #000;
+            border-top: 2px solid var(--accent-color);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.1em;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-gold { background-color: var(--gold-color); color: #000; }
+        .btn-gold:hover:not(:disabled) { background-color: #f7d061; }
+
+        .btn-battle { background-color: var(--text-color); color: #fff; }
+        .btn-battle:hover:not(:disabled) { background-color: #ff6b81; }
+
+        .btn-sac { background-color: #636e72; color: #fff; border: 1px solid #fff;}
+        .btn-sac:hover:not(:disabled) { background-color: #b2bec3; }
+
+        /* BATTLEFIELD SPECIFICS */
+        #field-ally, #field-enemy {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .death-animation {
+            animation: fadeOut 0.5s forwards;
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.5); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <header>
+            <div class="stat" id="current-round">ROUND 1</div>
+            <div class="stat" id="player-hp">💖<span>20</span></div>
+            <div class="stat" id="player-gold">💰<span>10</span></div>
+        </header>
+
+        <main>
+            <div id="battle-view" style="display:none;">
+                <div id="field-enemy">
+                    </div>
+                <div style="font-size: 2em; margin: 10px 0;">⚔️</div>
+                <div id="field-ally">
+                    </div>
+                <div id="battle-log"></div>
+            </div>
+
+            <div id="squad-view">
+                <div class="slot" data-index="0"></div>
+                <div class="slot" data-index="1"></div>
+                <div class="slot" data-index="2"></div>
+                <div class="slot" data-index="3"></div>
+                <div class="slot" data-index="4"></div>
+            </div>
+
+            <div id="shop-view">
+                <div class="slot shop-slot" data-index="0"></div>
+                <div class="slot shop-slot" data-index="1"></div>
+                <div class="slot shop-slot" data-index="2"></div>
+            </div>
+        </main>
+
+        <footer id="controls">
+            <button class="btn-sac" id="btn-sacrifice" onclick="toggleSacrificeMode()">Sacrifice: OFF</button>
+            <button class="btn-gold" id="btn-reroll" onclick="rerollShop()">Reroll Shop (1💰)</button>
+            <button class="btn-battle" id="btn-end-turn" onclick="startBattlePhase()">Start Battle</button>
+        </footer>
+    </div>
+
+    <script>
+        /************************************************
+         * GAME DATA & CONFIGURATION
+         ************************************************/
+        const MONSTER_REGISTRY = [
+            // TIER 1
+            { id: "m1a", name: "Soldier", emoji: "👨‍✈️", tier: 1, type: "human", atk: 2, hp: 3, effect: { trigger: "passive", logic: "team", val: { atk: 1, hp: 1 } } },
+            { id: "m1b", name: "Spirit", emoji: "🧟", tier: 1, type: "undead", atk: 3, hp: 1, effect: { trigger: "death", logic: "buff_random", val: { atk: 0, hp: 2 } } },
+            { id: "m1c", name: "Cave Bat", emoji: "🦇", tier: 1, type: "monster", atk: 1, hp: 1, effect: { trigger: "passive", logic: "solo", val: { atk: 2, hp: 1 } } },
+            { id: "m1d", name: "Scout", emoji: "🧑‍🌾", tier: 1, type: "human", atk: 3, hp: 2, effect: null },
+            // TIER 2 (Sacrifice 5pts to unlock)
+            { id: "m2a", name: "Skeleton", emoji: "💀", tier: 2, type: "undead", atk: 3, hp: 3, effect: { trigger: "passive", logic: "team", val: { atk: 1, hp: 1 } } },
+            { id: "m2b", name: "Wolf Companion", emoji: "🐺", tier: 2, type: "monster", atk: 4, hp: 3, effect: { trigger: "passive", logic: "team", val: { atk: 1, hp: 1 } } },
+            { id: "m2c", name: "Necromancer", emoji: "🧙‍♂️", tier: 2, type: "undead", atk: 2, hp: 4, effect: { trigger: "death", logic: "buff_random", val: { atk: 2, hp: 2 } } },
+            { id: "m2d", name: "Ogre", emoji: "👹", tier: 2, type: "monster", atk: 6, hp: 5, effect: null },
+            // TIER 3 (Sacrifice 15pts to unlock)
+            { id: "m3a", name: "Demon Lord", emoji: "😈", tier: 3, type: "monster", atk: 5, hp: 8, effect: { trigger: "passive", logic: "team", val: { atk: 1, hp: 1 } } },
+            { id: "m3b", name: "Undead King", emoji: "🤴", tier: 3, type: "undead", atk: 8, hp: 4, effect: { trigger: "passive", logic: "solo", val: { atk: 4, hp: 2 } } },
+        ];
+
+        // Enemy composition data (defined in dataobject)
+        const ENEMY_ROUNDS = [
+            { squad: ["m1c", "m1d"] },
+            { squad: ["m1a", "m1a", "m1a"] },
+            { squad: ["m1b", "m2a", "m1d"] },
+            { squad: ["m2d", "m2b", "m1c", "m2a"] },
+            { squad: ["m3a", "m2c", "m2a", "m1b", "m1a"] },
+        ];
+
+        const GOLD_PER_ROUND = 10;
+        const REROLL_COST = 1;
+        const BUY_COST = 3;
+        const SQUAD_SIZE = 5;
+        const T2_UNLOCK_SAC = 5;
+        const T3_UNLOCK_SAC = 15;
+
+        /************************************************
+         * GAME STATE
+         ************************************************/
+        let state = {
+            round: 1,
+            hp: 20,
+            gold: 10,
+            tierUnlocked: 1,
+            sacrificePoints: 0,
+            squad: [null, null, null, null, null],
+            shop: [null, null, null],
+            inSacrificeMode: false,
+            phase: 'prep' // 'prep' or 'battle'
+        };
+
+        let battleState = {
+            tempAllySquad: [],
+            tempEnemySquad: [],
+            log: []
+        };
+
+        /************************************************
+         * CORE INITIALIZATION
+         ************************************************/
+        function initGame() {
+            renderStats();
+            fillShop();
+            renderSquad();
+        }
+
+        /************************************************
+         * UTILITIES & LOGIC ENGINE
+         ************************************************/
+        
+        // Generate a random instance of a monster from available tiers
+        function getRandomMonster() {
+            const available = MONSTER_REGISTRY.filter(m => m.tier <= state.tierUnlocked);
+            const data = available[Math.floor(Math.random() * available.length)];
+            return {
+                ...data,
+                instanceId: 'inst_' + Date.now() + '_' + Math.random().toString(16).slice(2),
+                cAtk: data.atk,
+                cHp: data.hp
+            };
+        }
+
+        // Apply Aura effects (Team/Solo) before battle/after changes
+        function recalcBuffs(squadArray) {
+            // 1. Reset stats to base
+            squadArray.forEach(m => { if (m) { m.cAtk = m.atk; m.cHp = m.hp; } });
+
+            // 2. Count types
+            const typeCounts = squadArray.reduce((acc, m) => {
+                if (m) acc[m.type] = (acc[m.type] || 0) + 1;
+                return acc;
+            }, {});
+
+            // 3. Apply Passives
+            squadArray.forEach(m => {
+                if (!m || !m.effect || m.effect.trigger !== 'passive') return;
+
+                if (m.effect.logic === 'team' && typeCounts[m.type] > 1) {
+                    m.cAtk += m.effect.val.atk;
+                    m.cHp += m.effect.val.hp;
+                } else if (m.effect.logic === 'solo' && typeCounts[m.type] === 1) {
+                    m.cAtk += m.effect.val.atk;
+                    m.cHp += m.effect.val.hp;
+                }
+            });
+        }
+
+        /************************************************
+         * PREPARATION PHASE ACTIONS
+         ************************************************/
+        
+        function fillShop() {
+            state.shop = [getRandomMonster(), getRandomMonster(), getRandomMonster()];
+            renderShop();
+        }
+
+        function rerollShop() {
+            if (state.gold >= REROLL_COST) {
+                state.gold -= REROLL_COST;
+                renderStats();
+                fillShop();
+            }
+        }
+
+        function buyMonster(shopIndex) {
+            if (state.inSacrificeMode) return; // Cant buy while sacrificing
+            if (state.gold < BUY_COST) return alert("Not enough gold!");
+            
+            const monster = state.shop[shopIndex];
+            if (!monster) return;
+
+            // Find empty slot
+            const emptySlotIndex = state.squad.findIndex(s => s === null);
+            if (emptySlotIndex === -1) return alert("Squad full!");
+
+            state.gold -= BUY_COST;
+            state.squad[emptySlotIndex] = monster;
+            state.shop[shopIndex] = null; // Remove from shop
+
+            renderStats();
+            renderShop();
+            renderSquad();
+        }
+
+        function toggleSacrificeMode() {
+            state.inSacrificeMode = !state.inSacrificeMode;
+            document.getElementById('btn-sacrifice').innerText = `Sacrifice: ${state.inSacrificeMode ? 'ON' : 'OFF'}`;
+            document.getElementById('btn-sacrifice').style.backgroundColor = state.inSacrificeMode ? varString('--monster-color') : '#636e72';
+            renderSquad(); // Rerender to show cursor change
+        }
+
+        function handleSquadClick(squadIndex) {
+            if (!state.inSacrificeMode) return;
+
+            const monster = state.squad[squadIndex];
+            if (!monster) return;
+
+            // Perform sacrifice
+            state.squad[squadIndex] = null;
+            state.sacrificePoints += monster.tier;
+            log(`Sacrificed ${monster.name} for ${monster.tier} points.`);
+
+            // Check unlocks
+            if (state.tierUnlocked < 2 && state.sacrificePoints >= T2_UNLOCK_SAC) {
+                state.tierUnlocked = 2;
+                log("Unlocked TIER 2 monsters!");
+            } else if (state.tierUnlocked < 3 && state.sacrificePoints >= T3_UNLOCK_SAC) {
+                state.tierUnlocked = 3;
+                log("Unlocked TIER 3 monsters!");
+            }
+
+            // Always turn off sacrifice mode after one use
+            toggleSacrificeMode(); 
+            renderSquad();
+        }
+
+        /************************************************
+         * BATTLE PHASE LOGIC
+         ************************************************/
+        
+        function startBattlePhase() {
+            state.phase = 'battle';
+            state.inSacrificeMode = false; // Force off
+            
+            // Prepare squads
+            recalcBuffs(state.squad); // apply aurus before copying
+            
+            // Shallow clone for temporary battle stats
+            battleState.tempAllySquad = state.squad.filter(m => m !== null).map(m => ({ ...m }));
+            
+            // Generate Enemy Squad (Fake person)
+            const enemyDef = ENEMY_ROUNDS[Math.min(state.round - 1, ENEMY_ROUNDS.length - 1)];
+            battleState.tempEnemySquad = enemyDef.squad.map(id => {
+                const data = MONSTER_REGISTRY.find(m => m.id === id);
+                return {
+                    ...data,
+                    instanceId: 'enemy_' + Math.random().toString(16),
+                    cAtk: data.atk,
+                    cHp: data.hp
+                };
+            });
+            recalcBuffs(battleState.tempEnemySquad); // Enemy aurus
+
+            // UI Swapping
+            document.getElementById('squad-view').style.display = 'none';
+            document.getElementById('shop-view').style.display = 'none';
+            document.getElementById('controls').style.display = 'none';
+            document.getElementById('battle-view').style.display = 'flex';
+            battleState.log = [];
+            document.getElementById('battle-log').innerHTML = '';
+
+            battleLog(`ROUND ${state.round} BEGINS!`);
+            renderBattlefield();
+
+            // Start loop (with delay for visual)
+            setTimeout(battleLoop, 1000);
+        }
+
+        function battleLoop() {
+            // Check win/loss conditions
+            if (battleState.tempAllySquad.length === 0 && battleState.tempEnemySquad.length === 0) {
+                endBattle('draw'); return;
+            }
+            if (battleState.tempAllySquad.length === 0) {
+                endBattle('loss'); return;
+            }
+            if (battleState.tempEnemySquad.length === 0) {
+                endBattle('win'); return;
+            }
+
+            // Get front monsters
+            const ally = battleState.tempAllySquad[0];
+            const enemy = battleState.tempEnemySquad[0];
+
+            battleLog(`${ally.emoji} ${ally.name} (${ally.cAtk}/${ally.cHp}) fights ${enemy.emoji} ${enemy.name} (${enemy.cAtk}/${enemy.cHp})`);
+
+            // Apply Damage
+            ally.cHp -= enemy.cAtk;
+            enemy.cHp -= ally.cAtk;
+
+            renderBattlefield();
+
+            // Handle Deaths
+            setTimeout(() => {
+                let deaths = 0;
+                if (ally.cHp <= 0) {
+                    deaths++;
+                    battleState.tempAllySquad.shift();
+                    battleLog(`${ally.emoji} died.`);
+                    handleDeathEffects(ally, battleState.tempAllySquad);
+                }
+                if (enemy.cHp <= 0) {
+                    deaths++;
+                    battleState.tempEnemySquad.shift();
+                    battleLog(`Enemy ${enemy.emoji} died.`);
+                    handleDeathEffects(enemy, battleState.tempEnemySquad);
+                }
+
+                if (deaths > 0) renderBattlefield();
+
+                // Next fight
+                setTimeout(battleLoop, 800);
+            }, 600);
+        }
+
+        function handleDeathEffects(deadMonster, squadArray) {
+            if (!deadMonster.effect || deadMonster.effect.trigger !== 'death' || squadArray.length === 0) return;
+
+            if (deadMonster.effect.logic === 'buff_random') {
+                const target = squadArray[Math.floor(Math.random() * squadArray.length)];
+                target.cHp += deadMonster.effect.val.hp;
+                target.cAtk += deadMonster.effect.val.atk; // Data includes 0 atk buff
+                battleLog(`${deadMonster.emoji} trigger: Gave +${deadMonster.effect.val.hp}💖 to ${target.emoji}`);
+            }
+        }
+
+        function endBattle(result) {
+            state.phase = 'prep';
+            let damageTaken = 0;
+
+            if (result === 'win') {
+                battleLog(`VICTORY! Round ${state.round} Cleared.`);
+            } else if (result === 'loss') {
+                // Damage based on remaining enemy tier total
+                damageTaken = battleState.tempEnemySquad.reduce((sum, m) => sum + m.tier, 0);
+                state.hp -= damageTaken;
+                battleLog(`DEFEAT! Took ${damageTaken} damage.`);
+            } else {
+                battleLog(`DRAW! Nobody wins.`);
+            }
+
+            renderStats();
+
+            if (state.hp <= 0) {
+                alert(`GAME OVER! You reached Round ${state.round}. Reload to try again.`);
+                return;
+            }
+
+            // Prep for next round
+            state.round++;
+            state.gold = GOLD_PER_ROUND;
+            fillShop();
+            renderSquad();
+
+            // Swapping UI back
+            setTimeout(() => {
+                document.getElementById('battle-view').style.display = 'none';
+                document.getElementById('squad-view').style.display = 'flex';
+                document.getElementById('shop-view').style.display = 'flex';
+                document.getElementById('controls').style.display = 'flex';
+                renderStats(); // Update round number
+            }, 2000);
+        }
+
+        /************************************************
+         * RENDERING ENGINE
+         ************************************************/
+        
+        function renderStats() {
+            document.getElementById('current-round').innerText = `ROUND ${state.round}`;
+            document.getElementById('player-hp').querySelector('span').innerText = state.hp;
+            document.getElementById('player-gold').querySelector('span').innerText = state.gold;
+        }
+
+        // Helper to generate a card HTML
+        function generateMonsterCard(monster, isEnemy = false) {
+            if (!monster) return '';
+            const typeClass = `type-${monster.type}`;
+            const atkVal = monster.cAtk !== undefined ? monster.cAtk : monster.atk;
+            const hpVal = monster.cHp !== undefined ? monster.cHp : monster.hp;
+            const aurusIndicator = (monster.effect && monster.effect.trigger === 'passive') ? '⚡' : '';
+
+            return `
+                <div class="monster-card ${isEnemy ? 'enemy-card' : ''}">
+                    <div class="m-header">
+                        <span class="m-name">${aurusIndicator}${monster.name}</span>
+                        <div class="m-type-icon ${typeClass}" title="${monster.type}"></div>
+                    </div>
+                    <div class="m-body">${monster.emoji}</div>
+                    <div class="m-footer">
+                        <div class="m-stat m-atk">⚔️ ${atkVal}</div>
+                        <div class="m-stat m-hp">🛡️ ${hpVal}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderShop() {
+            const slots = document.querySelectorAll('#shop-view .slot');
+            slots.forEach((slot, index) => {
+                slot.innerHTML = '';
+                slot.classList.remove('filled');
+                if (state.shop[index]) {
+                    slot.innerHTML = generateMonsterCard(state.shop[index]);
+                    slot.classList.add('filled');
+                    slot.onclick = () => buyMonster(index);
+                } else {
+                    slot.onclick = null;
+                }
+            });
+        }
+
+        function renderSquad() {
+            recalcBuffs(state.squad); // apply aurus for visual accuracy
+            const slots = document.querySelectorAll('#squad-view .slot');
+            slots.forEach((slot, index) => {
+                slot.innerHTML = '';
+                slot.classList.remove('filled');
+                slot.style.cursor = state.inSacrificeMode ? 'pointer' : 'default';
+
+                if (state.squad[index]) {
+                    slot.innerHTML = generateMonsterCard(state.squad[index]);
+                    slot.classList.add('filled');
+                    slot.onclick = () => handleSquadClick(index);
+                } else {
+                    slot.onclick = null;
+                }
+            });
+        }
+
+        function renderBattlefield() {
+            const allyField = document.getElementById('field-ally');
+            const enemyField = document.getElementById('field-enemy');
+            allyField.innerHTML = '';
+            enemyField.innerHTML = '';
+
+            // Render up to 5 slots for visual consistency
+            for (let i = 0; i < SQUAD_SIZE; i++) {
+                const aSlot = document.createElement('div');
+                aSlot.className = 'slotfilled';
+                if (battleState.tempAllySquad[i]) aSlot.innerHTML = generateMonsterCard(battleState.tempAllySquad[i]);
+                allyField.appendChild(aSlot);
+
+                const eSlot = document.createElement('div');
+                eSlot.className = 'slot filled enemy-slot';
+                if (battleState.tempEnemySquad[i]) eSlot.innerHTML = generateMonsterCard(battleState.tempEnemySquad[i], true);
+                enemyField.appendChild(eSlot);
+            }
+        }
+
+        function battleLog(msg) {
+            const logBox = document.getElementById('battle-log');
+            logBox.innerHTML += `<div>${msg}</div>`;
+            logBox.scrollTop = logBox.scrollHeight; // Auto scroll
+        }
+
+        // Just simple alert logging for prep phase
+        function log(msg) { console.log(msg); }
+
+        // JS utility to get CSS var
+        function varString(varName) {
+            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        }
+
+        // Start
+        initGame();
+
+    </script>
+</body>
+</html>
