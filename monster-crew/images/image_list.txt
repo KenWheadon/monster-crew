@@ -1,0 +1,12 @@
+background.jpg
+background2.jpg
+bear-buff.png
+bear-shirt.png
+deady-hand.png
+giant-teeth.png
+living-lighting.png
+slime-daggers.png
+slime-glasses.png
+slime-sword.png
+wolf-buff.png
+wolf-jacket.png

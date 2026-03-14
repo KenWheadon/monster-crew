@@ -20,7 +20,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            background: url('images/background.jpg') center/cover no-repeat;
             color: white;
             margin: 0;
             display: flex;
@@ -35,6 +35,8 @@
             display: flex;
             flex-direction: column;
             border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
 
         /* STATS BAR */
@@ -56,13 +58,23 @@
 
         #battle-view {
             flex: 2;
-            background: radial-gradient(circle, #1a1a2e 0%, #000 100%);
+            background: url('images/background2.jpg') center/cover no-repeat;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             position: relative;
             transition: 0.3s;
+        }
+        #battle-view::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 0;
+        }
+        #battle-view > div {
+            z-index: 1;
         }
 
         .shake { animation: shake 0.2s ease-in-out; }
@@ -100,7 +112,7 @@
             padding: 8px; box-sizing: border-box;
         }
 
-        .card-emoji { font-size: 3.5rem; text-align: center; margin: 10px 0; }
+        .card-image { width: 100%; height: 80px; object-fit: contain; margin: 10px 0; }
         .card-stats {
             display: flex; justify-content: space-between;
             margin-top: auto; font-weight: bold; font-size: 1.1em;
@@ -131,7 +143,7 @@
         }
 
         .ins-type { text-transform: uppercase; letter-spacing: 2px; color: #aaa; margin-bottom: 10px; }
-        .ins-emoji { font-size: 6rem; margin: 20px 0; }
+        .ins-image { width: 140px; height: 140px; object-fit: contain; margin: 20px auto; display: block; }
         .ins-effect { color: var(--gold-color); font-style: italic; margin: 20px 0; line-height: 1.6; }
         .ins-flavor { color: #888; font-size: 0.9em; border-top: 1px solid #444; padding-top: 15px; }
 
@@ -221,7 +233,7 @@
         <div class="inspector-content" onclick="event.stopPropagation()">
             <div id="ins-type" class="ins-type">Human</div>
             <h1 id="ins-name">Soldier</h1>
-            <div id="ins-emoji" class="ins-emoji">👨‍✈️</div>
+            <img id="ins-image" class="ins-image" src="" alt="Monster Inspector Image">
             <div id="ins-stats" style="font-size: 2em; font-weight: bold;">
                 <span class="c-atk" id="ins-atk">2</span> / <span class="c-hp" id="ins-hp">3</span>
             </div>
@@ -241,33 +253,49 @@
          * MONSTER REGISTRY (The Backbone)
          */
         const MONSTER_REGISTRY = [
-            { id: "m1", name: "Recruit", emoji: "👨‍✈️", tier: 1, type: "human", atk: 2, hp: 4, cost: 5, 
-              effectDesc: "TEAM: +1 ATK and +1 HP for every other Human ally.", 
-              flavor: "Basic training lasted two hours. He's mostly here for the free soup." },
+            { id: "m1", name: "Buff Bear", image: "images/bear-buff.png", tier: 1, type: "monster", atk: 3, hp: 4, cost: 5, 
+              effectDesc: "TEAM: +1 ATK and +1 HP for every other Monster ally.", 
+              flavor: "He never skips leg day or arm day." },
             
-            { id: "m2", name: "Angry Wisp", emoji: "👻", tier: 1, type: "undead", atk: 4, hp: 1, cost: 5, 
+            { id: "m2", name: "Dead Hand", image: "images/deady-hand.png", tier: 1, type: "undead", atk: 4, hp: 1, cost: 5, 
               effectDesc: "AFTER: Give a random ally +3 HP when this dies.", 
-              flavor: "Local ghost too angry to stop existing." },
+              flavor: "Need a hand?" },
 
-            { id: "m3", name: "Slime Pup", emoji: "🐶", tier: 1, type: "monster", atk: 2, hp: 2, cost: 5, 
+            { id: "m3", name: "Slime Dagger", image: "images/slime-daggers.png", tier: 1, type: "monster", atk: 2, hp: 2, cost: 5, 
               effectDesc: "SOLO: +3 ATK and +2 HP if it's the only Monster.", 
-              flavor: "Is it a dog? Is it a puddle? Yes." },
+              flavor: "Sharp AND gooey." },
 
-            { id: "m4", name: "Grave Knight", emoji: "🛡️", tier: 2, type: "undead", atk: 4, hp: 6, cost: 8, 
+            { id: "m4", name: "Giant Teeth", image: "images/giant-teeth.png", tier: 2, type: "undead", atk: 4, hp: 6, cost: 8, 
               effectDesc: "TEAM: +2 HP for every other Undead ally.", 
-              flavor: "Being dead is no excuse for poor posture." },
+              flavor: "Being dead is no excuse for poor dental hygiene." },
 
-            { id: "m5", name: "Wild Owlbear", emoji: "🦉", tier: 2, type: "monster", atk: 6, hp: 4, cost: 8, 
+            { id: "m5", name: "Bear Shirt", image: "images/bear-shirt.png", tier: 2, type: "monster", atk: 6, hp: 4, cost: 8, 
               effectDesc: "SOLO: +4 ATK if no other monsters present.", 
-              flavor: "Twice the head turns, twice the carnage." },
+              flavor: "Just a bear wearing a neat shirt." },
 
-            { id: "m6", name: "Village Hero", emoji: "⚔️", tier: 3, type: "human", atk: 8, hp: 8, cost: 12, 
-              effectDesc: "TEAM: All Humans gain +2/+2 at start of battle.", 
-              flavor: "He's got the shiny hair, the big sword, and no dental insurance." }
+            { id: "m6", name: "Slime Sword", image: "images/slime-sword.png", tier: 3, type: "monster", atk: 8, hp: 8, cost: 12, 
+              effectDesc: "TEAM: All Monsters gain +2/+2 at start of battle.", 
+              flavor: "A legendary blade that leaves a sticky residue." },
+              
+            { id: "m7", name: "Buff Wolf", image: "images/wolf-buff.png", tier: 2, type: "human", atk: 5, hp: 5, cost: 8, 
+              effectDesc: "TEAM: All Humans gain +1/+1 at start of battle.", 
+              flavor: "Gains. That's it." },
+              
+            { id: "m8", name: "Wolf Jacket", image: "images/wolf-jacket.png", tier: 1, type: "human", atk: 3, hp: 2, cost: 5, 
+              effectDesc: "SOLO: +2 ATK if it's the only Human.", 
+              flavor: "Cool guys don't look at explosions." },
+              
+            { id: "m9", name: "Slime Glasses", image: "images/slime-glasses.png", tier: 1, type: "monster", atk: 1, hp: 5, cost: 5, 
+              effectDesc: "TEAM: Shop items cost 1 less.", 
+              flavor: "He's very smart. He reads books." },
+              
+            { id: "m10", name: "Living Lightning", image: "images/living-lighting.png", tier: 3, type: "undead", atk: 6, hp: 2, cost: 12, 
+              effectDesc: "AFTER: Deal 3 damage to random enemy when this dies.", 
+              flavor: "Pure energy, entirely shocking." }
         ];
 
         let state = {
-            round: 1, gold: 15, hp: 20, 
+            round: 1, gold: 10, hp: 20, 
             squad: [null, null, null, null, null],
             shop: [null, null, null],
             isPaused: false,
@@ -312,7 +340,7 @@
             // Fill Modal
             document.getElementById('ins-type').innerText = monster.type;
             document.getElementById('ins-name').innerText = monster.name;
-            document.getElementById('ins-emoji').innerText = monster.emoji;
+            document.getElementById('ins-image').src = monster.image;
             document.getElementById('ins-atk').innerText = monster.atk;
             document.getElementById('ins-hp').innerText = monster.hp;
             document.getElementById('ins-effect').innerText = monster.effectDesc;
@@ -473,7 +501,7 @@
             if (!m) return;
             slot.innerHTML = `
                 <div class="card">
-                    <div class="card-emoji">${m.emoji}</div>
+                    <img src="${m.image}" alt="${m.name}" class="card-image">
                     <div class="card-stats">
                         <span class="c-atk">⚔️ ${m.atk}</span>
                         <span class="c-hp">🛡️ ${m.hp}</span>
@@ -510,7 +538,7 @@
             state.isPaused = true;
             document.getElementById('ins-type').innerText = m.type;
             document.getElementById('ins-name').innerText = m.name;
-            document.getElementById('ins-emoji').innerText = m.emoji;
+            document.getElementById('ins-image').src = m.image;
             document.getElementById('ins-atk').innerText = m.cAtk;
             document.getElementById('ins-hp').innerText = m.cHp;
             document.getElementById('ins-effect').innerText = m.effectDesc;
