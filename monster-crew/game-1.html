@@ -244,6 +244,27 @@
         .clash-right { animation: clashRight 0.5s ease-in-out; }
         .clash-left { animation: clashLeft 0.5s ease-in-out; }
 
+        @keyframes defeatEffect {
+            0% { transform: scale(1) rotate(0deg); filter: grayscale(0) brightness(1); opacity: 1; }
+            50% { transform: scale(0.9) rotate(-10deg); filter: grayscale(1) brightness(0.5); opacity: 0.8; }
+            100% { transform: scale(0.5) rotate(15deg) translateY(50px); filter: grayscale(1) brightness(0); opacity: 0; }
+        }
+        @keyframes popSkull {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .defeated { animation: defeatEffect 0.5s ease-out forwards !important; pointer-events: none; }
+        .defeated::after {
+            content: "💀";
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            animation: popSkull 0.5s forwards;
+            z-index: 100;
+        }
+
         /* BATTLE RESULT MODAL */
         #battle-result-modal {
             position: fixed;
@@ -668,13 +689,38 @@
                 a.cHp -= e.cAtk;
                 e.cHp -= a.cAtk;
 
-                if (a.cHp <= 0) {
-                    const dead = battleData.ally.shift();
-                    if (dead.id === "m2") handleAfterDeathEffect('ally');
-                }
-                if (e.cHp <= 0) battleData.enemy.shift();
+                let delay = 0;
 
-                renderBattle();
+                if (a.cHp <= 0 && allyFront) {
+                    allyFront.classList.remove('clash-right');
+                    allyFront.classList.add('defeated');
+                    delay = 500;
+                }
+                if (e.cHp <= 0 && enemyFront) {
+                    enemyFront.classList.remove('clash-left');
+                    enemyFront.classList.add('defeated');
+                    delay = 500;
+                }
+
+                setTimeout(() => {
+                    let triggerM2Ally = false;
+                    let triggerM2Enemy = false;
+
+                    if (a.cHp <= 0) {
+                        const dead = battleData.ally.shift();
+                        if (dead.id === "m2") triggerM2Ally = true;
+                    }
+                    if (e.cHp <= 0) {
+                        const dead = battleData.enemy.shift();
+                        if (dead.id === "m2") triggerM2Enemy = true;
+                    }
+
+                    renderBattle();
+
+                    if (triggerM2Ally) handleAfterDeathEffect('ally');
+                    if (triggerM2Enemy) handleAfterDeathEffect('enemy');
+                }, delay);
+
             }, 500);
 
             setTimeout(battleStep, 2500);
