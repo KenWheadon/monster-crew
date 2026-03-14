@@ -69,6 +69,116 @@
             padding: 0px 10px 0px 0px;
         }
 
+        .shop-level-container {
+            cursor: pointer;
+            padding: 5px 15px;
+            border: 2px solid var(--gold-color);
+            border-radius: 10px;
+            background: rgba(255, 215, 0, 0.1);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .shop-level-container:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        /* FLIP CARD POPUP */
+        #shop-level-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 4000;
+            perspective: 1500px;
+            backdrop-filter: blur(5px);
+        }
+
+        .flip-card {
+            width: 400px;
+            height: 550px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .flip-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            border: 4px solid var(--gold-color);
+            padding: 30px;
+            box-sizing: border-box;
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        .chance-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 15px;
+            margin: 5px 0;
+        }
+        .chance-label {
+            width: 40px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .chance-bar-bg {
+            flex: 1;
+            height: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .chance-bar-fill {
+            height: 100%;
+            transition: width 0.5s ease-out;
+        }
+        .chance-pct {
+            width: 50px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .weights-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .weights-table th, .weights-table td {
+            padding: 8px 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        .weights-table th { color: var(--gold-color); font-size: 0.9em; }
+        .weights-table tr.current-level {
+            background: rgba(255,215,0,0.15);
+            outline: 1px solid var(--gold-color);
+        }
+
         /* PLAY AREA */
         main { display: flex; flex-direction: column; flex: 1; }
 
@@ -553,6 +663,10 @@
                     </div>
 
                     <div id="shop-view">
+                                    <div class="stat shop-level-container" id="shop-level-display" onclick="openShopLevelPopup()">
+                <img src="images/demon.png" class="icon-img" style="height: 1.5em; width: auto; filter: none;">
+                <span>SHOP LVL <span id="shop-level-num">1</span></span>
+            </div>
                         <img src="images/demon.png" alt="Shopkeeper" style="height: 180px; object-fit: contain; margin-right: 20px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));">
                         <div class="slot" onclick="inspectSlot('shop', 0, this)" oncontextmenu="buyMonster(0, event); return false;"></div>
                         <div class="slot" onclick="inspectSlot('shop', 1, this)" oncontextmenu="buyMonster(1, event); return false;"></div>
@@ -620,6 +734,52 @@
         </div>
     </div>
 
+    <div id="shop-level-modal" onclick="closeShopLevelPopup()">
+        <div class="flip-card" id="shop-flip-card" onclick="event.stopPropagation()">
+            <div class="flip-card-front" onclick="document.getElementById('shop-flip-card').classList.add('flipped')">
+                <div style="position: absolute; top: 20px; right: 20px; font-size: 1.5em;">ℹ️</div>
+                <h2 style="color: var(--gold-color); margin-bottom: 5px;">SHOP CHANCES</h2>
+                <div style="font-size: 1.8em; font-weight: bold; margin-bottom: 30px; color: white;">LEVEL <span id="popup-shop-level">1</span></div>
+                
+                <div id="tier-chances-container" style="width: 100%; flex: 1;">
+                    <!-- Filled by JS -->
+                </div>
+
+                <div style="margin-top: 20px; color: #888; font-size: 0.9em; font-style: italic; animation: pulse 2s infinite;">Click to see all level chances ➔</div>
+                <button class="btn-sec" onclick="event.stopPropagation(); closeShopLevelPopup()" style="margin-top: 20px; width: 100%;">CLOSE</button>
+            </div>
+            <div class="flip-card-back">
+                <h2 style="color: var(--gold-color); margin-bottom: 15px;">FULL PROBABILITIES</h2>
+                <div style="flex: 1; overflow-y: auto; width: 100%;">
+                    <table class="weights-table">
+                        <thead>
+                            <tr>
+                                <th>LVL</th>
+                                <th>E</th>
+                                <th>D</th>
+                                <th>C</th>
+                                <th>B</th>
+                                <th>A</th>
+                            </tr>
+                        </thead>
+                        <tbody id="full-weights-table">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn-sec" onclick="document.getElementById('shop-flip-card').classList.remove('flipped')" style="margin-top: 20px; width: 100%;">BACK</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+    </style>
+
     <script>
         /**
          * MONSTER REGISTRY (The Backbone)
@@ -669,8 +829,22 @@
         const TIER_NAMES = ["E", "D", "C", "B", "A"];
         const TIER_COLORS = { "E": "#b0bec5", "D": "#8bc34a", "C": "#29b6f6", "B": "#ab47bc", "A": "#ffa000" };
 
+        const SHOP_LEVEL_WEIGHTS = [
+            [100, 0, 0, 0, 0],       // Level 1
+            [70, 30, 0, 0, 0],       // Level 2
+            [50, 40, 10, 0, 0],      // Level 3
+            [40, 35, 25, 0, 0],      // Level 4
+            [30, 35, 25, 10, 0],     // Level 5
+            [20, 30, 30, 15, 5],     // Level 6
+            [10, 25, 35, 20, 10],    // Level 7
+            [5, 15, 35, 30, 15],     // Level 8
+            [0, 10, 30, 40, 20],     // Level 9
+            [0, 0, 20, 50, 30],      // Level 10
+        ];
+
         let state = {
             round: 1, gold: 10, hp: 20, 
+            shopLevel: 1,
             squad: [null, null, null, null, null],
             shop: [null, null, null],
             isPaused: false,
@@ -732,21 +906,9 @@
             updateUI();
         }
 
-        function getWeightedRandomTier(round) {
-            const weightsArray = [
-                [100, 0, 0, 0, 0],       // Round 1
-                [70, 30, 0, 0, 0],       // Round 2
-                [50, 40, 10, 0, 0],      // Round 3
-                [40, 35, 25, 0, 0],      // Round 4
-                [30, 35, 25, 10, 0],     // Round 5
-                [20, 30, 30, 15, 5],     // Round 6
-                [10, 25, 35, 20, 10],    // Round 7
-                [5, 15, 35, 30, 15],     // Round 8
-                [0, 10, 30, 40, 20],     // Round 9
-                [0, 0, 20, 50, 30],      // Round 10+
-            ];
-            const idx = Math.min(round - 1, 9);
-            const weights = weightsArray[idx];
+        function getWeightedRandomTier(level) {
+            const idx = Math.min(level - 1, SHOP_LEVEL_WEIGHTS.length - 1);
+            const weights = SHOP_LEVEL_WEIGHTS[idx];
             
             const rand = Math.random() * 100;
             let sum = 0;
@@ -1276,6 +1438,7 @@
             }
 
             state.round++;
+            state.shopLevel = Math.min(state.round, 10);
             const earnedGold = 10 + state.round;
             state.gold = earnedGold;
             
@@ -1408,6 +1571,7 @@
 
         function updateUI() {
             document.getElementById('round-display').innerText = `ROUND ${state.round}`;
+            document.getElementById('shop-level-num').innerText = state.shopLevel;
             document.getElementById('player-hp').innerHTML = `<img src="images/hp.png" class="icon-img"> ${state.hp}`;
             document.getElementById('player-gold').innerHTML = `<img src="images/bag1.png" class="coin-bag icon-img" style="transform: scale(1.5); margin-right: 5px;"> <img src="images/win-icon.png" class="icon-img"> ${state.gold}`;
 
@@ -1489,6 +1653,68 @@
                 renderCard(div, { ...m, atk: m.cAtk, hp: m.cHp });
                 enemyLine.appendChild(div);
             });
+        }
+
+        function openShopLevelPopup() {
+            const modal = document.getElementById('shop-level-modal');
+            const card = document.getElementById('shop-flip-card');
+            const level = state.shopLevel;
+            
+            document.getElementById('popup-shop-level').innerText = level;
+            card.classList.remove('flipped');
+            
+            // Populate Front
+            const container = document.getElementById('tier-chances-container');
+            container.innerHTML = '';
+            
+            const idx = Math.min(level - 1, SHOP_LEVEL_WEIGHTS.length - 1);
+            const weights = SHOP_LEVEL_WEIGHTS[idx];
+            
+            TIER_NAMES.forEach((name, i) => {
+                const weight = weights[i];
+                const color = TIER_COLORS[name];
+                
+                const row = document.createElement('div');
+                row.className = 'chance-row';
+                row.innerHTML = `
+                    <div class="chance-label" style="color: ${color}">${name}</div>
+                    <div class="chance-bar-bg">
+                        <div class="chance-bar-fill" style="width: 0%; background: ${color}"></div>
+                    </div>
+                    <div class="chance-pct">${weight}%</div>
+                `;
+                container.appendChild(row);
+                
+                // Animate bar
+                setTimeout(() => {
+                    const bar = row.querySelector('.chance-bar-fill');
+                    if (bar) bar.style.width = weight + '%';
+                }, 100 + i * 50);
+            });
+            
+            // Populate Back Table
+            const tbody = document.getElementById('full-weights-table');
+            tbody.innerHTML = '';
+            SHOP_LEVEL_WEIGHTS.forEach((rowWeights, i) => {
+                const tr = document.createElement('tr');
+                if (i + 1 === level) tr.className = 'current-level';
+                tr.innerHTML = `<td>${i + 1}</td>` + rowWeights.map(w => `<td>${w}%</td>`).join('');
+                tbody.appendChild(tr);
+            });
+
+            modal.style.display = 'flex';
+            
+            // Flip Animation on open
+            card.style.transform = 'rotateY(-180deg)';
+            setTimeout(() => {
+                card.style.transition = 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                card.style.transform = 'rotateY(0deg)';
+            }, 10);
+        }
+
+        function closeShopLevelPopup() {
+            const modal = document.getElementById('shop-level-modal');
+            modal.style.display = 'none';
         }
 
         function inspectMonsterOnly(m, element) {
