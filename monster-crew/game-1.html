@@ -217,6 +217,37 @@
             z-index: 10;
         }
 
+        .card-cost {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gold-color);
+            color: black;
+            font-weight: bold;
+            font-size: 0.9em;
+            padding: 4px 8px;
+            border-radius: 5px;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .card-tier {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            color: black;
+            font-weight: bold;
+            font-size: 0.9em;
+            padding: 4px 8px;
+            border-radius: 5px;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            z-index: 10;
+            text-transform: uppercase;
+        }
+
         .floating-text {
             position: absolute;
             font-weight: bold;
@@ -323,6 +354,132 @@
             0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
+
+        /* CHARACTER SELECT MODAL */
+        #character-select-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            backdrop-filter: blur(8px);
+        }
+
+        .char-card {
+            background: var(--panel-color);
+            border: 3px solid #555;
+            border-radius: 15px;
+            padding: 20px;
+            width: 180px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .char-card:hover {
+            transform: scale(1.05);
+            border-color: var(--text-color);
+            box-shadow: 0 0 20px rgba(255,0,85,0.4);
+        }
+
+        .char-icon {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+
+        .char-title {
+            color: var(--gold-color);
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .char-desc {
+            font-size: 0.9em;
+            color: white;
+        }
+
+        /* LOBBY DRAWER */
+        #shop-phase {
+            display: flex;
+            flex: 1;
+            width: 100%;
+        }
+
+        #character-drawer {
+            width: 100px;
+            background: rgba(0,0,0,0.6);
+            border-left: 2px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .drawer-char {
+            position: relative;
+            text-align: center;
+            padding: 10px 5px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #444;
+            border-radius: 8px;
+            width: 80px;
+            transition: 0.3s;
+        }
+
+        .drawer-char.is-player {
+            border-color: var(--gold-color);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .drawer-icon {
+            font-size: 2.2em;
+            position: relative;
+            margin-bottom: 5px;
+        }
+
+        .skull-overlay {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5em;
+            opacity: 0.6;
+            pointer-events: none;
+            display: none;
+            z-index: 10;
+        }
+
+        .drawer-char.dead .skull-overlay {
+            display: block;
+        }
+
+        .drawer-char.dead {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        .drawer-name {
+            font-size: 0.7em;
+            color: white;
+            display: block;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .drawer-hp {
+            color: var(--health-color);
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .drawer-hp .dead-text {
+            color: var(--text-color);
+        }
     </style>
 </head>
 <body>
@@ -336,22 +493,31 @@
 
         <main>
             <div id="battle-view" style="display: none;">
+                <div id="combat-info" style="position: absolute; top: 20px; text-align: center; z-index: 10;"></div>
                 <div id="enemy-line" style="display:flex; gap:15px; margin-bottom:40px;"></div>
                 <div id="ally-line" style="display:flex; gap:15px;"></div>
             </div>
 
-            <div id="squad-view">
-                <div class="slot" onclick="inspectSlot('squad', 0, this)"></div>
-                <div class="slot" onclick="inspectSlot('squad', 1, this)"></div>
-                <div class="slot" onclick="inspectSlot('squad', 2, this)"></div>
-                <div class="slot" onclick="inspectSlot('squad', 3, this)"></div>
-                <div class="slot" onclick="inspectSlot('squad', 4, this)"></div>
-            </div>
+            <div id="shop-phase">
+                <div style="display: flex; flex-direction: column; flex: 1;">
+                    <div id="squad-view">
+                        <div class="slot" onclick="inspectSlot('squad', 0, this)"></div>
+                        <div class="slot" onclick="inspectSlot('squad', 1, this)"></div>
+                        <div class="slot" onclick="inspectSlot('squad', 2, this)"></div>
+                        <div class="slot" onclick="inspectSlot('squad', 3, this)"></div>
+                        <div class="slot" onclick="inspectSlot('squad', 4, this)"></div>
+                    </div>
 
-            <div id="shop-view">
-                <div class="slot" onclick="inspectSlot('shop', 0, this)"></div>
-                <div class="slot" onclick="inspectSlot('shop', 1, this)"></div>
-                <div class="slot" onclick="inspectSlot('shop', 2, this)"></div>
+                    <div id="shop-view">
+                        <div class="slot" onclick="inspectSlot('shop', 0, this)" oncontextmenu="buyMonster(0); return false;"></div>
+                        <div class="slot" onclick="inspectSlot('shop', 1, this)" oncontextmenu="buyMonster(1); return false;"></div>
+                        <div class="slot" onclick="inspectSlot('shop', 2, this)" oncontextmenu="buyMonster(2); return false;"></div>
+                    </div>
+                </div>
+
+                <div id="character-drawer">
+                    <!-- Drawer characters rendering -->
+                </div>
             </div>
         </main>
 
@@ -364,7 +530,8 @@
     <div id="inspector" onclick="closeInspector()">
         <div class="inspector-inner" id="inspector-inner" onclick="event.stopPropagation()">
             <div class="inspector-front">
-                <div class="card-level" id="ins-front-level" style="font-size: 1.5em; padding: 10px 20px; top: -15px; right: -15px;">LVL 1</div>
+                <div class="card-tier" id="ins-front-tier" style="font-size: 1.5em; padding: 10px 20px; top: -15px; left: -15px;">E</div>
+                <div class="card-level" id="ins-front-level" style="font-size: 1.5em; padding: 10px 20px; top: -15px; right: -15px;">1</div>
                 <img id="ins-front-image" src="" alt="Monster" style="width: 100%; height: 60%; object-fit: contain; margin: auto 0;">
                 <div class="card-stats" style="width: 100%; font-size: 2.5em; display: flex; justify-content: space-between; margin-top: auto;">
                     <span class="c-atk" id="ins-front-atk">⚔️ 0</span>
@@ -399,59 +566,111 @@
         </div>
     </div>
 
+    <div id="character-select-modal">
+        <div class="result-inner" style="width: auto; max-width: 90%;">
+            <h1 style="color: var(--gold-color); font-size: 2.5em; margin-bottom: 30px;">CHOOSE YOUR HERO</h1>
+            <div id="character-list" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <!-- Cards inserted by JS -->
+            </div>
+        </div>
+    </div>
+
     <script>
         /**
          * MONSTER REGISTRY (The Backbone)
          */
         const MONSTER_REGISTRY = [
-            { id: "m1", name: "Buff Bear", image: "images/bear-buff.png", tier: 1, type: "monster", atk: 3, hp: 4, cost: 5, 
+            { id: "m1", name: "Buff Bear", image: "images/bear-buff.png", tier: "E", type: "monster", atk: 3, hp: 4, cost: 5, 
               effectDesc: "TEAM: +1 ATK and +1 HP for every other Monster ally.", 
               flavor: "He never skips leg day or arm day." },
             
-            { id: "m2", name: "Dead Hand", image: "images/deady-hand.png", tier: 1, type: "undead", atk: 4, hp: 1, cost: 5, 
+            { id: "m2", name: "Dead Hand", image: "images/deady-hand.png", tier: "E", type: "undead", atk: 4, hp: 1, cost: 5, 
               effectDesc: "AFTER: Give a random ally +3 HP when this dies.", 
               flavor: "Need a hand?" },
 
-            { id: "m3", name: "Slime Dagger", image: "images/slime-daggers.png", tier: 1, type: "monster", atk: 2, hp: 2, cost: 5, 
+            { id: "m3", name: "Slime Dagger", image: "images/slime-daggers.png", tier: "D", type: "monster", atk: 2, hp: 2, cost: 5, 
               effectDesc: "SOLO: +3 ATK and +2 HP if it's the only Monster.", 
               flavor: "Sharp AND gooey." },
 
-            { id: "m4", name: "Giant Teeth", image: "images/giant-teeth.png", tier: 2, type: "undead", atk: 4, hp: 6, cost: 8, 
+            { id: "m4", name: "Giant Teeth", image: "images/giant-teeth.png", tier: "C", type: "undead", atk: 4, hp: 6, cost: 8, 
               effectDesc: "TEAM: +2 HP for every other Undead ally.", 
               flavor: "Being dead is no excuse for poor dental hygiene." },
 
-            { id: "m5", name: "Bear Shirt", image: "images/bear-shirt.png", tier: 2, type: "monster", atk: 6, hp: 4, cost: 8, 
+            { id: "m5", name: "Bear Shirt", image: "images/bear-shirt.png", tier: "B", type: "monster", atk: 6, hp: 4, cost: 8, 
               effectDesc: "SOLO: +4 ATK if no other monsters present.", 
               flavor: "Just a bear wearing a neat shirt." },
 
-            { id: "m6", name: "Slime Sword", image: "images/slime-sword.png", tier: 3, type: "monster", atk: 8, hp: 8, cost: 12, 
+            { id: "m6", name: "Slime Sword", image: "images/slime-sword.png", tier: "A", type: "monster", atk: 8, hp: 8, cost: 12, 
               effectDesc: "TEAM: All Monsters gain +2/+2 at start of battle.", 
               flavor: "A legendary blade that leaves a sticky residue." },
               
-            { id: "m7", name: "Buff Wolf", image: "images/wolf-buff.png", tier: 2, type: "human", atk: 5, hp: 5, cost: 8, 
+            { id: "m7", name: "Buff Wolf", image: "images/wolf-buff.png", tier: "B", type: "human", atk: 5, hp: 5, cost: 8, 
               effectDesc: "TEAM: All Humans gain +1/+1 at start of battle.", 
               flavor: "Gains. That's it." },
               
-            { id: "m8", name: "Wolf Jacket", image: "images/wolf-jacket.png", tier: 1, type: "human", atk: 3, hp: 2, cost: 5, 
+            { id: "m8", name: "Wolf Jacket", image: "images/wolf-jacket.png", tier: "D", type: "human", atk: 3, hp: 2, cost: 5, 
               effectDesc: "SOLO: +2 ATK if it's the only Human.", 
               flavor: "Cool guys don't look at explosions." },
               
-            { id: "m9", name: "Slime Glasses", image: "images/slime-glasses.png", tier: 1, type: "monster", atk: 1, hp: 5, cost: 5, 
+            { id: "m9", name: "Slime Glasses", image: "images/slime-glasses.png", tier: "C", type: "monster", atk: 1, hp: 5, cost: 5, 
               effectDesc: "TEAM: Shop items cost 1 less.", 
               flavor: "He's very smart. He reads books." },
               
-            { id: "m10", name: "Living Lightning", image: "images/living-lighting.png", tier: 3, type: "undead", atk: 6, hp: 2, cost: 12, 
+            { id: "m10", name: "Living Lightning", image: "images/living-lighting.png", tier: "A", type: "undead", atk: 6, hp: 2, cost: 12, 
               effectDesc: "AFTER: Deal 3 damage to random enemy when this dies.", 
               flavor: "Pure energy, entirely shocking." }
         ];
+
+        const TIER_NAMES = ["E", "D", "C", "B", "A"];
+        const TIER_COLORS = { "E": "#b0bec5", "D": "#8bc34a", "C": "#29b6f6", "B": "#ab47bc", "A": "#ffa000" };
 
         let state = {
             round: 1, gold: 10, hp: 20, 
             squad: [null, null, null, null, null],
             shop: [null, null, null],
             isPaused: false,
-            currentlyInspecting: null
+            currentlyInspecting: null,
+            character: null,
+            characters: null,
+            currentOpponent: null
         };
+
+        const CHARACTERS = [
+            { id: "beast", name: "Beastmaster", desc: "Higher chance for Monster units.", typeWeights: { monster: 60, undead: 20, human: 20 }, icon: "🐻" },
+            { id: "necro", name: "Necromancer", desc: "Higher chance for Undead units.", typeWeights: { monster: 20, undead: 60, human: 20 }, icon: "💀" },
+            { id: "captain", name: "Commander", desc: "Higher chance for Human units.", typeWeights: { monster: 20, undead: 20, human: 60 }, icon: "⚔️" },
+            { id: "collector", name: "Collector", desc: "Equal chances for all units.", typeWeights: "equal", icon: "🃏" }
+        ];
+
+        function renderCharacterSelection() {
+            const list = document.getElementById('character-list');
+            list.innerHTML = '';
+            CHARACTERS.forEach(char => {
+                const div = document.createElement('div');
+                div.className = 'char-card';
+                div.innerHTML = `
+                    <div class="char-icon">${char.icon}</div>
+                    <div class="char-title">${char.name}</div>
+                    <div class="char-desc">${char.desc}</div>
+                `;
+                div.onclick = () => selectCharacter(char);
+                list.appendChild(div);
+            });
+        }
+
+        function selectCharacter(char) {
+            state.character = char;
+            state.hp = 20;
+            state.characters = CHARACTERS.map(c => ({
+                id: c.id,
+                name: c.name,
+                icon: c.icon,
+                hp: 20
+            }));
+            document.getElementById('character-select-modal').style.display = 'none';
+            refreshShop();
+            updateUI();
+        }
 
         let battleData = { ally: [], enemy: [] };
 
@@ -459,14 +678,72 @@
          * CORE ENGINE
          */
         function init() {
-            refreshShop();
+            renderCharacterSelection();
+            document.getElementById('character-select-modal').style.display = 'flex';
             updateUI();
+        }
+
+        function getWeightedRandomTier(round) {
+            const weightsArray = [
+                [100, 0, 0, 0, 0],       // Round 1
+                [70, 30, 0, 0, 0],       // Round 2
+                [50, 40, 10, 0, 0],      // Round 3
+                [40, 35, 25, 0, 0],      // Round 4
+                [30, 35, 25, 10, 0],     // Round 5
+                [20, 30, 30, 15, 5],     // Round 6
+                [10, 25, 35, 20, 10],    // Round 7
+                [5, 15, 35, 30, 15],     // Round 8
+                [0, 10, 30, 40, 20],     // Round 9
+                [0, 0, 20, 50, 30],      // Round 10+
+            ];
+            const idx = Math.min(round - 1, 9);
+            const weights = weightsArray[idx];
+            
+            const rand = Math.random() * 100;
+            let sum = 0;
+            for (let i = 0; i < 5; i++) {
+                sum += weights[i];
+                if (rand <= sum) return TIER_NAMES[i];
+            }
+            return "E";
         }
 
         function refreshShop() {
             state.shop = state.shop.map(() => {
-                const pool = MONSTER_REGISTRY.filter(m => m.tier <= (state.round > 3 ? 3 : state.round > 1 ? 2 : 1));
-                return { ...pool[Math.floor(Math.random() * pool.length)], instId: Math.random() };
+                let tier = getWeightedRandomTier(state.round);
+                let pool = MONSTER_REGISTRY.filter(m => m.tier === tier);
+                // Fallback in case a tier has no monsters
+                while (pool.length === 0) {
+                    let idx = TIER_NAMES.indexOf(tier);
+                    if (idx > 0) tier = TIER_NAMES[idx - 1];
+                    else break;
+                    pool = MONSTER_REGISTRY.filter(m => m.tier === tier);
+                }
+
+                let selectedMonster;
+                if (!state.character || state.character.typeWeights === "equal") {
+                    selectedMonster = pool[Math.floor(Math.random() * pool.length)];
+                } else {
+                    let totalWeight = 0;
+                    let weightedPool = pool.map(m => {
+                        let w = state.character.typeWeights[m.type] || 10;
+                        totalWeight += w;
+                        return { monster: m, weight: w };
+                    });
+
+                    let rand = Math.random() * totalWeight;
+                    let sum = 0;
+                    for(let item of weightedPool) {
+                        sum += item.weight;
+                        if(rand <= sum) {
+                            selectedMonster = item.monster;
+                            break;
+                        }
+                    }
+                    if(!selectedMonster) selectedMonster = pool[0];
+                }
+
+                return { ...selectedMonster, instId: Math.random() };
             });
             updateUI();
         }
@@ -497,8 +774,10 @@
             const hp = monster.cHp !== undefined ? monster.cHp : monster.hp;
 
             // Fill Front
-            document.getElementById('ins-front-level').innerText = `LVL ${lvl}`;
+            document.getElementById('ins-front-level').innerText = `${lvl}`;
             document.getElementById('ins-front-image').src = monster.image;
+            document.getElementById('ins-front-tier').innerText = monster.tier || "E";
+            document.getElementById('ins-front-tier').style.background = TIER_COLORS[monster.tier] || "#b0bec5";
             document.getElementById('ins-front-atk').innerText = `⚔️ ${atk}`;
             document.getElementById('ins-front-hp').innerText = `🛡️ ${hp}`;
 
@@ -587,6 +866,7 @@
 
         function buyMonster(index) {
             const monster = state.shop[index];
+            if (!monster) return;
             let discount = state.squad.filter(m => m && m.id === "m9").length;
             let currentCost = Math.max(0, monster.cost - discount);
             if (state.gold >= currentCost) {
@@ -644,9 +924,30 @@
             if (state.squad.every(s => s === null)) return alert("Need a squad!");
             
             document.getElementById('battle-view').style.display = 'flex';
-            document.getElementById('squad-view').style.display = 'none';
-            document.getElementById('shop-view').style.display = 'none';
+            document.getElementById('shop-phase').style.display = 'none';
             document.getElementById('controls').style.display = 'none';
+
+            let opponents = state.characters ? state.characters.filter(c => c.id !== state.character?.id && c.hp > 0) : [];
+            if (opponents.length > 0) {
+                state.currentOpponent = opponents[Math.floor(Math.random() * opponents.length)];
+            } else {
+                state.currentOpponent = null;
+            }
+
+            const combatInfo = document.getElementById('combat-info');
+            if (combatInfo) {
+                if (state.currentOpponent) {
+                    combatInfo.innerHTML = `
+                        <h2 style="color: var(--gold-color); text-shadow: 2px 2px 0 #000; margin: 0 0 5px 0;">VS ${state.currentOpponent.name}</h2>
+                        <div style="font-size: 1.5em; color: var(--health-color); font-weight: bold; text-shadow: 1px 1px 0 #000;">
+                            ${state.currentOpponent.icon} ❤️ ${state.currentOpponent.hp}
+                        </div>
+                    `;
+                    combatInfo.style.display = 'block';
+                } else {
+                    combatInfo.style.display = 'none';
+                }
+            }
 
             // Clone squad and generate enemies
             battleData.ally = state.squad.filter(s => s !== null).map(s => ({ ...s, cHp: s.hp, cAtk: s.atk }));
@@ -736,8 +1037,43 @@
 
         function endBattle() {
             const win = battleData.ally.length > 0;
-            if (!win) state.hp -= 5;
+            let hpLoss = 0;
+            let opponentHpLoss = 0;
+
+            if (!win) {
+                const aliveMonsters = battleData.enemy.length;
+                hpLoss = state.round + aliveMonsters;
+                state.hp -= hpLoss;
+                if (state.hp <= 0) state.hp = 0;
+                
+                if (state.characters) {
+                    let pChar = state.characters.find(c => c.id === state.character.id);
+                    if (pChar) pChar.hp = state.hp;
+                }
+            } else {
+                if (state.currentOpponent) {
+                    const aliveMonsters = battleData.ally.length;
+                    opponentHpLoss = state.round + aliveMonsters;
+                    
+                    let op = state.characters.find(c => c.id === state.currentOpponent.id);
+                    if (op) {
+                        op.hp -= opponentHpLoss;
+                        if (op.hp <= 0) op.hp = 0;
+                    }
+                }
+            }
             
+            if (state.characters) {
+                state.characters.forEach(c => {
+                    if (c.id !== state.character?.id && c.id !== state.currentOpponent?.id && c.hp > 0) {
+                        if (Math.random() < 0.4) {
+                            c.hp -= (state.round + Math.floor(Math.random() * 3));
+                            if (c.hp <= 0) c.hp = 0;
+                        }
+                    }
+                });
+            }
+
             state.round++;
             const earnedGold = 10 + state.round;
             state.gold = earnedGold;
@@ -750,12 +1086,16 @@
             if (win) {
                 title.innerText = "VICTORY!";
                 title.style.color = 'var(--gold-color)';
-                desc.innerText = `You gained ${earnedGold}💰!`;
+                let opText = "";
+                if (state.currentOpponent && opponentHpLoss > 0) {
+                    opText = `<br><span style="color:var(--text-color); font-size:0.8em; margin-top:10px; display:inline-block;">${state.currentOpponent.name} lost ${opponentHpLoss}❤️!</span>`;
+                }
+                desc.innerHTML = `You gained ${earnedGold}💰!${opText}`;
                 createCoinShower();
             } else {
                 title.innerText = "DEFEAT!";
                 title.style.color = 'var(--health-color)';
-                desc.innerText = `You lost 5❤️!`;
+                desc.innerText = `You lost ${hpLoss}❤️!`;
             }
         }
 
@@ -775,8 +1115,7 @@
         function closeBattleResult() {
             document.getElementById('battle-result-modal').style.display = 'none';
             document.getElementById('battle-view').style.display = 'none';
-            document.getElementById('squad-view').style.display = 'flex';
-            document.getElementById('shop-view').style.display = 'flex';
+            document.getElementById('shop-phase').style.display = 'flex';
             document.getElementById('controls').style.display = 'flex';
             
             refreshShop();
@@ -808,16 +1147,44 @@
             state.squad.forEach((m, i) => renderCard(squadSlots[i], m));
 
             const shopSlots = document.querySelectorAll('#shop-view .slot');
-            state.shop.forEach((m, i) => renderCard(shopSlots[i], m));
+            state.shop.forEach((m, i) => renderCard(shopSlots[i], m, true));
+
+            // Render Drawer
+            if (state.characters && document.getElementById('character-drawer')) {
+                const drawer = document.getElementById('character-drawer');
+                drawer.innerHTML = '';
+                state.characters.forEach(c => {
+                    const isPlayer = state.character && c.id === state.character.id;
+                    const isDead = c.hp <= 0;
+                    const hpText = isDead ? '<span class="dead-text">DEAD</span>' : `❤️ ${c.hp}`;
+
+                    drawer.innerHTML += `
+                        <div class="drawer-char ${isPlayer ? 'is-player' : ''} ${isDead ? 'dead' : ''}">
+                            <div class="drawer-icon">
+                                ${c.icon}
+                                <div class="skull-overlay">💀</div>
+                            </div>
+                            <span class="drawer-name">${c.name}</span>
+                            <div class="drawer-hp">${hpText}</div>
+                        </div>
+                    `;
+                });
+            }
         }
 
-        function renderCard(slot, m) {
+        function renderCard(slot, m, isShop = false) {
             slot.innerHTML = '';
             slot.classList.toggle('filled', !!m);
             if (!m) return;
             const lvl = m.level || 1;
+            const tierStr = m.tier || "E";
+            const tierColor = TIER_COLORS[tierStr] || "#b0bec5";
+            let discount = state.squad.filter(sm => sm && sm.id === "m9").length;
+            let currentCost = isShop ? Math.max(0, m.cost - discount) : m.cost;
             slot.innerHTML = `
-                <div class="card-level">LVL ${lvl}</div>
+                ${isShop ? `<div class="card-cost">${currentCost}💰</div>` : ''}
+                <div class="card-tier" style="background: ${tierColor};">${tierStr}</div>
+                <div class="card-level">${lvl}</div>
                 <div class="card">
                     <img src="${m.image}" alt="${m.name}" class="card-image">
                     <div class="card-stats">
