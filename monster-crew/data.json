@@ -1,0 +1,246 @@
+{
+  "monsters": [
+    {
+      "id": "m1",
+      "name": "Buff Bear",
+      "image": "images/bear-buff.png",
+      "tier": "E",
+      "type": "monster",
+      "atk": 3,
+      "hp": 4,
+      "cost": 5,
+      "effectDesc": "TEAM: +1 ATK and +1 HP for every other Monster ally.",
+      "flavor": "He never skips leg day or arm day."
+    },
+    {
+      "id": "m2",
+      "name": "Dead Hand",
+      "image": "images/deady-hand.png",
+      "tier": "E",
+      "type": "undead",
+      "atk": 4,
+      "hp": 1,
+      "cost": 5,
+      "effectDesc": "AFTER: Give a random ally +3 HP when this dies.",
+      "flavor": "Need a hand?"
+    },
+    {
+      "id": "m3",
+      "name": "Slime Dagger",
+      "image": "images/slime-daggers.png",
+      "tier": "D",
+      "type": "monster",
+      "atk": 2,
+      "hp": 2,
+      "cost": 5,
+      "effectDesc": "SOLO: +3 ATK and +2 HP if it's the only Monster.",
+      "flavor": "Sharp AND gooey."
+    },
+    {
+      "id": "m4",
+      "name": "Giant Teeth",
+      "image": "images/giant-teeth.png",
+      "tier": "C",
+      "type": "undead",
+      "atk": 4,
+      "hp": 6,
+      "cost": 8,
+      "effectDesc": "TEAM: +2 HP for every other Undead ally.",
+      "flavor": "Being dead is no excuse for poor dental hygiene.",
+      "locked": true,
+      "unlockPrice": 5
+    },
+    {
+      "id": "m5",
+      "name": "Bear Shirt",
+      "image": "images/bear-shirt.png",
+      "tier": "B",
+      "type": "monster",
+      "atk": 6,
+      "hp": 4,
+      "cost": 8,
+      "effectDesc": "SOLO: +4 ATK if no other monsters present.",
+      "flavor": "Just a bear wearing a neat shirt.",
+      "locked": true,
+      "unlockPrice": 10
+    },
+    {
+      "id": "m6",
+      "name": "Slime Sword",
+      "image": "images/slime-sword.png",
+      "tier": "A",
+      "type": "monster",
+      "atk": 8,
+      "hp": 8,
+      "cost": 12,
+      "effectDesc": "TEAM: All Monsters gain +2/+2 at start of battle.",
+      "flavor": "A legendary blade that leaves a sticky residue.",
+      "locked": true,
+      "unlockPrice": 20
+    },
+    {
+      "id": "m7",
+      "name": "Buff Wolf",
+      "image": "images/wolf-buff.png",
+      "tier": "B",
+      "type": "human",
+      "atk": 5,
+      "hp": 5,
+      "cost": 8,
+      "effectDesc": "TEAM: All Humans gain +1/+1 at start of battle.",
+      "flavor": "Gains. That's it.",
+      "locked": true,
+      "unlockPrice": 10
+    },
+    {
+      "id": "m8",
+      "name": "Wolf Jacket",
+      "image": "images/wolf-jacket.png",
+      "tier": "D",
+      "type": "human",
+      "atk": 3,
+      "hp": 2,
+      "cost": 5,
+      "effectDesc": "SOLO: +2 ATK if it's the only Human.",
+      "flavor": "Cool guys don't look at explosions."
+    },
+    {
+      "id": "m9",
+      "name": "Slime Glasses",
+      "image": "images/slime-glasses.png",
+      "tier": "C",
+      "type": "monster",
+      "atk": 1,
+      "hp": 5,
+      "cost": 5,
+      "effectDesc": "TEAM: Shop items cost 1 less.",
+      "flavor": "He's very smart. He reads books.",
+      "locked": true,
+      "unlockPrice": 5
+    },
+    {
+      "id": "m10",
+      "name": "Living Lightning",
+      "image": "images/living-lighting.png",
+      "tier": "A",
+      "type": "undead",
+      "atk": 6,
+      "hp": 2,
+      "cost": 12,
+      "effectDesc": "AFTER: Deal 3 damage to random enemy when this dies.",
+      "flavor": "Pure energy, entirely shocking.",
+      "locked": true,
+      "unlockPrice": 20
+    },
+    {
+      "id": "m11",
+      "name": "Man",
+      "image": "images/man.png",
+      "tier": "E",
+      "type": "human",
+      "atk": 1,
+      "hp": 1,
+      "cost": 5,
+      "effectDesc": "TEAM: All Humans gain +1/+1 at start of battle.",
+      "flavor": "Pure energy, entirely shocking."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "gold_1",
+      "name": "Starting Purse",
+      "desc": "Start with +5 gold each run.",
+      "price": 5,
+      "icon": "💰"
+    },
+    {
+      "id": "hp_1",
+      "name": "Extra Padding",
+      "desc": "Start with +10 max HP.",
+      "price": 5,
+      "icon": "🛡️"
+    },
+    {
+      "id": "gold_2",
+      "name": "Merchant Seal",
+      "desc": "Start with +10 gold each run.",
+      "price": 15,
+      "icon": "🏦"
+    },
+    {
+      "id": "hp_2",
+      "name": "Vitality Boost",
+      "desc": "Start with +20 max HP.",
+      "price": 15,
+      "icon": "❤️"
+    }
+  ],
+  "tierNames": [
+    "E",
+    "D",
+    "C",
+    "B",
+    "A"
+  ],
+  "tierColors": {
+    "E": "#b0bec5",
+    "D": "#8bc34a",
+    "C": "#29b6f6",
+    "B": "#ab47bc",
+    "A": "#ffa000"
+  },
+  "shopLevelWeights": [
+    [100, 0, 0, 0, 0],
+    [70, 30, 0, 0, 0],
+    [50, 40, 10, 0, 0],
+    [40, 35, 25, 0, 0],
+    [30, 35, 25, 10, 0],
+    [20, 30, 30, 15, 5],
+    [10, 25, 35, 20, 10],
+    [5, 15, 35, 30, 15],
+    [0, 10, 30, 40, 20],
+    [0, 0, 20, 50, 30]
+  ],
+  "characters": [
+    {
+      "id": "beast",
+      "name": "Beastmaster",
+      "desc": "Higher chance for Monster units.",
+      "typeWeights": {
+        "monster": 60,
+        "undead": 20,
+        "human": 20
+      },
+      "icon": "<img src='images/beastmaster.png' class='char-img'>"
+    },
+    {
+      "id": "necro",
+      "name": "Necromancer",
+      "desc": "Higher chance for Undead units.",
+      "typeWeights": {
+        "monster": 20,
+        "undead": 60,
+        "human": 20
+      },
+      "icon": "<img src='images/necromancer.png' class='char-img'>"
+    },
+    {
+      "id": "captain",
+      "name": "Commander",
+      "desc": "Higher chance for Human units.",
+      "typeWeights": {
+        "monster": 20,
+        "undead": 20,
+        "human": 60
+      },
+      "icon": "<img src='images/commander.png' class='char-img'>"
+    },
+    {
+      "id": "collector",
+      "name": "Collector",
+      "desc": "Equal chances for all units.",
+      "typeWeights": "equal",
+      "icon": "<img src='images/collector.png' class='char-img'>"
+    }
+  ]
+}

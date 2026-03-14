@@ -650,9 +650,261 @@
         .drawer-hp .dead-text {
             color: var(--text-color);
         }
+        /* TITLE SCREEN */
+        #title-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #title-logo {
+            max-width: 600px;
+            width: 90%;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 0 20px rgba(255, 0, 85, 0.4));
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+        }
+
+        .title-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 300px;
+        }
+
+        .btn-title {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            letter-spacing: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid var(--text-color);
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+
+        .btn-title:hover {
+            background: var(--text-color);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--text-color);
+        }
+
+        .trophy-counter {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 1.5em;
+            color: var(--gold-color);
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 2px solid var(--gold-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* UPGRADES STORE */
+        #store-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--modal-bg);
+            z-index: 6000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .store-inner {
+            background: var(--panel-color);
+            border: 4px solid var(--gold-color);
+            border-radius: 20px;
+            padding: 40px;
+            width: 800px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .store-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+        }
+
+        .store-section {
+            margin-bottom: 40px;
+        }
+
+        .store-section-title {
+            color: var(--gold-color);
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .shop-item {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #555;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .shop-item.locked {
+            opacity: 0.8;
+        }
+
+        .shop-item:hover {
+            border-color: var(--gold-color);
+        }
+
+        .item-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+        }
+
+        .item-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .item-desc {
+            font-size: 0.85em;
+            color: #ccc;
+            margin-bottom: 15px;
+            height: 40px;
+            overflow: hidden;
+        }
+
+        .item-price {
+            background: var(--gold-color);
+            color: black;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .item-price:hover {
+            transform: scale(1.1);
+        }
+
+        .item-price.disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .item-purchased {
+            color: #2ecc71;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* CREDITS MODAL */
+        #credits-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 7000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
     </style>
 </head>
 <body>
+
+    <div id="title-screen">
+        <div class="trophy-counter">
+             🏆 <span id="main-trophy-count">0</span>
+        </div>
+        <img src="images/logo.png" alt="Monster Crew Logo" id="title-logo">
+        <div class="title-buttons">
+            <button class="btn-title" onclick="startGame()">PLAY</button>
+            <button class="btn-title" onclick="openStore()">UPGRADES</button>
+            <button class="btn-title" onclick="openCredits()">CREDITS</button>
+        </div>
+    </div>
+
+    <div id="store-modal">
+        <div class="store-inner">
+            <div class="store-header">
+                <h2>MONSTER SHOP</h2>
+                <div style="font-size: 1.5em; color: var(--gold-color);">
+                     🏆 <span id="store-trophy-count">0</span>
+                </div>
+            </div>
+
+            <div class="store-section">
+                <div class="store-section-title">Character Upgrades</div>
+                <div class="store-grid" id="char-upgrades-grid">
+                    <!-- Upgrades filled by JS -->
+                </div>
+            </div>
+
+            <div class="store-section">
+                <div class="store-section-title">Card Unlocks</div>
+                <div class="store-grid" id="card-unlocks-grid">
+                    <!-- Card unlocks filled by JS -->
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn-sec" onclick="closeStore()" style="width: 200px;">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits-modal" onclick="closeCredits()">
+        <div class="result-inner" onclick="event.stopPropagation()">
+            <h1 style="color: var(--gold-color); font-size: 2.5em; margin-bottom: 30px;">CREDITS</h1>
+            <p style="font-size: 1.8em; line-height: 1.6;">
+                Thanks for playing!<br>
+                <span style="color: var(--text-color); font-weight: bold;">Game by Ken Wheadon</span>
+            </p>
+            <button class="btn-main" onclick="closeCredits()" style="margin-top: 20px; width: 100%;">BACK</button>
+        </div>
+    </div>
 
     <div id="game-container">
         <header>
@@ -799,69 +1051,63 @@
     </style>
 
     <script>
-        /**
-         * MONSTER REGISTRY (The Backbone)
-         */
-        const MONSTER_REGISTRY = [
-            { id: "m1", name: "Buff Bear", image: "images/bear-buff.png", tier: "E", type: "monster", atk: 3, hp: 4, cost: 5, 
-              effectDesc: "TEAM: +1 ATK and +1 HP for every other Monster ally.", 
-              flavor: "He never skips leg day or arm day." },
-            
-            { id: "m2", name: "Dead Hand", image: "images/deady-hand.png", tier: "E", type: "undead", atk: 4, hp: 1, cost: 5, 
-              effectDesc: "AFTER: Give a random ally +3 HP when this dies.", 
-              flavor: "Need a hand?" },
+        let MONSTER_REGISTRY = [];
+        let UPGRADES_REGISTRY = [];
+        let TIER_NAMES = [];
+        let TIER_COLORS = {};
+        let SHOP_LEVEL_WEIGHTS = [];
+        let CHARACTERS = [];
 
-            { id: "m3", name: "Slime Dagger", image: "images/slime-daggers.png", tier: "D", type: "monster", atk: 2, hp: 2, cost: 5, 
-              effectDesc: "SOLO: +3 ATK and +2 HP if it's the only Monster.", 
-              flavor: "Sharp AND gooey." },
+        async function loadData() {
+            try {
+                const response = await fetch('data.json');
+                const data = await response.json();
+                MONSTER_REGISTRY = data.monsters;
+                UPGRADES_REGISTRY = data.upgrades;
+                TIER_NAMES = data.tierNames;
+                TIER_COLORS = data.tierColors;
+                SHOP_LEVEL_WEIGHTS = data.shopLevelWeights;
+                CHARACTERS = data.characters;
+            } catch (error) {
+                console.error("Error loading data.json:", error);
+            }
+        }
 
-            { id: "m4", name: "Giant Teeth", image: "images/giant-teeth.png", tier: "C", type: "undead", atk: 4, hp: 6, cost: 8, 
-              effectDesc: "TEAM: +2 HP for every other Undead ally.", 
-              flavor: "Being dead is no excuse for poor dental hygiene." },
 
-            { id: "m5", name: "Bear Shirt", image: "images/bear-shirt.png", tier: "B", type: "monster", atk: 6, hp: 4, cost: 8, 
-              effectDesc: "SOLO: +4 ATK if no other monsters present.", 
-              flavor: "Just a bear wearing a neat shirt." },
 
-            { id: "m6", name: "Slime Sword", image: "images/slime-sword.png", tier: "A", type: "monster", atk: 8, hp: 8, cost: 12, 
-              effectDesc: "TEAM: All Monsters gain +2/+2 at start of battle.", 
-              flavor: "A legendary blade that leaves a sticky residue." },
-              
-            { id: "m7", name: "Buff Wolf", image: "images/wolf-buff.png", tier: "B", type: "human", atk: 5, hp: 5, cost: 8, 
-              effectDesc: "TEAM: All Humans gain +1/+1 at start of battle.", 
-              flavor: "Gains. That's it." },
-              
-            { id: "m8", name: "Wolf Jacket", image: "images/wolf-jacket.png", tier: "D", type: "human", atk: 3, hp: 2, cost: 5, 
-              effectDesc: "SOLO: +2 ATK if it's the only Human.", 
-              flavor: "Cool guys don't look at explosions." },
-              
-            { id: "m9", name: "Slime Glasses", image: "images/slime-glasses.png", tier: "C", type: "monster", atk: 1, hp: 5, cost: 5, 
-              effectDesc: "TEAM: Shop items cost 1 less.", 
-              flavor: "He's very smart. He reads books." },
-              
-            { id: "m10", name: "Living Lightning", image: "images/living-lighting.png", tier: "A", type: "undead", atk: 6, hp: 2, cost: 12, 
-              effectDesc: "AFTER: Deal 3 damage to random enemy when this dies.", 
-              flavor: "Pure energy, entirely shocking." }
-        ];
 
-        const TIER_NAMES = ["E", "D", "C", "B", "A"];
-        const TIER_COLORS = { "E": "#b0bec5", "D": "#8bc34a", "C": "#29b6f6", "B": "#ab47bc", "A": "#ffa000" };
+        let metaProgress = {
+            trophies: 0,
+            unlockedCards: ["m1", "m2", "m3", "m8"], // These are free
+            purchasedUpgrades: []
+        };
 
-        const SHOP_LEVEL_WEIGHTS = [
-            [100, 0, 0, 0, 0],       // Level 1
-            [70, 30, 0, 0, 0],       // Level 2
-            [50, 40, 10, 0, 0],      // Level 3
-            [40, 35, 25, 0, 0],      // Level 4
-            [30, 35, 25, 10, 0],     // Level 5
-            [20, 30, 30, 15, 5],     // Level 6
-            [10, 25, 35, 20, 10],    // Level 7
-            [5, 15, 35, 30, 15],     // Level 8
-            [0, 10, 30, 40, 20],     // Level 9
-            [0, 0, 20, 50, 30],      // Level 10
-        ];
+        function loadProgress() {
+            const saved = localStorage.getItem('monster_crew_progress');
+            if (saved) {
+                metaProgress = JSON.parse(saved);
+            }
+            updateTrophyDisplay();
+        }
+
+        function saveProgress() {
+            localStorage.setItem('monster_crew_progress', JSON.stringify(metaProgress));
+            updateTrophyDisplay();
+        }
+
+        function updateTrophyDisplay() {
+            if (document.getElementById('main-trophy-count'))
+                document.getElementById('main-trophy-count').innerText = metaProgress.trophies;
+            if (document.getElementById('store-trophy-count'))
+                document.getElementById('store-trophy-count').innerText = metaProgress.trophies;
+        }
+
+
+
+
 
         let state = {
-            round: 1, gold: 10, hp: 20, 
+            round: 1, gold: 5, hp: 10, 
             shopLevel: 1,
             squad: [null, null, null, null, null],
             shop: [null, null, null],
@@ -872,12 +1118,7 @@
             currentOpponent: null
         };
 
-        const CHARACTERS = [
-            { id: "beast", name: "Beastmaster", desc: "Higher chance for Monster units.", typeWeights: { monster: 60, undead: 20, human: 20 }, icon: "<img src='images/beastmaster.png' class='char-img'>" },
-            { id: "necro", name: "Necromancer", desc: "Higher chance for Undead units.", typeWeights: { monster: 20, undead: 60, human: 20 }, icon: "<img src='images/necromancer.png' class='char-img'>" },
-            { id: "captain", name: "Commander", desc: "Higher chance for Human units.", typeWeights: { monster: 20, undead: 20, human: 60 }, icon: "<img src='images/commander.png' class='char-img'>" },
-            { id: "collector", name: "Collector", desc: "Equal chances for all units.", typeWeights: "equal", icon: "<img src='images/collector.png' class='char-img'>" }
-        ];
+
 
         function renderCharacterSelection() {
             const list = document.getElementById('character-list');
@@ -895,18 +1136,43 @@
             });
         }
 
+        function startGame() {
+            document.getElementById('title-screen').style.display = 'none';
+            document.getElementById('character-select-modal').style.display = 'flex';
+            renderCharacterSelection();
+        }
+
         function selectCharacter(char) {
             state.character = char;
-            state.hp = 20;
+            
+            // Apply Meta Upgrades
+            let startHP = 10;
+            let startGold = 5;
+
+            if (metaProgress.purchasedUpgrades.includes("gold_1")) startGold += 5;
+            if (metaProgress.purchasedUpgrades.includes("gold_2")) startGold += 10;
+            if (metaProgress.purchasedUpgrades.includes("hp_1")) startHP += 10;
+            if (metaProgress.purchasedUpgrades.includes("hp_2")) startHP += 20;
+
+            state.hp = startHP;
+            state.gold = startGold;
+            state.round = 1;
+
             state.characters = CHARACTERS.map(c => ({
                 id: c.id,
                 name: c.name,
                 icon: c.icon,
                 typeWeights: c.typeWeights,
-                hp: 20,
-                gold: 10,
+                hp: 20, // AI gets standard HP
+                gold: 15,
                 squad: [null, null, null, null, null]
             }));
+
+            // Sync players starting stats to the state copy
+            const myChar = state.characters.find(c => c.id === char.id);
+            myChar.hp = state.hp;
+            myChar.gold = state.gold;
+
             document.getElementById('character-select-modal').style.display = 'none';
             refreshShop();
             simulateAITurns();
@@ -918,9 +1184,9 @@
         /**
          * CORE ENGINE
          */
-        function init() {
-            renderCharacterSelection();
-            document.getElementById('character-select-modal').style.display = 'flex';
+        async function init() {
+            await loadData();
+            loadProgress();
             updateUI();
         }
 
@@ -935,6 +1201,10 @@
                 if (rand <= sum) return TIER_NAMES[i];
             }
             return "E";
+        }
+
+        function getAvailableMonsters(tier) {
+            return MONSTER_REGISTRY.filter(m => m.tier === tier && (!m.locked || metaProgress.unlockedCards.includes(m.id)));
         }
 
         function simulateAITurns() {
@@ -974,11 +1244,11 @@
 
                     let aiShop = [0, 1, 2].map(() => {
                         let tier = getWeightedRandomTier(state.round);
-                        let pool = MONSTER_REGISTRY.filter(m => m.tier === tier);
+                        let pool = getAvailableMonsters(tier);
                         while (pool.length === 0) {
                             let idx = TIER_NAMES.indexOf(tier);
                             if (idx > 0) tier = TIER_NAMES[idx - 1]; else break;
-                            pool = MONSTER_REGISTRY.filter(m => m.tier === tier);
+                            pool = getAvailableMonsters(tier);
                         }
                         let selectedMonster;
                         if (ai.typeWeights === "equal") {
@@ -1035,13 +1305,13 @@
         function refreshShop() {
             state.shop = state.shop.map(() => {
                 let tier = getWeightedRandomTier(state.round);
-                let pool = MONSTER_REGISTRY.filter(m => m.tier === tier);
+                let pool = getAvailableMonsters(tier);
                 // Fallback in case a tier has no monsters
                 while (pool.length === 0) {
                     let idx = TIER_NAMES.indexOf(tier);
                     if (idx > 0) tier = TIER_NAMES[idx - 1];
                     else break;
-                    pool = MONSTER_REGISTRY.filter(m => m.tier === tier);
+                    pool = getAvailableMonsters(tier);
                 }
 
                 let selectedMonster;
@@ -1457,13 +1727,13 @@
 
             state.round++;
             state.shopLevel = Math.min(state.round, 10);
-            const earnedGold = 10 + state.round;
-            state.gold = earnedGold;
+            const earnedGold = 10 + Math.floor(state.round / 2);
+            state.gold += earnedGold;
             
             if (state.characters) {
                 state.characters.forEach(ai => {
                     if (ai.id !== state.character?.id && ai.hp > 0) {
-                        ai.gold = earnedGold;
+                        ai.gold += earnedGold;
                     }
                 });
             }
@@ -1476,23 +1746,39 @@
             const btn = modal.querySelector('button');
 
             const isPlayerDead = state.hp <= 0;
-            let areOthersDead = false;
+            let aliveOthers = [];
             if (state.characters) {
-                const aliveOthers = state.characters.filter(c => c.id !== state.character?.id && c.hp > 0);
-                if (aliveOthers.length === 0) areOthersDead = true;
+                aliveOthers = state.characters.filter(c => c.id !== state.character?.id && c.hp > 0);
             }
+            const areOthersDead = aliveOthers.length === 0;
 
             if (isPlayerDead) {
                 title.innerText = "GAME OVER";
                 title.style.color = 'var(--health-color)';
-                desc.innerText = `You lost all your HP...`;
-                btn.innerText = "RESTART";
+                
+                // Placement check
+                let trophies = 0;
+                let placement = aliveOthers.length + 1;
+                if (placement === 2) trophies = 2;
+                if (placement === 3) trophies = 1;
+                
+                metaProgress.trophies += trophies;
+                saveProgress();
+                
+                let trophyText = trophies > 0 ? `<br><span style="color:var(--gold-color)">You earned ${trophies} 🏆!</span>` : "";
+                desc.innerHTML = `You came in ${placement}${getPlacementSuffix(placement)} place.${trophyText}`;
+                
+                btn.innerText = "MAIN MENU";
                 btn.onclick = () => location.reload();
             } else if (areOthersDead) {
                 title.innerText = "CHAMPION!";
                 title.style.color = 'var(--gold-color)';
-                desc.innerText = `You defeated all competitors!`;
-                btn.innerText = "PLAY AGAIN";
+                
+                metaProgress.trophies += 4;
+                saveProgress();
+
+                desc.innerHTML = `You defeated all competitors!<br><span style="color:var(--gold-color)">You earned 4 🏆!</span>`;
+                btn.innerText = "MAIN MENU";
                 btn.onclick = () => location.reload();
                 createCoinShower();
             } else {
@@ -1517,6 +1803,13 @@
                     desc.innerHTML = `You lost ${hpLoss}<img src="images/hp.png" class="icon-img">!`;
                 }
             }
+        }
+
+        function getPlacementSuffix(n) {
+            if (n === 1) return "st";
+            if (n === 2) return "nd";
+            if (n === 3) return "rd";
+            return "th";
         }
 
         function createCoinShower() {
@@ -1737,6 +2030,85 @@
 
         function inspectMonsterOnly(m, element) {
             openInspector(m, 'battle', null, element);
+        }
+
+        function openStore() {
+            renderStore();
+            document.getElementById('store-modal').style.display = 'flex';
+        }
+
+        function closeStore() {
+            document.getElementById('store-modal').style.display = 'none';
+        }
+
+        function renderStore() {
+            const charUpgradesGrid = document.getElementById('char-upgrades-grid');
+            const cardUnlocksGrid = document.getElementById('card-unlocks-grid');
+            
+            charUpgradesGrid.innerHTML = '';
+            cardUnlocksGrid.innerHTML = '';
+            
+            // Render Character Upgrades
+            UPGRADES_REGISTRY.forEach(upg => {
+                const isPurchased = metaProgress.purchasedUpgrades.includes(upg.id);
+                const canAfford = metaProgress.trophies >= upg.price;
+                
+                const div = document.createElement('div');
+                div.className = `shop-item ${isPurchased ? 'purchased' : ''}`;
+                div.innerHTML = `
+                    <div class="item-icon">${upg.icon}</div>
+                    <div class="item-name">${upg.name}</div>
+                    <div class="item-desc">${upg.desc}</div>
+                    ${isPurchased ? '<div class="item-purchased">PURCHASED</div>' : 
+                    `<div class="item-price ${canAfford ? '' : 'disabled'}" onclick="buyUpgrade('${upg.id}', ${upg.price})">🏆 ${upg.price}</div>`}
+                `;
+                charUpgradesGrid.appendChild(div);
+            });
+            
+            // Render Card Unlocks
+            MONSTER_REGISTRY.filter(m => m.locked).forEach(card => {
+                const isUnlocked = metaProgress.unlockedCards.includes(card.id);
+                const canAfford = metaProgress.trophies >= card.unlockPrice;
+                
+                const div = document.createElement('div');
+                div.className = `shop-item ${isUnlocked ? 'purchased' : ''}`;
+                div.innerHTML = `
+                    <img src="${card.image}" class="item-image">
+                    <div class="item-name">${card.name}</div>
+                    <div class="item-desc">${card.effectDesc}</div>
+                    ${isUnlocked ? '<div class="item-purchased">UNLOCKED</div>' : 
+                    `<div class="item-price ${canAfford ? '' : 'disabled'}" onclick="unlockCard('${card.id}', ${card.unlockPrice})">🏆 ${card.unlockPrice}</div>`}
+                `;
+                cardUnlocksGrid.appendChild(div);
+            });
+            
+            updateTrophyDisplay();
+        }
+
+        function buyUpgrade(id, price) {
+            if (metaProgress.trophies >= price && !metaProgress.purchasedUpgrades.includes(id)) {
+                metaProgress.trophies -= price;
+                metaProgress.purchasedUpgrades.push(id);
+                saveProgress();
+                renderStore();
+            }
+        }
+
+        function unlockCard(id, price) {
+            if (metaProgress.trophies >= price && !metaProgress.unlockedCards.includes(id)) {
+                metaProgress.trophies -= price;
+                metaProgress.unlockedCards.push(id);
+                saveProgress();
+                renderStore();
+            }
+        }
+
+        function openCredits() {
+            document.getElementById('credits-modal').style.display = 'flex';
+        }
+
+        function closeCredits() {
+            document.getElementById('credits-modal').style.display = 'none';
         }
 
         init();
