@@ -178,6 +178,21 @@
             75% { transform: translateX(10px); }
         }
 
+        .card-level {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--gold-color);
+            color: black;
+            font-weight: bold;
+            font-size: 0.9em;
+            padding: 4px 8px;
+            border-radius: 5px;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
         .floating-text {
             position: absolute;
             font-weight: bold;
@@ -256,6 +271,7 @@
             <div id="ins-actions" style="margin-top: 30px; display:flex; justify-content: center; gap: 15px;">
                 <button class="btn-main" id="ins-buy-btn">BUY (5💰)</button>
                 <button class="btn-sec" id="ins-sac-btn">SACRIFICE</button>
+                <button class="btn-sec" id="ins-merge-btn" style="background: var(--gold-color); color: black;">MERGE</button>
                 <button class="btn-sec" onclick="closeInspector()">CLOSE</button>
             </div>
         </div>
@@ -363,12 +379,33 @@
             const buyBtn = document.getElementById('ins-buy-btn');
             const sacBtn = document.getElementById('ins-sac-btn');
             
+            const mergeBtn = document.getElementById('ins-merge-btn');
+
             buyBtn.style.display = type === 'shop' ? 'block' : 'none';
             buyBtn.innerText = `BUY (${monster.cost}💰)`;
             buyBtn.onclick = () => buyMonster(index);
 
             sacBtn.style.display = type === 'squad' ? 'block' : 'none';
             sacBtn.onclick = () => sacrificeMonster(index);
+
+            // Check if mergeable
+            let canMerge = false;
+            let mergeTargets = [];
+            if (type === 'squad') {
+                const lvl = monster.level || 1;
+                for (let i = 0; i < state.squad.length; i++) {
+                    const sm = state.squad[i];
+                    if (sm && sm.id === monster.id && (sm.level || 1) === lvl && i !== index) {
+                        mergeTargets.push(i);
+                    }
+                }
+                if (mergeTargets.length >= 2) {
+                    canMerge = true;
+                }
+            }
+
+            mergeBtn.style.display = canMerge ? 'block' : 'none';
+            mergeBtn.onclick = () => mergeMonster(index, mergeTargets.slice(0, 2));
 
             document.getElementById('inspector').style.display = 'flex';
         }
@@ -396,6 +433,24 @@
         function sacrificeMonster(index) {
             state.squad[index] = null;
             state.gold += 2; // Refund 2 gold
+            closeInspector();
+            updateUI();
+        }
+
+        function mergeMonster(index, targets) {
+            const mainMonster = state.squad[index];
+            const m1 = state.squad[targets[0]];
+            const m2 = state.squad[targets[1]];
+            
+            mainMonster.atk += m1.atk + m2.atk;
+            mainMonster.hp += m1.hp + m2.hp;
+            mainMonster.level = (mainMonster.level || 1) + 1;
+            mainMonster.cAtk = mainMonster.atk;
+            mainMonster.cHp = mainMonster.hp;
+            
+            state.squad[targets[0]] = null;
+            state.squad[targets[1]] = null;
+            
             closeInspector();
             updateUI();
         }
@@ -522,7 +577,9 @@
             slot.innerHTML = '';
             slot.classList.toggle('filled', !!m);
             if (!m) return;
+            const lvl = m.level || 1;
             slot.innerHTML = `
+                <div class="card-level">LVL ${lvl}</div>
                 <div class="card">
                     <img src="${m.image}" alt="${m.name}" class="card-image">
                     <div class="card-stats">
