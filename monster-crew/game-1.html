@@ -243,6 +243,65 @@
         }
         .clash-right { animation: clashRight 0.5s ease-in-out; }
         .clash-left { animation: clashLeft 0.5s ease-in-out; }
+
+        /* BATTLE RESULT MODAL */
+        #battle-result-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .result-inner {
+            background: var(--panel-color);
+            border: 4px solid var(--gold-color);
+            border-radius: 20px;
+            padding: 40px 60px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .result-inner h1 {
+            font-size: 3em;
+            margin: 0 0 20px 0;
+            color: var(--gold-color);
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .result-inner p {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        /* COIN SHOWER */
+        .coin-particle {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 2001;
+            background-image: url('images/win-icon.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -308,6 +367,14 @@
                     <button class="btn-sec" onclick="closeInspector()">CLOSE</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="battle-result-modal">
+        <div class="result-inner">
+            <h1 id="battle-result-title">VICTORY!</h1>
+            <p id="battle-result-desc">You gained 11💰!</p>
+            <button class="btn-main" onclick="closeBattleResult()">CONTINUE</button>
         </div>
     </div>
 
@@ -428,8 +495,11 @@
             const sacBtn = document.getElementById('ins-sac-btn');
             const mergeBtn = document.getElementById('ins-merge-btn');
 
+            let discount = state.squad.filter(m => m && m.id === "m9").length;
+            let currentCost = type === 'shop' ? Math.max(0, monster.cost - discount) : monster.cost;
+
             buyBtn.style.display = type === 'shop' ? 'block' : 'none';
-            buyBtn.innerText = `BUY (${monster.cost}💰)`;
+            buyBtn.innerText = `BUY (${currentCost}💰)`;
             buyBtn.onclick = () => buyMonster(index);
 
             sacBtn.style.display = type === 'squad' ? 'block' : 'none';
@@ -496,10 +566,12 @@
 
         function buyMonster(index) {
             const monster = state.shop[index];
-            if (state.gold >= monster.cost) {
+            let discount = state.squad.filter(m => m && m.id === "m9").length;
+            let currentCost = Math.max(0, monster.cost - discount);
+            if (state.gold >= currentCost) {
                 const emptyIdx = state.squad.indexOf(null);
                 if (emptyIdx !== -1) {
-                    state.gold -= monster.cost;
+                    state.gold -= currentCost;
                     state.squad[emptyIdx] = { ...monster, cAtk: monster.atk, cHp: monster.hp };
                     state.shop[index] = null;
                     closeInspector();
@@ -509,8 +581,19 @@
         }
 
         function sacrificeMonster(index) {
+            const sacrificed = state.squad[index];
             state.squad[index] = null;
             state.gold += 2; // Refund 2 gold
+            
+            if (sacrificed.id === "m2") {
+                const allies = state.squad.filter(m => m !== null);
+                if (allies.length > 0) {
+                    const randomAlly = allies[Math.floor(Math.random() * allies.length)];
+                    randomAlly.hp += 3;
+                    if (randomAlly.cHp !== undefined) randomAlly.cHp += 3;
+                }
+            }
+
             closeInspector();
             updateUI();
         }
@@ -610,10 +693,41 @@
             if (!win) state.hp -= 5;
             
             state.round++;
-            state.gold = 10 + state.round;
+            const earnedGold = 10 + state.round;
+            state.gold = earnedGold;
             
-            alert(win ? "VICTORY!" : "DEFEAT! -5 HP");
+            const modal = document.getElementById('battle-result-modal');
+            const title = document.getElementById('battle-result-title');
+            const desc = document.getElementById('battle-result-desc');
             
+            modal.style.display = 'flex';
+            if (win) {
+                title.innerText = "VICTORY!";
+                title.style.color = 'var(--gold-color)';
+                desc.innerText = `You gained ${earnedGold}💰!`;
+                createCoinShower();
+            } else {
+                title.innerText = "DEFEAT!";
+                title.style.color = 'var(--health-color)';
+                desc.innerText = `You lost 5❤️!`;
+            }
+        }
+
+        function createCoinShower() {
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const coin = document.createElement('div');
+                    coin.className = 'coin-particle';
+                    coin.style.left = Math.random() * 100 + 'vw';
+                    coin.style.animationDuration = (Math.random() * 1 + 1.5) + 's';
+                    document.body.appendChild(coin);
+                    setTimeout(() => coin.remove(), 2500);
+                }, Math.random() * 1000);
+            }
+        }
+
+        function closeBattleResult() {
+            document.getElementById('battle-result-modal').style.display = 'none';
             document.getElementById('battle-view').style.display = 'none';
             document.getElementById('squad-view').style.display = 'flex';
             document.getElementById('shop-view').style.display = 'flex';
