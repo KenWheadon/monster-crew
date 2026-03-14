@@ -1040,14 +1040,7 @@
             state.squad[index] = null;
             state.gold += 2; // Refund 2 gold
             
-            if (sacrificed.id === "m2") {
-                const allies = state.squad.filter(m => m !== null);
-                if (allies.length > 0) {
-                    const randomAlly = allies[Math.floor(Math.random() * allies.length)];
-                    randomAlly.hp += 3;
-                    if (randomAlly.cHp !== undefined) randomAlly.cHp += 3;
-                }
-            }
+            triggerDeathEffect(sacrificed, 'shop');
 
             closeInspector();
             updateUI();
@@ -1165,22 +1158,40 @@
                 }
 
                 setTimeout(() => {
-                    let triggerM2Ally = false;
-                    let triggerM2Enemy = false;
+                    let deadAllies = [];
+                    let deadEnemies = [];
 
-                    if (a.cHp <= 0) {
-                        const dead = battleData.ally.shift();
-                        if (dead.id === "m2") triggerM2Ally = true;
-                    }
-                    if (e.cHp <= 0) {
-                        const dead = battleData.enemy.shift();
-                        if (dead.id === "m2") triggerM2Enemy = true;
-                    }
+                    if (a.cHp <= 0) deadAllies.push(battleData.ally.shift());
+                    if (e.cHp <= 0) deadEnemies.push(battleData.enemy.shift());
 
                     renderBattle();
 
-                    if (triggerM2Ally) handleAfterDeathEffect('ally');
-                    if (triggerM2Enemy) handleAfterDeathEffect('enemy');
+                    deadAllies.forEach(dead => triggerDeathEffect(dead, 'battle', 'ally'));
+                    deadEnemies.forEach(dead => triggerDeathEffect(dead, 'battle', 'enemy'));
+                    
+                    let additionalDeaths = true;
+                    while(additionalDeaths) {
+                        additionalDeaths = false;
+                        for (let i = 0; i < battleData.ally.length; i++) {
+                            if (battleData.ally[i].cHp <= 0) {
+                                const dead = battleData.ally.splice(i, 1)[0];
+                                triggerDeathEffect(dead, 'battle', 'ally');
+                                additionalDeaths = true;
+                                i--;
+                            }
+                        }
+                        for (let i = 0; i < battleData.enemy.length; i++) {
+                            if (battleData.enemy[i].cHp <= 0) {
+                                const dead = battleData.enemy.splice(i, 1)[0];
+                                triggerDeathEffect(dead, 'battle', 'enemy');
+                                additionalDeaths = true;
+                                i--;
+                            }
+                        }
+                    }
+
+                    renderBattle(); // Re-render to show updated stats
+
                 }, delay);
 
             }, 500);
@@ -1188,11 +1199,36 @@
             setTimeout(battleStep, 2500);
         }
 
-        function handleAfterDeathEffect(side) {
-            const targets = side === 'ally' ? battleData.ally : battleData.enemy;
-            if (targets.length > 0) {
-                targets[0].cHp += 3;
-                showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', `+3 HP`, 'var(--monster-color)');
+        function triggerDeathEffect(deadMonster, context, side = 'ally') {
+            if (!deadMonster) return;
+
+            if (deadMonster.id === "m2") {
+                // Give a random ally +3 HP
+                if (context === 'battle') {
+                    const targets = side === 'ally' ? battleData.ally : battleData.enemy;
+                    if (targets.length > 0) {
+                        const randomAlly = targets[Math.floor(Math.random() * targets.length)];
+                        randomAlly.cHp += 3;
+                        showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', `+3 HP`, 'var(--monster-color)');
+                    }
+                } else if (context === 'shop') {
+                    const allies = state.squad.filter(m => m !== null);
+                    if (allies.length > 0) {
+                        const randomAlly = allies[Math.floor(Math.random() * allies.length)];
+                        randomAlly.hp += 3;
+                        if (randomAlly.cHp !== undefined) randomAlly.cHp += 3;
+                    }
+                }
+            } else if (deadMonster.id === "m10") {
+                // Deal 3 damage to random enemy
+                if (context === 'battle') {
+                    const enemies = side === 'ally' ? battleData.enemy : battleData.ally;
+                    if (enemies.length > 0) {
+                        const randomEnemy = enemies[Math.floor(Math.random() * enemies.length)];
+                        randomEnemy.cHp -= 3;
+                        showEffect(side === 'ally' ? 'enemy-line' : 'ally-line', `-3 HP`, 'var(--health-color)');
+                    }
+                }
             }
         }
 
