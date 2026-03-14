@@ -18,6 +18,19 @@
             --modal-bg: rgba(0, 0, 0, 0.9);
         }
 
+        .icon-img.coin-bag{
+            width:3.25rem;
+            height:3.25rem;
+        }
+
+        .icon-img {
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: middle;
+            display: inline-block;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: url('images/background.jpg') center/cover no-repeat;
@@ -343,7 +356,7 @@
             height: 40px;
             pointer-events: none;
             z-index: 2001;
-            background-image: url('images/win-icon.png');
+            background-image: url('images/bag1.png');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -487,8 +500,8 @@
     <div id="game-container">
         <header>
             <div class="stat" id="round-display">ROUND 1</div>
-            <div class="stat" id="player-hp">❤️ 20</div>
-            <div class="stat" id="player-gold">💰 15</div>
+            <div class="stat" id="player-hp"><img src="images/hp.png" class="icon-img"> 20</div>
+            <div class="stat" id="player-gold"><img src="images/bag1.png" class="icon-img" style="transform: scale(1.5); margin-right: 5px;"> <img src="images/win-icon.png" class="icon-img"> 15</div>
         </header>
 
         <main>
@@ -509,6 +522,7 @@
                     </div>
 
                     <div id="shop-view">
+                        <img src="images/demon.png" alt="Shopkeeper" style="height: 180px; object-fit: contain; margin-right: 20px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));">
                         <div class="slot" onclick="inspectSlot('shop', 0, this)" oncontextmenu="buyMonster(0); return false;"></div>
                         <div class="slot" onclick="inspectSlot('shop', 1, this)" oncontextmenu="buyMonster(1); return false;"></div>
                         <div class="slot" onclick="inspectSlot('shop', 2, this)" oncontextmenu="buyMonster(2); return false;"></div>
@@ -522,7 +536,7 @@
         </main>
 
         <footer id="controls">
-            <button class="btn-sec" onclick="rerollShop()">Reroll (1💰)</button>
+            <button class="btn-sec" onclick="rerollShop()">Reroll (1<img src="images/win-icon.png" class="icon-img">)</button>
             <button class="btn-main" id="btn-battle" onclick="startBattle()">Fight!</button>
         </footer>
     </div>
@@ -535,7 +549,7 @@
                 <img id="ins-front-image" src="" alt="Monster" style="width: 100%; height: 60%; object-fit: contain; margin: auto 0;">
                 <div class="card-stats" style="width: 100%; font-size: 2.5em; display: flex; justify-content: space-between; margin-top: auto;">
                     <span class="c-atk" id="ins-front-atk">⚔️ 0</span>
-                    <span class="c-hp" id="ins-front-hp">🛡️ 0</span>
+                    <span class="c-hp" id="ins-front-hp"><img src="images/hp.png" class="icon-img"> 0</span>
                 </div>
             </div>
             <div class="inspector-back">
@@ -549,7 +563,7 @@
                 <div id="ins-flavor" class="ins-flavor">He just wants to go home and nap.</div>
                 
                 <div id="ins-actions" style="margin-top: auto; display:flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn-main" id="ins-buy-btn">BUY (5💰)</button>
+                    <button class="btn-main" id="ins-buy-btn">BUY (5<img src="images/win-icon.png" class="icon-img">)</button>
                     <button class="btn-sec" id="ins-sac-btn">SACRIFICE</button>
                     <button class="btn-sec" id="ins-merge-btn" style="background: var(--gold-color); color: black;">MERGE</button>
                     <button class="btn-sec" onclick="closeInspector()">CLOSE</button>
@@ -561,7 +575,7 @@
     <div id="battle-result-modal">
         <div class="result-inner">
             <h1 id="battle-result-title">VICTORY!</h1>
-            <p id="battle-result-desc">You gained 11💰!</p>
+            <p id="battle-result-desc">You gained 11<img src="images/win-icon.png" class="icon-img">!</p>
             <button class="btn-main" onclick="closeBattleResult()">CONTINUE</button>
         </div>
     </div>
@@ -778,8 +792,8 @@
             document.getElementById('ins-front-image').src = monster.image;
             document.getElementById('ins-front-tier').innerText = monster.tier || "E";
             document.getElementById('ins-front-tier').style.background = TIER_COLORS[monster.tier] || "#b0bec5";
-            document.getElementById('ins-front-atk').innerText = `⚔️ ${atk}`;
-            document.getElementById('ins-front-hp').innerText = `🛡️ ${hp}`;
+            document.getElementById('ins-front-atk').innerHTML = `⚔️ ${atk}`;
+            document.getElementById('ins-front-hp').innerHTML = `<img src="images/hp.png" class="icon-img"> ${hp}`;
 
             // Fill Back
             document.getElementById('ins-type').innerText = monster.type;
@@ -799,7 +813,7 @@
             let currentCost = type === 'shop' ? Math.max(0, monster.cost - discount) : monster.cost;
 
             buyBtn.style.display = type === 'shop' ? 'block' : 'none';
-            buyBtn.innerText = `BUY (${currentCost}💰)`;
+            buyBtn.innerHTML = `BUY (${currentCost}<img src="images/win-icon.png" class="icon-img">)`;
             buyBtn.onclick = () => buyMonster(index);
 
             sacBtn.style.display = type === 'squad' ? 'block' : 'none';
@@ -940,7 +954,7 @@
                     combatInfo.innerHTML = `
                         <h2 style="color: var(--gold-color); text-shadow: 2px 2px 0 #000; margin: 0 0 5px 0;">VS ${state.currentOpponent.name}</h2>
                         <div style="font-size: 1.5em; color: var(--health-color); font-weight: bold; text-shadow: 1px 1px 0 #000;">
-                            ${state.currentOpponent.icon} ❤️ ${state.currentOpponent.hp}
+                            ${state.currentOpponent.icon} <img src="images/hp.png" class="icon-img"> ${state.currentOpponent.hp}
                         </div>
                     `;
                     combatInfo.style.display = 'block';
@@ -1084,19 +1098,45 @@
             const desc = document.getElementById('battle-result-desc');
             
             modal.style.display = 'flex';
-            if (win) {
-                title.innerText = "VICTORY!";
+            const btn = modal.querySelector('button');
+
+            const isPlayerDead = state.hp <= 0;
+            let areOthersDead = false;
+            if (state.characters) {
+                const aliveOthers = state.characters.filter(c => c.id !== state.character?.id && c.hp > 0);
+                if (aliveOthers.length === 0) areOthersDead = true;
+            }
+
+            if (isPlayerDead) {
+                title.innerText = "GAME OVER";
+                title.style.color = 'var(--health-color)';
+                desc.innerText = `You lost all your HP...`;
+                btn.innerText = "RESTART";
+                btn.onclick = () => location.reload();
+            } else if (areOthersDead) {
+                title.innerText = "CHAMPION!";
                 title.style.color = 'var(--gold-color)';
-                let opText = "";
-                if (state.currentOpponent && opponentHpLoss > 0) {
-                    opText = `<br><span style="color:var(--text-color); font-size:0.8em; margin-top:10px; display:inline-block;">${state.currentOpponent.name} lost ${opponentHpLoss}❤️!</span>`;
-                }
-                desc.innerHTML = `You gained ${earnedGold}💰!${opText}`;
+                desc.innerText = `You defeated all competitors!`;
+                btn.innerText = "PLAY AGAIN";
+                btn.onclick = () => location.reload();
                 createCoinShower();
             } else {
-                title.innerText = "DEFEAT!";
-                title.style.color = 'var(--health-color)';
-                desc.innerText = `You lost ${hpLoss}❤️!`;
+                btn.innerText = "CONTINUE";
+                btn.onclick = closeBattleResult;
+                if (win) {
+                    title.innerText = "VICTORY!";
+                    title.style.color = 'var(--gold-color)';
+                    let opText = "";
+                    if (state.currentOpponent && opponentHpLoss > 0) {
+                        opText = `<br><span style="color:var(--text-color); font-size:0.8em; margin-top:10px; display:inline-block;">${state.currentOpponent.name} lost ${opponentHpLoss}<img src="images/hp.png" class="icon-img">!</span>`;
+                    }
+                    desc.innerHTML = `You gained ${earnedGold}<img src="images/win-icon.png" class="icon-img">!${opText}`;
+                    createCoinShower();
+                } else {
+                    title.innerText = "DEFEAT!";
+                    title.style.color = 'var(--health-color)';
+                    desc.innerHTML = `You lost ${hpLoss}<img src="images/hp.png" class="icon-img">!`;
+                }
             }
         }
 
@@ -1140,8 +1180,8 @@
 
         function updateUI() {
             document.getElementById('round-display').innerText = `ROUND ${state.round}`;
-            document.getElementById('player-hp').innerText = `❤️ ${state.hp}`;
-            document.getElementById('player-gold').innerText = `💰 ${state.gold}`;
+            document.getElementById('player-hp').innerHTML = `<img src="images/hp.png" class="icon-img"> ${state.hp}`;
+            document.getElementById('player-gold').innerHTML = `<img src="images/bag1.png" class="coin-bag icon-img" style="transform: scale(1.5); margin-right: 5px;"> <img src="images/win-icon.png" class="icon-img"> ${state.gold}`;
 
             // Render Slots
             const squadSlots = document.querySelectorAll('#squad-view .slot');
@@ -1157,7 +1197,7 @@
                 state.characters.forEach(c => {
                     const isPlayer = state.character && c.id === state.character.id;
                     const isDead = c.hp <= 0;
-                    const hpText = isDead ? '<span class="dead-text">DEAD</span>' : `❤️ ${c.hp}`;
+                    const hpText = isDead ? '<span class="dead-text">DEAD</span>' : `<img src="images/hp.png" class="icon-img"> ${c.hp}`;
 
                     drawer.innerHTML += `
                         <div class="drawer-char ${isPlayer ? 'is-player' : ''} ${isDead ? 'dead' : ''}">
@@ -1183,14 +1223,14 @@
             let discount = state.squad.filter(sm => sm && sm.id === "m9").length;
             let currentCost = isShop ? Math.max(0, m.cost - discount) : m.cost;
             slot.innerHTML = `
-                ${isShop ? `<div class="card-cost">${currentCost}💰</div>` : ''}
+                ${isShop ? `<div class="card-cost">${currentCost}<img src="images/win-icon.png" class="icon-img" style="width:1em;height:1em;"></div>` : ''}
                 <div class="card-tier" style="background: ${tierColor};">${tierStr}</div>
                 <div class="card-level">${lvl}</div>
                 <div class="card">
                     <img src="${m.image}" alt="${m.name}" class="card-image">
                     <div class="card-stats">
                         <span class="c-atk">⚔️ ${m.atk}</span>
-                        <span class="c-hp">🛡️ ${m.hp}</span>
+                        <span class="c-hp"><img src="images/hp.png" class="icon-img"> ${m.hp}</span>
                     </div>
                 </div>
             `;
