@@ -188,9 +188,22 @@
         }
 
         @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-100px); }
+            0% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -100px); }
         }
+
+        @keyframes clashRight {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(50px) scale(1.1); z-index: 10; border-color: var(--health-color); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes clashLeft {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-50px) scale(1.1); z-index: 10; border-color: var(--health-color); }
+            100% { transform: translateX(0); }
+        }
+        .clash-right { animation: clashRight 0.5s ease-in-out; }
+        .clash-left { animation: clashLeft 0.5s ease-in-out; }
     </style>
 </head>
 <body>
@@ -423,23 +436,32 @@
             const a = battleData.ally[0];
             const e = battleData.enemy[0];
 
-            // Visual Damage
-            showEffect('ally-line', `-${e.cAtk}`, 'var(--health-color)');
-            showEffect('enemy-line', `-${a.cAtk}`, 'var(--health-color)');
-            document.getElementById('battle-view').classList.add('shake');
-            setTimeout(() => document.getElementById('battle-view').classList.remove('shake'), 200);
+            const allyFront = document.getElementById('ally-line').children[0];
+            const enemyFront = document.getElementById('enemy-line').children[0];
 
-            a.cHp -= e.cAtk;
-            e.cHp -= a.cAtk;
+            if (allyFront) allyFront.classList.add('clash-right');
+            if (enemyFront) enemyFront.classList.add('clash-left');
 
-            if (a.cHp <= 0) {
-                const dead = battleData.ally.shift();
-                if (dead.id === "m2") handleAfterDeathEffect('ally');
-            }
-            if (e.cHp <= 0) battleData.enemy.shift();
+            setTimeout(() => {
+                // Visual Damage
+                showEffect('ally-line', `-${e.cAtk}`, 'var(--health-color)');
+                showEffect('enemy-line', `-${a.cAtk}`, 'var(--health-color)');
+                document.getElementById('battle-view').classList.add('shake');
+                setTimeout(() => document.getElementById('battle-view').classList.remove('shake'), 200);
 
-            renderBattle();
-            setTimeout(battleStep, 1200);
+                a.cHp -= e.cAtk;
+                e.cHp -= a.cAtk;
+
+                if (a.cHp <= 0) {
+                    const dead = battleData.ally.shift();
+                    if (dead.id === "m2") handleAfterDeathEffect('ally');
+                }
+                if (e.cHp <= 0) battleData.enemy.shift();
+
+                renderBattle();
+            }, 500);
+
+            setTimeout(battleStep, 2500);
         }
 
         function handleAfterDeathEffect(side) {
@@ -473,12 +495,13 @@
          */
         function showEffect(containerId, text, color) {
             const container = document.getElementById(containerId);
+            const target = container.children.length > 0 ? container.children[0] : container;
             const el = document.createElement('div');
             el.className = 'floating-text';
             el.innerText = text;
             el.style.color = color;
             el.style.left = "50%";
-            container.appendChild(el);
+            target.appendChild(el);
             setTimeout(() => el.remove(), 1000);
         }
 
@@ -529,6 +552,9 @@
             battleData.enemy.forEach(m => {
                 const div = document.createElement('div');
                 div.className = 'slot filled';
+                div.onclick = () => {
+                    inspectMonsterOnly(m);
+                }
                 renderCard(div, { ...m, atk: m.cAtk, hp: m.cHp });
                 enemyLine.appendChild(div);
             });
