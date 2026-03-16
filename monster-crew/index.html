@@ -1240,6 +1240,27 @@
             updateUI();
         }
 
+        function syncToSquad(clonedMonster, stat, amount, side = 'ally') {
+            if (!clonedMonster || !clonedMonster.instId) return;
+            let squad = null;
+            if (side === 'ally') squad = state.squad;
+            else if (side === 'enemy' && state.currentOpponent) {
+                let ai = state.characters.find(c => c.id === state.currentOpponent.id);
+                if (ai) squad = ai.squad;
+            }
+            if (squad) {
+                const original = squad.find(s => s && s.instId === clonedMonster.instId);
+                if (original) {
+                    original[stat] += amount;
+                    if (original[stat] < 1) original[stat] = 1; // Min stat is 1
+                    
+                    // Sync combat properties if they exist
+                    if (stat === 'atk') original.cAtk = original.atk;
+                    if (stat === 'hp') original.cHp = original.hp;
+                }
+            }
+        }
+
         function getWeightedRandomTier(level) {
             const idx = Math.min(level - 1, SHOP_LEVEL_WEIGHTS.length - 1);
             const weights = SHOP_LEVEL_WEIGHTS[idx];
@@ -1753,6 +1774,7 @@
                     battleData.ally.forEach(other => {
                         if (other !== m && other.type === m.type) {
                             other.cAtk += x;
+                            syncToSquad(other, 'atk', x, 'ally');
                         }
                     });
                 }
@@ -1763,21 +1785,25 @@
                     if (othersOfSameType.length === 0) {
                         m.cAtk += x;
                         m.cHp += x;
+                        syncToSquad(m, 'atk', x, 'ally');
+                        syncToSquad(m, 'hp', x, 'ally');
                     }
                 }
                 // Inner Dread Power: Cosmics gain +2/+0 at start of combat.
                 if (state.character && state.character.id === 'dread' && m.type === 'Cosmic') {
                     m.cAtk += 2;
+                    syncToSquad(m, 'atk', 2, 'ally');
                 }
             });
 
-            // Apply Enemy Effects (Simple AI start effects if any, or just generic ones)
+            // Apply Enemy Effects
             battleData.enemy.forEach(m => {
                 if (m.effect && m.effect.startsWith("Team:")) {
                     const x = parseInt(m.effect.split(":")[1]);
                     battleData.enemy.forEach(other => {
                         if (other !== m && other.type === m.type) {
                             other.cAtk += x;
+                            syncToSquad(other, 'atk', x, 'enemy');
                         }
                     });
                 }
@@ -1787,11 +1813,14 @@
                     if (othersOfSameType.length === 0) {
                         m.cAtk += x;
                         m.cHp += x;
+                        syncToSquad(m, 'atk', x, 'enemy');
+                        syncToSquad(m, 'hp', x, 'enemy');
                     }
                 }
-                // AI Inner Dread check (if the opponent has that ID)
+                // AI Inner Dread check
                 if (state.currentOpponent && state.currentOpponent.id === 'dread' && m.type === 'Cosmic') {
                     m.cAtk += 2;
+                    syncToSquad(m, 'atk', 2, 'enemy');
                 }
             });
 
@@ -1899,8 +1928,10 @@
                 const x = parseInt(deadMonster.effect.split(":")[1]);
                 runStats.effectTriggers.Honor++;
                 targets.forEach(m => {
-                    if (context === 'battle') m.cHp += x;
-                    else m.hp += x;
+                    if (context === 'battle') {
+                        m.cHp += x;
+                        syncToSquad(m, 'hp', x, side);
+                    } else m.hp += x;
                 });
                 if (context === 'battle') showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', `+${x} HP`, 'var(--nature-color)');
             }
@@ -1910,8 +1941,10 @@
                 const x = parseInt(deadMonster.effect.split(":")[1]);
                 runStats.effectTriggers.Anger++;
                 targets.forEach(m => {
-                    if (context === 'battle') m.cAtk += x;
-                    else m.atk += x;
+                    if (context === 'battle') {
+                        m.cAtk += x;
+                        syncToSquad(m, 'atk', x, side);
+                    } else m.atk += x;
                 });
                 if (context === 'battle') showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', `+${x} ATK`, 'var(--beast-color)');
             }
@@ -1922,7 +1955,12 @@
                 runStats.effectTriggers.Weak++;
                 const randEnemy = enemies[Math.floor(Math.random() * enemies.length)];
                 randEnemy.cAtk = Math.max(1, randEnemy.cAtk - x);
-                randEnemy.cHp = Math.max(1, randEnemy.cHp - x); // Don't kill via Weak? Actually let's allow it to kill if it fits game rules, but for now max(1) for safety.
+                randEnemy.cHp = Math.max(1, randEnemy.cHp - x); 
+                
+                // Subtractions are now permanent as per request
+                syncToSquad(randEnemy, 'atk', -x, side === 'ally' ? 'enemy' : 'ally');
+                syncToSquad(randEnemy, 'hp', -x, side === 'ally' ? 'enemy' : 'ally');
+
                 showEffect(side === 'ally' ? 'enemy-line' : 'ally-line', `-${x}/-${x}`, 'var(--health-color)');
             }
 
@@ -1945,8 +1983,10 @@
             if (currentCaptain && currentCaptain.id === 'pete' && deadMonster.type === 'Nature') {
                 targets.forEach(m => {
                     if (m.type === 'Nature') {
-                        if (context === 'battle') m.cHp += 1;
-                        else m.hp += 1;
+                        if (context === 'battle') {
+                            m.cHp += 1;
+                            syncToSquad(m, 'hp', 1, side);
+                        } else m.hp += 1;
                     }
                 });
             }
@@ -2175,15 +2215,47 @@
             setTimeout(() => el.remove(), 1000);
         }
 
+        function calculateEffectiveStats(squad) {
+            if (!squad) return [];
+            let result = squad.map(m => m ? { ...m, atk: m.atk, hp: m.hp } : null);
+
+            result.forEach((m, i) => {
+                if (!m) return;
+                // TEAM: +X/0 to EACH OTHER friendly card of same type
+                if (m.effect && m.effect.startsWith("Team:")) {
+                    const x = parseInt(m.effect.split(":")[1]);
+                    result.forEach((other, j) => {
+                        if (other && i !== j && other.type === m.type) {
+                            other.atk += x;
+                        }
+                    });
+                }
+                // SOLO: +X/+X if no OTHER friendly cards share type
+                if (m.effect && m.effect.startsWith("Solo:")) {
+                    const x = parseInt(m.effect.split(":")[1]);
+                    const othersOfSameType = result.filter((other, j) => other && i !== j && other.type === m.type);
+                    if (othersOfSameType.length === 0) {
+                        m.atk += x;
+                        m.hp += x;
+                    }
+                }
+            });
+            return result;
+        }
+
         function updateUI() {
-            document.getElementById('round-display').innerText = `ROUND ${state.round}`;
+            document.getElementById('id-round-display') ? document.getElementById('id-round-display').innerText = `ROUND ${state.round}` : null;
+            if (document.getElementById('round-display')) document.getElementById('round-display').innerText = `ROUND ${state.round}`;
             document.getElementById('shop-level-num').innerText = state.shopLevel;
             document.getElementById('player-hp').innerHTML = `<img src="images/hp.png" class="icon-img"> ${state.hp}`;
             document.getElementById('player-gold').innerHTML = `<img src="images/bag1.png" class="coin-bag icon-img" style="transform: scale(1.5); margin-right: 5px;"> <img src="images/win-icon.png" class="icon-img"> ${state.gold}`;
 
+            // Calculate squad with passives for display
+            const effectiveSquad = calculateEffectiveStats(state.squad);
+
             // Render Slots
             const squadSlots = document.querySelectorAll('#squad-view .slot');
-            state.squad.forEach((m, i) => renderCard(squadSlots[i], m));
+            effectiveSquad.forEach((m, i) => renderCard(squadSlots[i], m));
 
             const shopSlots = document.querySelectorAll('#shop-view .slot');
             state.shop.forEach((m, i) => renderCard(shopSlots[i], m, true));
@@ -2222,8 +2294,13 @@
             const lvl = m.level || 1;
             const tierStr = m.tier || "E";
             const tierColor = TIER_COLORS[tierStr] || "#b0bec5";
-            let discount = state.squad.filter(sm => sm && sm.id === "m9").length;
-            let currentCost = isShop ? Math.max(0, m.cost - discount) : m.cost;
+            let totalDiscount = state.squad.filter(sm => sm !== null).reduce((sum, sm) => {
+                if (sm.effect && sm.effect.startsWith("Cheap:")) {
+                    return sum + parseInt(sm.effect.split(":")[1]);
+                }
+                return sum;
+            }, 0);
+            let currentCost = isShop ? Math.max(0, m.cost - totalDiscount) : m.cost;
             slot.innerHTML = `
                 ${isShop ? `<div class="card-cost">${currentCost}<img src="images/win-icon.png" class="icon-img" style="width:1em;height:1em;"></div>` : ''}
                 <div class="card-tier" style="background: ${tierColor};">${tierStr}</div>

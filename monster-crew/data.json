@@ -480,7 +480,7 @@
         "Nature": 14,
         "Cosmic": 14
       },
-      "icon": "<img src='images/beastmaster.png' class='char-img'>"
+      "icon": "<img src='images/massive-rat.png' class='char-img'>"
     },
     {
       "id": "brain",
@@ -497,7 +497,7 @@
         "Nature": 14,
         "Cosmic": 14
       },
-      "icon": "<img src='images/necromancer.png' class='char-img'>"
+      "icon": "<img src='images/superbrain.png' class='char-img'>"
     },
     {
       "id": "pete",
@@ -514,7 +514,7 @@
         "Nature": 30,
         "Cosmic": 14
       },
-      "icon": "<img src='images/collector.png' class='char-img'>"
+      "icon": "<img src='images/snappy-pete.png' class='char-img'>"
     },
     {
       "id": "dread",
@@ -531,7 +531,7 @@
         "Nature": 14,
         "Cosmic": 30
       },
-      "icon": "<img src='images/necromancer.png' class='char-img'>"
+      "icon": "<img src='images/innerdread.png' class='char-img'>"
     },
     {
       "id": "pancake",
@@ -548,7 +548,7 @@
         "Nature": 14,
         "Cosmic": 14
       },
-      "icon": "<img src='images/collector.png' class='char-img'>"
+      "icon": "<img src='images/pancake.png' class='char-img'>"
     }
   ]
 }
