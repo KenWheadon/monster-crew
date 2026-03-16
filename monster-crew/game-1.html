@@ -1490,6 +1490,7 @@
             sacBtn.style.display = type === 'squad' ? 'block' : 'none';
             sacBtn.onclick = () => sacrificeMonster(index);
 
+            let canMerge = false;
             let mergeTargets = [];
             let neededForMerge = (monster.effect === "Twin") ? 1 : 2;
             if (type === 'squad') {

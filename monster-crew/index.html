@@ -1214,7 +1214,7 @@
                 icon: c.icon,
                 typeWeights: c.typeWeights,
                 hp: 20, // AI gets standard HP
-                gold: 15,
+                gold: startGold,
                 squad: [null, null, null, null, null]
             }));
 
@@ -1262,122 +1262,171 @@
             state.characters.forEach(ai => {
                 if (ai.id === state.character?.id || ai.hp <= 0) return;
                 
-                let loopGuard = 50;
-                while (ai.gold > 0 && loopGuard-- > 0) {
-                    let merged = false;
+                // Helper to calculate AI costs
+                const getAICost = (monster) => {
+                    let discount = ai.squad.filter(sm => sm !== null).reduce((sum, sm) => {
+                        if (sm.effect && sm.effect.startsWith("Cheap:")) return sum + parseInt(sm.effect.split(":")[1]);
+                        return sum;
+                    }, 0);
+                    return Math.max(0, monster.cost - discount);
+                };
+
+                // Helper to perform AI merges (triple check)
+                const performAIMerges = () => {
                     for (let i = 0; i < ai.squad.length; i++) {
-                        if (!ai.squad[i]) continue;
+                        const m = ai.squad[i];
+                        if (!m) continue;
+                        let needed = (m.effect === "Twin") ? 1 : 2;
                         let targets = [];
                         for (let j = 0; j < ai.squad.length; j++) {
-                            if (i !== j && ai.squad[j] && ai.squad[j].id === ai.squad[i].id && (ai.squad[j].level || 1) === (ai.squad[i].level || 1)) {
+                            if (i !== j && ai.squad[j] && ai.squad[j].id === m.id && (ai.squad[j].level || 1) === (m.level || 1)) {
                                 targets.push(j);
                             }
                         }
-                        let needed = (ai.squad[i].effect === "Twin") ? 1 : 2;
                         if (targets.length >= needed) {
-                            let bonusAtk = 0;
-                            let bonusHp = 0;
                             for (let k = 0; k < needed; k++) {
                                 let tIdx = targets[k];
-                                bonusAtk += ai.squad[tIdx].atk;
-                                bonusHp += ai.squad[tIdx].hp;
+                                m.atk += ai.squad[tIdx].atk;
+                                m.hp += ai.squad[tIdx].hp;
                                 ai.squad[tIdx] = null;
                             }
-                            ai.squad[i].atk += bonusAtk;
-                            ai.squad[i].hp += bonusHp;
-                            ai.squad[i].level = (ai.squad[i].level || 1) + 1;
-
-                            // Super Brain Power for AI
+                            m.level = (m.level || 1) + 1;
                             if (ai.id === 'brain') {
-                                ai.squad[i].atk = Math.floor(ai.squad[i].atk * 1.5);
-                                ai.squad[i].hp = Math.floor(ai.squad[i].hp * 1.5);
+                                m.atk = Math.floor(m.atk * 1.5);
+                                m.hp = Math.floor(m.hp * 1.5);
                             }
-
-                            ai.squad[i].cAtk = ai.squad[i].atk;
-                            ai.squad[i].cHp = ai.squad[i].hp;
-                            merged = true;
-                            break;
+                            m.cAtk = m.atk; m.cHp = m.hp;
+                            return true; // Merged, call again
                         }
                     }
-                    if (merged) continue;
+                    return false;
+                };
 
-                    let emptyIdx = ai.squad.indexOf(null);
-                    if (emptyIdx === -1) break;
+                // Helper to apply AI Buy Powers
+                const applyAIBuyPowers = (m) => {
+                    if (ai.id === 'vance' && m.type === 'Human') {
+                        ai.squad.forEach(asm => {
+                            if (asm && asm.type === 'Human') {
+                                asm.atk += 1; asm.hp += 1;
+                                asm.cAtk = asm.atk; asm.cHp = asm.hp;
+                            }
+                        });
+                    }
+                };
 
+                // Clean up merges first
+                while(performAIMerges());
+
+                let loopGuard = 100; // Increased guard for better spending
+                while (ai.gold > 0 && loopGuard-- > 0) {
+                    // Generate a virtual shop for AI
                     let aiShop = [0, 1, 2].map(() => {
                         let tier = getWeightedRandomTier(state.round);
                         let pool = getAvailableMonsters(tier);
-                        while (pool.length === 0) {
+                        while (pool.length === 0 && tier !== "E") {
                             let idx = TIER_NAMES.indexOf(tier);
-                            if (idx > 0) tier = TIER_NAMES[idx - 1]; else break;
+                            tier = TIER_NAMES[idx - 1];
                             pool = getAvailableMonsters(tier);
                         }
-                        let selectedMonster;
-                        if (ai.typeWeights === "equal") {
-                            selectedMonster = pool[Math.floor(Math.random() * pool.length)];
+                        let selected;
+                        if (!ai.typeWeights || ai.typeWeights === "equal") {
+                            selected = pool[Math.floor(Math.random() * pool.length)];
                         } else {
-                            let totalWeight = 0;
-                            let weightedPool = pool.map(m => {
+                            let total = 0;
+                            let weighted = pool.map(m => {
                                 let w = ai.typeWeights[m.type] || 10;
-                                totalWeight += w;
-                                return { monster: m, weight: w };
+                                total += w;
+                                return { m, w };
                             });
-                            let rand = Math.random() * totalWeight;
-                            let sum = 0;
-                            for (let item of weightedPool) {
-                                sum += item.weight;
-                                if (rand <= sum) { selectedMonster = item.monster; break; }
+                            let r = Math.random() * total;
+                            let s = 0;
+                            for (let item of weighted) {
+                                s += item.w;
+                                if (r <= s) { selected = item.m; break; }
                             }
-                            if (!selectedMonster) selectedMonster = pool[0];
                         }
-                        return { ...selectedMonster, instId: Math.random() };
-                    });
+                        return selected ? { ...selected, cAtk: Math.max(1, selected.atk), instId: Math.random() } : null;
+                    }).filter(m => m !== null);
 
-                    aiShop.sort((a, b) => {
-                        let aIsDup = ai.squad.find(s => s && s.id === a.id);
-                        let bIsDup = ai.squad.find(s => s && s.id === b.id);
-                        if (aIsDup && !bIsDup) return -1;
-                        if (!aIsDup && bIsDup) return 1;
-                        return b.cost - a.cost;
-                    });
+                    let acted = false;
 
-                    let bought = false;
+                    // 1. Try to buy for immediate merge (priority)
                     for (let m of aiShop) {
-                        if (!m) continue;
-                        let totalDiscount = ai.squad.filter(sm => sm !== null).reduce((sum, sm) => {
-                            if (sm.effect && sm.effect.startsWith("Cheap:")) {
-                                return sum + parseInt(sm.effect.split(":")[1]);
-                            }
-                            return sum;
-                        }, 0);
-                        let cost = Math.max(0, m.cost - totalDiscount);
-                        
+                        let cost = getAICost(m);
                         if (ai.gold >= cost) {
-                            emptyIdx = ai.squad.indexOf(null);
-                            if (emptyIdx !== -1) {
+                            let targetIdx = ai.squad.findIndex(s => s && s.id === m.id && (s.level || 1) === (m.level || 1));
+                            if (targetIdx !== -1) {
                                 ai.gold -= cost;
-                                ai.squad[emptyIdx] = { ...m, cAtk: m.atk, cHp: m.hp };
-                                
-                                // Captain Vance Power for AI: Humans gain +1/+1 when a Human is bought.
-                                if (ai.id === 'vance' && m.type === 'Human') {
-                                    ai.squad.forEach(asm => {
-                                        if (asm && asm.type === 'Human') {
-                                            asm.atk += 1;
-                                            asm.hp += 1;
-                                            asm.cAtk = asm.atk;
-                                            asm.cHp = asm.hp;
-                                        }
-                                    });
+                                // Level up the existing one
+                                ai.squad[targetIdx].atk += m.atk;
+                                ai.squad[targetIdx].hp += m.hp;
+                                ai.squad[targetIdx].level = (ai.squad[targetIdx].level || 1) + 1;
+                                if (ai.id === 'brain') {
+                                    ai.squad[targetIdx].atk = Math.floor(ai.squad[targetIdx].atk * 1.5);
+                                    ai.squad[targetIdx].hp = Math.floor(ai.squad[targetIdx].hp * 1.5);
                                 }
-
-                                bought = true;
+                                ai.squad[targetIdx].cAtk = ai.squad[targetIdx].atk; 
+                                ai.squad[targetIdx].cHp = ai.squad[targetIdx].hp;
+                                applyAIBuyPowers(m);
+                                while(performAIMerges());
+                                acted = true;
                                 break;
                             }
                         }
                     }
+                    if (acted) continue;
 
-                    if (!bought && ai.gold >= 1) ai.gold--;
-                    else if (!bought) break;
+                    // 2. Try to buy new card
+                    for (let m of aiShop) {
+                        let cost = getAICost(m);
+                        if (ai.gold >= cost) {
+                            let emptyIdx = ai.squad.indexOf(null);
+                            if (emptyIdx !== -1) {
+                                ai.gold -= cost;
+                                ai.squad[emptyIdx] = { ...m, cAtk: Math.max(1, m.atk), cHp: m.hp };
+                                applyAIBuyPowers(m);
+                                acted = true;
+                                break;
+                            } else {
+                                // Squad full, evaluate replacement
+                                let worstIdx = -1;
+                                let worstVal = Infinity;
+                                ai.squad.forEach((s, idx) => {
+                                    if (s) {
+                                        // Heuristic: stats + tier weight + level weight
+                                        let val = (s.atk + s.hp) + (TIER_NAMES.indexOf(s.tier) * 10) + ((s.level-1) * 15);
+                                        if (val < worstVal) { worstVal = val; worstIdx = idx; }
+                                    }
+                                });
+
+                                let newVal = (m.atk + m.hp) + (TIER_NAMES.indexOf(m.tier) * 10);
+                                if (newVal > worstVal + 5) { // Significantly better to swap
+                                    // Sell worst
+                                    let sacrificed = ai.squad[worstIdx];
+                                    ai.gold += 1; 
+                                    if (ai.id === 'mrat' && sacrificed.type === 'Beast') {
+                                        ai.squad.forEach(asm => {
+                                            if (asm && asm.type === 'Beast') {
+                                                asm.atk += 1; asm.hp += 1;
+                                                asm.cAtk = Math.max(1, asm.atk); asm.cHp = asm.hp;
+                                            }
+                                        });
+                                    }
+                                    
+                                    ai.gold -= cost;
+                                    ai.squad[worstIdx] = { ...m, cAtk: Math.max(1, m.atk), cHp: m.hp };
+                                    applyAIBuyPowers(m);
+                                    acted = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!acted) {
+                        if (ai.gold >= 1) ai.gold--; // Reroll
+                        else break;
+                    }
                 }
             });
         }
@@ -1564,7 +1613,7 @@
                 const emptyIdx = state.squad.indexOf(null);
                 if (emptyIdx !== -1) {
                     state.gold -= currentCost;
-                    state.squad[emptyIdx] = { ...monster, cAtk: monster.atk, cHp: monster.hp };
+                    state.squad[emptyIdx] = { ...monster, cAtk: Math.max(1, monster.atk), cHp: monster.hp };
                     state.shop[index] = null;
                     
                     runStats.buys[monster.type] = (runStats.buys[monster.type] || 0) + 1;
@@ -1637,7 +1686,7 @@
                 mainMonster.hp = Math.floor(mainMonster.hp * 1.5);
             }
 
-            mainMonster.cAtk = mainMonster.atk;
+            mainMonster.cAtk = Math.max(1, mainMonster.atk);
             mainMonster.cHp = mainMonster.hp;
             
             closeInspector();
@@ -1872,7 +1921,7 @@
                 const x = parseInt(deadMonster.effect.split(":")[1]);
                 runStats.effectTriggers.Weak++;
                 const randEnemy = enemies[Math.floor(Math.random() * enemies.length)];
-                randEnemy.cAtk = Math.max(0, randEnemy.cAtk - x);
+                randEnemy.cAtk = Math.max(1, randEnemy.cAtk - x);
                 randEnemy.cHp = Math.max(1, randEnemy.cHp - x); // Don't kill via Weak? Actually let's allow it to kill if it fits game rules, but for now max(1) for safety.
                 showEffect(side === 'ally' ? 'enemy-line' : 'ally-line', `-${x}/-${x}`, 'var(--health-color)');
             }
