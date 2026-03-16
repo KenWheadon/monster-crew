@@ -892,6 +892,13 @@
             </div>
 
             <div class="store-section">
+                <div class="store-section-title">Character Unlocks</div>
+                <div class="store-grid" id="char-unlocks-grid">
+                    <!-- Character unlocks filled by JS -->
+                </div>
+            </div>
+
+            <div class="store-section">
                 <div class="store-section-title">Card Unlocks</div>
                 <div class="store-grid" id="card-unlocks-grid">
                     <!-- Card unlocks filled by JS -->
@@ -1088,8 +1095,30 @@
         let metaProgress = {
             trophies: 0,
             unlockedCards: ["m1", "h1", "g1", "n1", "c1", "k1"], // These are free
-            purchasedUpgrades: []
+            unlockedCharacters: ["vance", "mrat"],
+            purchasedUpgrades: [],
+            achievements: {}
         };
+
+        let runStats = {
+            buys: { Human: 0, Beast: 0, Genetic: 0, Mech: 0, Nature: 0, Cosmic: 0 },
+            sells: { Human: 0, Beast: 0, Genetic: 0, Mech: 0, Nature: 0, Cosmic: 0 },
+            merges: 0,
+            effectTriggers: { Honor: 0, Anger: 0, Weak: 0, Extra: 0, Team: 0, Solo: 0, Twin: 0, Cheap: 0 },
+            maxGold: 0,
+            tokensSummoned: 0
+        };
+
+        const ACHIEVEMENT_DEFINITIONS = [
+            { id: "first_win", name: "First Voyage", desc: "Win your first game.", check: (s, win) => win },
+            { id: "shop_regular", name: "Shop Regular", desc: "Buy 100 cards across all runs.", check: (s) => false, isMeta: true }, // Meta achievements handled separately
+            { id: "vance_human_buys", name: "Crew's Best Friend", desc: "Buy 20 Humans in one run.", check: (s) => s.buys.Human >= 20 },
+            { id: "mrat_beast_sells", name: "Rat Pack Leader", desc: "Sell 15 Beasts in one run.", check: (s) => s.sells.Beast >= 15 },
+            { id: "pete_nature_deaths", name: "Thorny Revenge", desc: "Trigger Weak 20 times in one game.", check: (s) => s.effectTriggers.Weak >= 20 },
+            { id: "pancake_tokens", name: "Pancake Stack", desc: "Summon 30 tokens in one run.", check: (s) => s.tokensSummoned >= 30 },
+            { id: "brain_merges", name: "Gene Splicer", desc: "Perform 10 merges in one run.", check: (s) => s.merges >= 10 },
+            { id: "dread_anger", name: "Dread Awakening", desc: "Trigger Anger 20 times in one game.", check: (s) => s.effectTriggers.Anger >= 20 }
+        ];
 
         function loadProgress() {
             const saved = localStorage.getItem('monster_crew_progress');
@@ -1133,14 +1162,16 @@
             const list = document.getElementById('character-list');
             list.innerHTML = '';
             CHARACTERS.forEach(char => {
+                const isUnlocked = char.locked === false || metaProgress.unlockedCharacters.includes(char.id);
                 const div = document.createElement('div');
-                div.className = 'char-card';
+                div.className = `char-card ${isUnlocked ? '' : 'locked'}`;
                 div.innerHTML = `
-                    <div class="char-icon">${char.icon}</div>
-                    <div class="char-title">${char.name}</div>
-                    <div class="char-desc">${char.desc}</div>
+                    <div class="char-icon" style="${isUnlocked ? '' : 'filter: brightness(0) invert(0.5);'}">${char.icon}</div>
+                    <div class="char-title">${char.name} ${isUnlocked ? '' : '🔒'}</div>
+                    <div class="char-desc">${isUnlocked ? char.desc : `Unlock in store for 🏆 ${char.unlockPrice}`}</div>
                 `;
-                div.onclick = () => selectCharacter(char);
+                if (isUnlocked) div.onclick = () => selectCharacter(char);
+                else div.style.cursor = 'not-allowed';
                 list.appendChild(div);
             });
         }
@@ -1166,6 +1197,16 @@
             state.hp = startHP;
             state.gold = startGold;
             state.round = 1;
+            
+            // Reset Run Stats
+            runStats = {
+                buys: { Human: 0, Beast: 0, Genetic: 0, Mech: 0, Nature: 0, Cosmic: 0 },
+                sells: { Human: 0, Beast: 0, Genetic: 0, Mech: 0, Nature: 0, Cosmic: 0 },
+                merges: 0,
+                effectTriggers: { Honor: 0, Anger: 0, Weak: 0, Extra: 0, Team: 0, Solo: 0, Twin: 0, Cheap: 0 },
+                maxGold: 0,
+                tokensSummoned: 0
+            };
 
             state.characters = CHARACTERS.map(c => ({
                 id: c.id,
@@ -1525,6 +1566,8 @@
                     state.squad[emptyIdx] = { ...monster, cAtk: monster.atk, cHp: monster.hp };
                     state.shop[index] = null;
                     
+                    runStats.buys[monster.type] = (runStats.buys[monster.type] || 0) + 1;
+
                     // Captain Vance Power: Humans gain +1/+1 when a Human is bought.
                     if (state.character && state.character.id === 'vance' && monster.type === 'Human') {
                         state.squad.forEach(m => {
@@ -1584,6 +1627,8 @@
             mainMonster.atk += bonusAtk;
             mainMonster.hp += bonusHp;
             mainMonster.level = (mainMonster.level || 1) + 1;
+            
+            runStats.merges++;
 
             // Super Brain Power: Merging grants x1.5 the stats.
             if (state.character && state.character.id === 'brain') {
@@ -1802,6 +1847,7 @@
             // Honor: 0/+X to other friendly cards on death.
             if (deadMonster.effect && deadMonster.effect.startsWith("Honor:")) {
                 const x = parseInt(deadMonster.effect.split(":")[1]);
+                runStats.effectTriggers.Honor++;
                 targets.forEach(m => {
                     if (context === 'battle') m.cHp += x;
                     else m.hp += x;
@@ -1812,6 +1858,7 @@
             // Anger: +X/0 to other friendly cards on death.
             if (deadMonster.effect && deadMonster.effect.startsWith("Anger:")) {
                 const x = parseInt(deadMonster.effect.split(":")[1]);
+                runStats.effectTriggers.Anger++;
                 targets.forEach(m => {
                     if (context === 'battle') m.cAtk += x;
                     else m.atk += x;
@@ -1822,6 +1869,7 @@
             // Weak: -X/-X to enemy random card.
             if (deadMonster.effect && deadMonster.effect.startsWith("Weak:") && context === 'battle' && enemies.length > 0) {
                 const x = parseInt(deadMonster.effect.split(":")[1]);
+                runStats.effectTriggers.Weak++;
                 const randEnemy = enemies[Math.floor(Math.random() * enemies.length)];
                 randEnemy.cAtk = Math.max(0, randEnemy.cAtk - x);
                 randEnemy.cHp = Math.max(1, randEnemy.cHp - x); // Don't kill via Weak? Actually let's allow it to kill if it fits game rules, but for now max(1) for safety.
@@ -1837,6 +1885,7 @@
                     id: "spawn", name: "Token", image: "images/ghost.png", type: "Cosmic", 
                     atk: x, hp: y, cAtk: x, cHp: y, tier: "E", effectDesc: "Spawned token." 
                 };
+                runStats.tokensSummoned++;
                 if (side === 'ally') battleData.ally.push(spawn);
                 else battleData.enemy.push(spawn);
             }
@@ -1967,25 +2016,38 @@
             } else {
                 btn.innerText = "CONTINUE";
                 btn.onclick = closeBattleResult;
-                if (draw) {
-                    title.innerText = "DRAW!";
-                    title.style.color = '#ccc';
-                    desc.innerHTML = `You gained ${earnedGold}<img src="images/win-icon.png" class="icon-img">!`;
-                } else if (win) {
-                    title.innerText = "VICTORY!";
-                    title.style.color = 'var(--gold-color)';
-                    let opText = "";
-                    if (state.currentOpponent && opponentHpLoss > 0) {
-                        opText = `<br><span style="color:var(--text-color); font-size:0.8em; margin-top:10px; display:inline-block;">${state.currentOpponent.name} lost ${opponentHpLoss}<img src="images/hp.png" class="icon-img">!</span>`;
-                    }
-                    desc.innerHTML = `You gained ${earnedGold}<img src="images/win-icon.png" class="icon-img">!${opText}`;
-                    createCoinShower();
-                } else {
-                    title.innerText = "DEFEAT!";
-                    title.style.color = 'var(--health-color)';
-                    desc.innerHTML = `You lost ${hpLoss}<img src="images/hp.png" class="icon-img">!`;
-                }
             }
+
+            // Achievement Check
+            const isWin = areOthersDead && !isPlayerDead;
+            ACHIEVEMENT_DEFINITIONS.forEach(ach => {
+                if (!metaProgress.achievements[ach.id]) {
+                    if (ach.check(runStats, isWin)) {
+                        metaProgress.achievements[ach.id] = true;
+                        metaProgress.trophies += 5; // Reward 5 trophies per achievement
+                        showAchievementToast(ach.name);
+                    }
+                }
+            });
+            saveProgress();
+        }
+
+        function showAchievementToast(name) {
+            const toast = document.createElement('div');
+            toast.innerHTML = `<div style="color:var(--gold-color);font-size:0.8em">ACHIEVEMENT UNLOCKED</div><div>${name}</div>`;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.background = 'rgba(0,0,0,0.9)';
+            toast.style.color = 'white';
+            toast.style.padding = '15px 25px';
+            toast.style.borderRadius = '10px';
+            toast.style.border = '2px solid var(--gold-color)';
+            toast.style.zIndex = '8000';
+            toast.style.fontWeight = 'bold';
+            toast.style.animation = 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
         }
 
         function getPlacementSuffix(n) {
@@ -2231,10 +2293,29 @@
         function renderStore() {
             const charUpgradesGrid = document.getElementById('char-upgrades-grid');
             const cardUnlocksGrid = document.getElementById('card-unlocks-grid');
+            const charUnlocksGrid = document.getElementById('char-unlocks-grid');
             
             charUpgradesGrid.innerHTML = '';
             cardUnlocksGrid.innerHTML = '';
+            charUnlocksGrid.innerHTML = '';
             
+            // Render Character Unlocks
+            CHARACTERS.filter(c => c.locked).forEach(char => {
+                const isUnlocked = metaProgress.unlockedCharacters.includes(char.id);
+                const canAfford = metaProgress.trophies >= char.unlockPrice;
+                
+                const div = document.createElement('div');
+                div.className = `shop-item ${isUnlocked ? 'purchased' : ''}`;
+                div.innerHTML = `
+                    <div class="item-icon">${char.icon}</div>
+                    <div class="item-name">${char.name}</div>
+                    <div class="item-desc">${char.desc}</div>
+                    ${isUnlocked ? '<div class="item-purchased">UNLOCKED</div>' : 
+                    `<div class="item-price ${canAfford ? '' : 'disabled'}" onclick="unlockCharacter('${char.id}', ${char.unlockPrice})">🏆 ${char.unlockPrice}</div>`}
+                `;
+                charUnlocksGrid.appendChild(div);
+            });
+
             // Render Character Upgrades
             UPGRADES_REGISTRY.forEach(upg => {
                 const isPurchased = metaProgress.purchasedUpgrades.includes(upg.id);
@@ -2285,6 +2366,15 @@
             if (metaProgress.trophies >= price && !metaProgress.unlockedCards.includes(id)) {
                 metaProgress.trophies -= price;
                 metaProgress.unlockedCards.push(id);
+                saveProgress();
+                renderStore();
+            }
+        }
+
+        function unlockCharacter(id, price) {
+            if (metaProgress.trophies >= price && !metaProgress.unlockedCharacters.includes(id)) {
+                metaProgress.trophies -= price;
+                metaProgress.unlockedCharacters.push(id);
                 saveProgress();
                 renderStore();
             }
