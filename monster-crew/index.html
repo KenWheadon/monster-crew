@@ -25,13 +25,13 @@
             width:3.25rem;
         }
 
-        .shop-header{
+        .shop-header {
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
-            width: 30%;
+            width: auto;
         }
         .shop-header div{
             width: 50%;
@@ -56,23 +56,28 @@
         }
 
         #game-container {
-            width: 1100px;
-            max-width: 100%;
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             border: 2px solid rgba(255,255,255,0.1);
             background: rgba(0, 0, 0, 0.4);
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            position: relative;
+            overflow: hidden;
         }
 
         /* STATS BAR */
         header {
             background: rgba(0,0,0,0.5);
-            padding: 15px 30px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 3px solid var(--text-color);
+            flex-shrink: 0;
+            z-index: 100;
         }
 
         .stat { font-size: 1.4em; font-weight: bold; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
@@ -135,13 +140,14 @@
             backface-visibility: hidden;
             border-radius: 20px;
             border: 4px solid var(--gold-color);
-            padding: 30px;
+            padding: 20px;
             box-sizing: border-box;
             background: #1a1a2e;
             display: flex;
             flex-direction: column;
             align-items: center;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            overflow-y: auto;
         }
 
         .flip-card-back {
@@ -198,7 +204,7 @@
         main { display: flex; flex-direction: column; flex: 1; }
 
         #battle-view {
-            flex: 2;
+            flex: 1.5;
             background: url('images/background2.jpg') center/cover no-repeat;
             display: flex;
             flex-direction: column;
@@ -206,6 +212,7 @@
             align-items: center;
             position: relative;
             transition: 0.3s;
+            min-height: 0;
         }
         #battle-view::before {
             content: "";
@@ -221,21 +228,25 @@
         .shake { animation: shake 0.2s ease-in-out; }
 
         #squad-view, #shop-view {
-            flex: 1;
+            /* flex: 1; */
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
-            padding: 10px;
+            gap: 10px;
+            padding: 5px 10px;
             background: rgba(0,0,0,0.3);
+            min-height: 140px;
+            overflow-x: auto;
+            width: 100%;
         }
 
         #shop-view { border-top: 1px solid rgba(255,255,255,0.1); }
 
         /* MONSTER CARDS */
         .slot {
-            width: 130px;
-            height: 180px;
+            width: 110px;
+            height: 155px;
+            flex-shrink: 0;
             border: 2px solid rgba(255,255,255,0.05);
             border-radius: 12px;
             background: rgba(255,255,255,0.02);
@@ -326,11 +337,13 @@
 
         /* CONTROLS */
         #controls {
-            padding: 20px;
+            padding: 10px 20px;
             background: #000;
             display: flex;
             justify-content: center;
             gap: 20px;
+            flex-shrink: 0;
+            border-top: 2px solid var(--text-color);
         }
 
         button {
@@ -596,13 +609,12 @@
             align-items: center;
             padding: 10px;
             gap: 10px;
-            overflow-y: auto;
         }
 
         .drawer-char {
             position: relative;
             text-align: center;
-            padding: 10px 5px;
+            padding: 5px;
             background: rgba(255,255,255,0.05);
             border: 1px solid #444;
             border-radius: 8px;
@@ -976,6 +988,154 @@
             align-items: center;
             backdrop-filter: blur(5px);
         }
+
+        /* MOBILE OVERRIDES */
+        @media (max-width: 800px) {
+            body {
+                height: 100vh;
+                height: -webkit-fill-available;
+            }
+            #game-container {
+                border-radius: 0;
+                height: 100%;
+            }
+            header {
+                padding: 10px;
+                gap: 5px;
+            }
+            .stat {
+                font-size: 1em;
+            }
+            .shop-level-container {
+                font-size: 1em;
+                padding: 5px 8px;
+            }
+            #character-drawer {
+                width: 60px;
+                padding: 5px;
+            }
+            .drawer-char {
+                width: 50px;
+                padding: 5px 2px;
+            }
+            .drawer-icon {
+                font-size: 1.5em;
+            }
+            .drawer-name {
+                display: none;
+            }
+            .slot {
+                width: 90px;
+                height: 130px;
+            }
+            .card-image {
+                height: 50px;
+            }
+            .card-stats {
+                font-size: 0.9em;
+            }
+            .squad-summary {
+                padding: 5px 10px;
+                margin: 5px;
+                flex-wrap: wrap;
+                font-size: 0.9em;
+            }
+            .squad-stats-group {
+                gap: 10px;
+            }
+            .captain-reminder {
+                font-size: 0.8em;
+                padding: 5px;
+                max-width: 100%;
+            }
+            .inspector-inner {
+                width: 95%;
+                height: 80vh;
+            }
+            .flip-card {
+                width: 95%;
+                height: 80vh;
+            }
+            .result-inner {
+                padding: 20px;
+                width: 90%;
+            }
+            .result-inner h1 {
+                font-size: 2em;
+            }
+            .store-inner {
+                padding: 15px;
+                width: 95%;
+            }
+            .store-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            .char-card {
+                width: 140px;
+                padding: 10px;
+            }
+            .char-icon {
+                font-size: 2.5em;
+            }
+            .char-title {
+                font-size: 1em;
+            }
+            .char-desc {
+                font-size: 0.75em;
+            }
+            #shop-view {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                height: auto;
+                justify-content: flex-start;
+                min-height: 140px;
+            }
+            .shop-header {
+                width: auto;
+                flex-shrink: 0;
+                margin-bottom: 0px;
+            }
+            .shop-header img[alt="Shopkeeper"] {
+                height: 60px !important;
+                margin-right: 0 !important;
+            }
+            .floating-text, .floating-stat {
+                font-size: 1.2em;
+            }
+            #controls {
+                padding: 10px;
+                gap: 5px;
+            }
+            button {
+                padding: 8px 12px;
+                font-size: 0.85em;
+                border-radius: 20px;
+            }
+            #round-display {
+                font-size: 0.9em;
+            }
+            #player-hp, #player-gold {
+                font-size: 1em;
+            }
+            .icon-img {
+                width: 1em;
+            }
+            .icon-img.coin-bag {
+                width: 2rem;
+            }
+            #help-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.4em;
+                bottom: 10px;
+                right: 10px;
+            }
+            #shop-view .slot {
+                margin: 0 5px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1039,7 +1199,7 @@
                 Thanks for playing!<br>
                 <span style="color: var(--text-color); font-weight: bold;">Game by Ken Wheadon</span>
             </p>
-            <button class="btn-main" onclick="closeCredits()" style="margin-top: 20px; width: 100%;">BACK</button>
+            <button class="btn-main" onclick="closeCredits()" style="margin-top: 20px; width: 100%; max-width: 300px;">BACK</button>
         </div>
     </div>
 
@@ -1074,11 +1234,13 @@
                         <div id="captain-passive-reminder" class="captain-reminder">
                             <!-- Filled by JS -->
                         </div>
+
+                        <div id="battle-preview-section" class="battle-preview-teaser" style="display: none;">
+                            <!-- Filled by JS -->
+                        </div>
                     </div>
 
-                    <div id="battle-preview-section" class="battle-preview-teaser" style="display: none;">
-                        <!-- Filled by JS -->
-                    </div>
+
 
                     <div id="squad-view">
                         <div class="slot" onclick="inspectSlot('squad', 0, this)"></div>
@@ -1103,7 +1265,10 @@
                 </div>
 
                 <div id="character-drawer">
-                    <!-- Drawer characters rendering -->
+                    <div id="drawer-leaderboard-summary" style="width: 100%;">
+                        <!-- Summary items -->
+                    </div>
+                    <button class="btn-sec" onclick="openLobby()" style="font-size: 0.7em; padding: 5px; width: 100%; margin-top: auto;">VIEW ALL</button>
                 </div>
             </div>
         </main>
@@ -1181,10 +1346,20 @@
     </div>
 
     <div id="tutorial-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9500; display: none; justify-content: center; align-items: center; color: white;">
-        <div id="tutorial-step" class="result-inner" style="width: 450px;">
+        <div id="tutorial-step" class="result-inner" style="max-width: 450px; width: 90%;">
             <h2 id="tutorial-title" style="color: var(--gold-color);">WELCOME CADET!</h2>
             <p id="tutorial-text"></p>
             <button class="btn-main" onclick="nextTutorial()">NEXT</button>
+        </div>
+    </div>
+
+    <div id="lobby-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 8500; display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px);">
+        <div class="result-inner" onclick="event.stopPropagation()" style="width: 500px; max-width: 95%; max-height: 80vh; overflow-y: auto;">
+            <h1 style="color: var(--gold-color); margin-bottom: 20px;">LOBBY</h1>
+            <div id="full-lobby-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                <!-- Filled by JS -->
+            </div>
+            <button class="btn-main" onclick="closeLobby()" style="width: 100%;">CLOSE</button>
         </div>
     </div>
 
@@ -2566,27 +2741,78 @@
                 }
             });
 
-            // Render Drawer
-            if (state.characters && document.getElementById('character-drawer')) {
-                const drawer = document.getElementById('character-drawer');
-                drawer.innerHTML = '';
-                state.characters.forEach(c => {
-                    const isPlayer = state.character && c.id === state.character.id;
+            // Render Drawer Summary
+            if (state.characters && document.getElementById('drawer-leaderboard-summary')) {
+                const summary = document.getElementById('drawer-leaderboard-summary');
+                summary.innerHTML = '';
+                
+                // Get all players, sort by HP (desc)
+                const sorted = [...state.characters].sort((a, b) => b.hp - a.hp);
+                
+                const myChar = state.characters.find(c => c.id === state.character?.id);
+                const others = sorted.filter(c => c.id !== state.character?.id);
+                const leader = others[0]; // Highest excluding player
+
+                const renderSummaryItem = (c, label) => {
                     const isDead = c.hp <= 0;
                     const hpText = isDead ? '<span class="dead-text">DEAD</span>' : `<img src="images/hp.png" class="icon-img"> ${c.hp}`;
-
-                    drawer.innerHTML += `
-                        <div class="drawer-char ${isPlayer ? 'is-player' : ''} ${isDead ? 'dead' : ''}">
-                            <div class="drawer-icon">
+                    return `
+                        <div class="drawer-char ${c.id === myChar?.id ? 'is-player' : ''} ${isDead ? 'dead' : ''}" style="margin-bottom: 5px; padding: 5px;">
+                            <div style="font-size: 0.6em; color: var(--gold-color); text-transform: uppercase;">${label}</div>
+                            <div class="drawer-icon" style="font-size: 1.5em; margin: 0;">
                                 ${c.icon}
                                 <div class="skull-overlay">💀</div>
                             </div>
-                            <span class="drawer-name">${c.name}</span>
-                            <div class="drawer-hp">${hpText}</div>
+                            <span class="drawer-name" style="font-size: 0.6em;">${c.name}</span>
+                            <div class="drawer-hp" style="font-size: 0.8em;">${hpText}</div>
                         </div>
                     `;
-                });
+                };
+
+                if (leader) summary.innerHTML += renderSummaryItem(leader, 'Leader');
+                if (myChar) summary.innerHTML += renderSummaryItem(myChar, 'You');
             }
+        }
+
+        function openLobby() {
+            const list = document.getElementById('full-lobby-list');
+            list.innerHTML = '';
+            
+            // Sort by HP
+            const sorted = [...state.characters].sort((a,b) => b.hp - a.hp);
+            
+            sorted.forEach((c, idx) => {
+                const isPlayer = state.character && c.id === state.character.id;
+                const isDead = c.hp <= 0;
+                const hpText = isDead ? '<span class="dead-text">DEAD</span>' : `HP: ${c.hp}`;
+                
+                const item = document.createElement('div');
+                item.style.display = 'flex';
+                item.style.alignItems = 'center';
+                item.style.padding = '10px';
+                item.style.background = isPlayer ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.05)';
+                item.style.border = isPlayer ? '1px solid var(--gold-color)' : '1px solid #444';
+                item.style.borderRadius = '10px';
+                item.style.gap = '15px';
+                item.style.opacity = isDead ? '0.5' : '1';
+                
+                item.innerHTML = `
+                    <div style="font-size: 1.2em; font-weight: bold; width: 30px; color: ${idx === 0 ? 'var(--gold-color)' : '#888'}">#${idx + 1}</div>
+                    <div style="font-size: 2em;">${c.icon}</div>
+                    <div style="flex: 1; text-align: left;">
+                        <div style="font-weight: bold; color: ${isPlayer ? 'var(--gold-color)' : 'white'}">${c.name} ${isPlayer ? '(YOU)' : ''}</div>
+                        <div style="font-size: 0.8em; color: #aaa;">${c.hp > 0 ? 'Competing...' : 'Eliminated'}</div>
+                    </div>
+                    <div style="font-weight: bold; color: var(--health-color);">${hpText}</div>
+                `;
+                list.appendChild(item);
+            });
+            
+            document.getElementById('lobby-modal').style.display = 'flex';
+        }
+
+        function closeLobby() {
+            document.getElementById('lobby-modal').style.display = 'none';
         }
 
         function updateSquadSummary(effectiveSquad) {
