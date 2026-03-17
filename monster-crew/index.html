@@ -476,7 +476,7 @@
         }
 
         .result-inner {
-            background: var(--panel-color);
+            background: rgba(0,0,0,0.85);
             border: 4px solid var(--gold-color);
             border-radius: 20px;
             padding: 40px 60px;
@@ -526,7 +526,7 @@
         #character-select-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: url('images/bg-selection.png') center/cover no-repeat;
+            background: url('images/bg-selection.jpg') center/cover no-repeat;
             display: none;
             justify-content: center;
             align-items: center;
@@ -663,7 +663,7 @@
         #title-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: url('images/bg-title.png') center/cover no-repeat;
+            background: url('images/bg-title.jpg') center/cover no-repeat;
             z-index: 5000;
             display: flex;
             flex-direction: column;
@@ -799,6 +799,123 @@
             font-size: 3em;
             margin-bottom: 10px;
         }
+
+        /* NEW UI ELEMENTS */
+        .squad-summary {
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            padding: 10px 20px;
+            border-radius: 15px;
+            margin: 10px;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .squad-stats-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .squad-stat-total {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .type-synergies {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .type-badge {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: transform 0.2s;
+        }
+        .type-badge:hover { transform: scale(1.05); }
+        .type-badge.active { border-color: var(--gold-color); box-shadow: 0 0 10px rgba(255,215,0,0.2); }
+
+        .captain-reminder {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            background: rgba(255,215,0,0.1);
+            border: 1px solid var(--gold-color);
+            border-radius: 10px;
+            font-size: 0.9em;
+            max-width: 300px;
+        }
+
+        .battle-preview-teaser {
+            background: rgba(255,0,85,0.1);
+            border: 1px solid var(--text-color);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .win-chance-bar {
+            height: 10px;
+            background: #222;
+            border-radius: 5px;
+            width: 100px;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+
+        .win-chance-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--health-color), #2ecc71);
+            width: 50%;
+            transition: width 0.5s;
+        }
+
+        /* JUICE & ANIMATIONS */
+        .card-glow-green {
+            box-shadow: 0 0 15px #2ecc71 !important;
+            border-color: #2ecc71 !important;
+        }
+
+        .floating-stat {
+            position: absolute;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 1000;
+            animation: floatAndFade 1.2s ease-out forwards;
+        }
+
+        @keyframes floatAndFade {
+            0% { transform: translate(-50%, 0); opacity: 0; scale: 0.5; }
+            20% { transform: translate(-50%, -20px); opacity: 1; scale: 1.2; }
+            100% { transform: translate(-50%, -80px); opacity: 0; scale: 1; }
+        }
+
+        .slot-highlight {
+            animation: pulse-border 1s infinite alternate;
+        }
+
+        @keyframes pulse-border {
+            from { border-color: rgba(255,255,255,0.1); box-shadow: 0 0 0px transparent; }
+            to { border-color: var(--gold-color); box-shadow: 0 0 10px var(--gold-color); }
+        }
+
+        .type-icon { width: 1.1em; height: 1.1em; vertical-align: middle; }
         
         .item-image {
             width: 80px;
@@ -866,6 +983,10 @@
     <div id="title-screen">
         <div class="trophy-counter">
              🏆 <span id="main-trophy-count">0</span>
+        </div>
+        <div id="trophy-progress-container" style="position: absolute; bottom: 15%; width: 40%; background: rgba(0,0,0,0.7); height: 12px; border-radius: 6px; border: 1px solid var(--gold-color); overflow: visible; display: flex; align-items: center;">
+            <div id="trophy-progress-fill" style="height: 100%; background: var(--gold-color); width: 0%; transition: width 1s; box-shadow: 0 0 10px var(--gold-color);"></div>
+            <div id="trophy-next-milestone-label" style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.8em; font-weight: bold; color: var(--gold-color); white-space: nowrap;">NEXT REWARD: ???</div>
         </div>
         <img src="images/logo.png" alt="Monster Crew Logo" id="title-logo">
         <div class="title-buttons">
@@ -938,6 +1059,27 @@
 
             <div id="shop-phase">
                 <div style="display: flex; flex-direction: column; flex: 1;">
+                    <div id="squad-summary-bar" class="squad-summary">
+                        <div class="squad-stats-group">
+                            <div class="squad-stat-total" title="Total Squad Attack">
+                                ⚔️ <span id="total-squad-atk">0</span>
+                            </div>
+                            <div class="squad-stat-total" title="Total Squad HP">
+                                <img src="images/hp.png" class="icon-img"> <span id="total-squad-hp">0</span>
+                            </div>
+                        </div>
+                        <div id="squad-type-synergies" class="type-synergies">
+                            <!-- Filled by JS -->
+                        </div>
+                        <div id="captain-passive-reminder" class="captain-reminder">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+
+                    <div id="battle-preview-section" class="battle-preview-teaser" style="display: none;">
+                        <!-- Filled by JS -->
+                    </div>
+
                     <div id="squad-view">
                         <div class="slot" onclick="inspectSlot('squad', 0, this)"></div>
                         <div class="slot" onclick="inspectSlot('squad', 1, this)"></div>
@@ -991,6 +1133,7 @@
                     <span class="c-atk" id="ins-atk">2</span> / <span class="c-hp" id="ins-hp">3</span>
                 </div>
                 <div id="ins-effect" class="ins-effect">TEAM: +1/+1 for each Human.</div>
+                <div id="ins-synergy-hint" style="color: #2ecc71; font-size: 0.9em; margin-bottom: 15px; display: none; background: rgba(46, 204, 113, 0.1); padding: 8px; border-radius: 5px;"></div>
                 <div id="ins-flavor" class="ins-flavor">He just wants to go home and nap.</div>
                 
                 <div id="ins-actions" style="margin-top: auto; display:flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
@@ -1020,6 +1163,32 @@
         </div>
     </div>
 
+    <div id="glossary-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px);">
+        <div class="result-inner" onclick="event.stopPropagation()" style="width: 500px; max-width: 90%;">
+            <h1 style="color: var(--gold-color); margin-bottom: 20px;">KEYWORD GLOSSARY</h1>
+            <div style="text-align: left; max-height: 400px; overflow-y: auto; padding: 20px; color: white; line-height: 1.6;">
+                <p><b style="color: var(--gold-color);">Team:</b> Grants stats to other friendly cards that share its type at start of battle.</p>
+                <p><b style="color: var(--beast-color);">Anger:</b> Grants Attack to all allies when this card dies.</p>
+                <p><b style="color: var(--nature-color);">Honor:</b> Grants HP to all allies when this card dies.</p>
+                <p><b style="color: var(--gold-color);">Cheap:</b> While in squad, shop cards cost less (min 0).</p>
+                <p><b style="color: var(--human-color);">Twin:</b> Only requires 1 duplicate instead of 2 to merge and level up.</p>
+                <p><b style="color: var(--cosmic-color);">Extra:</b> Spawns a token (stats based on effect) when this card dies.</p>
+                <p><b style="color: var(--health-color);">Weak:</b> Permanently reduces stats of a random enemy when this card dies.</p>
+                <p><b style="color: var(--genetic-color);">Solo:</b> Gains stats at start of battle if it's the only one of its type in squad.</p>
+            </div>
+            <button class="btn-main" onclick="closeGlossary()" style="margin-top: 20px; width: 100%;">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="tutorial-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9500; display: none; justify-content: center; align-items: center; color: white;">
+        <div id="tutorial-step" class="result-inner" style="width: 450px;">
+            <h2 id="tutorial-title" style="color: var(--gold-color);">WELCOME CADET!</h2>
+            <p id="tutorial-text"></p>
+            <button class="btn-main" onclick="nextTutorial()">NEXT</button>
+        </div>
+    </div>
+
+    <button id="help-btn" onclick="openGlossary()" style="position: fixed; bottom: 20px; right: 20px; border-radius: 50%; width: 50px; height: 50px; font-size: 1.8em; background: rgba(0,0,0,0.6); border: 2px solid var(--gold-color); color: var(--gold-color); cursor: pointer; z-index: 4500; display: flex; align-items: center; justify-content: center; transition: 0.3s;">?</button>
     <div id="shop-level-modal" onclick="closeShopLevelPopup()">
         <div class="flip-card" id="shop-flip-card" onclick="event.stopPropagation()">
             <div class="flip-card-front" onclick="document.getElementById('shop-flip-card').classList.add('flipped')">
@@ -1138,6 +1307,19 @@
                 document.getElementById('main-trophy-count').innerText = metaProgress.trophies;
             if (document.getElementById('store-trophy-count'))
                 document.getElementById('store-trophy-count').innerText = metaProgress.trophies;
+
+            // Updated Progress Bar logic
+            const milestones = [10, 25, 50, 100, 250, 500, 1000];
+            const currentTrophies = metaProgress.trophies;
+            let nextMilestone = milestones.find(m => m > currentTrophies) || milestones[milestones.length-1] + 500;
+            let prevMilestone = milestones[milestones.indexOf(nextMilestone)-1] || 0;
+            
+            const progress = ((currentTrophies - prevMilestone) / (nextMilestone - prevMilestone)) * 100;
+            const fill = document.getElementById('trophy-progress-fill');
+            const label = document.getElementById('trophy-next-milestone-label');
+            
+            if (fill) fill.style.width = Math.min(100, Math.max(0, progress)) + '%';
+            if (label) label.innerText = `NEXT REWARD AT ${nextMilestone} 🏆 (${nextMilestone - currentTrophies} LEFT)`;
         }
 
 
@@ -1234,10 +1416,53 @@
         /**
          * CORE ENGINE
          */
+        /**
+         * TUTORIAL & GLOSSARY
+         */
+        function openGlossary() { document.getElementById('glossary-modal').style.display = 'flex'; }
+        function closeGlossary() { document.getElementById('glossary-modal').style.display = 'none'; }
+
+        let tutorialStep = 0;
+        const tutorialSteps = [
+            { title: "BUILD YOUR CREW", text: "Buy cards from the shop to build your squad. Each card has a Type and a unique Effect!" },
+            { title: "SYNERGIES", text: "Cards of the same type often buff each other. Watch your Squad Summary Bar for active synergies!" },
+            { title: "POWER UP", text: "Collect 3 of the same card to merge them into a higher level version with combined stats!" },
+            { title: "FIGHT!", text: "Once you're ready, click 'Fight!' to battle an opponent. If you win, you'll earn trophies and progress!" }
+        ];
+
+        function checkTutorial() {
+            if (!localStorage.getItem('monster_crew_tutorial_seen')) {
+                showTutorial();
+            }
+        }
+
+        function showTutorial() {
+            tutorialStep = 0;
+            updateTutorialStep();
+            document.getElementById('tutorial-overlay').style.display = 'flex';
+        }
+
+        function nextTutorial() {
+            tutorialStep++;
+            if (tutorialStep >= tutorialSteps.length) {
+                document.getElementById('tutorial-overlay').style.display = 'none';
+                localStorage.setItem('monster_crew_tutorial_seen', 'true');
+            } else {
+                updateTutorialStep();
+            }
+        }
+
+        function updateTutorialStep() {
+            const step = tutorialSteps[tutorialStep];
+            document.getElementById('tutorial-title').innerText = step.title;
+            document.getElementById('tutorial-text').innerText = step.text;
+        }
+
         async function init() {
             await loadData();
             loadProgress();
             updateUI();
+            checkTutorial(); // Check tutorial on start
         }
 
         function syncToSquad(clonedMonster, stat, amount, side = 'ally') {
@@ -1539,9 +1764,9 @@
             const sacBtn = document.getElementById('ins-sac-btn');
             const mergeBtn = document.getElementById('ins-merge-btn');
 
-            let totalDiscount = state.squad.filter(m => m !== null).reduce((sum, m) => {
-                if (m.effect && m.effect.startsWith("Cheap:")) {
-                    return sum + parseInt(m.effect.split(":")[1]);
+            let totalDiscount = state.squad.filter(m => m !== null).reduce((sum, sm) => {
+                if (sm.effect && sm.effect.startsWith("Cheap:")) {
+                    return sum + parseInt(sm.effect.split(":")[1]);
                 }
                 return sum;
             }, 0);
@@ -1574,6 +1799,21 @@
             }
             mergeBtn.style.display = canMerge ? 'block' : 'none';
             mergeBtn.onclick = () => mergeMonster(index, mergeTargets.slice(0, neededForMerge));
+
+            const synergyHint = document.getElementById('ins-synergy-hint');
+            if (synergyHint) {
+                const sameTypeInSquad = state.squad.filter(s => s && s.type === monster.type).length;
+                if (monster.effect && monster.effect.startsWith("Team:")) {
+                    const x = parseInt(monster.effect.split(":")[1]);
+                    synergyHint.innerText = `SYNERGY: Will trigger on ${sameTypeInSquad} allies → +${x * sameTypeInSquad} ATK total!`;
+                    synergyHint.style.display = 'block';
+                } else if (monster.effect && monster.effect.startsWith("Anger:")) {
+                    synergyHint.innerText = `SYNERGY: Deaths will trigger buffs for your ${state.squad.filter(s=>s).length} allies!`;
+                    synergyHint.style.display = 'block';
+                } else {
+                    synergyHint.style.display = 'none';
+                }
+            }
 
             // Animation
             const inspector = document.getElementById('inspector');
@@ -1625,7 +1865,7 @@
             if (!monster) return;
             let totalDiscount = state.squad.filter(m => m !== null).reduce((sum, m) => {
                 if (m.effect && m.effect.startsWith("Cheap:")) {
-                    return sum + parseInt(m.effect.split(":")[1]);
+                    return sum + parseInt(sm.effect.split(":")[1]);
                 }
                 return sum;
             }, 0);
@@ -1639,18 +1879,21 @@
                     
                     runStats.buys[monster.type] = (runStats.buys[monster.type] || 0) + 1;
 
-                    // Captain Vance Power: Humans gain +1/+1 when a Human is bought.
+                    // Captain Vance Power
                     if (state.character && state.character.id === 'vance' && monster.type === 'Human') {
-                        state.squad.forEach(m => {
+                        state.squad.forEach((m, idx) => {
                             if (m && m.type === 'Human') {
-                                m.atk += 1;
-                                m.hp += 1;
+                                m.atk += 1; m.hp += 1;
                                 if (m.cAtk !== undefined) m.cAtk += 1;
                                 if (m.cHp !== undefined) m.cHp += 1;
+                                showFloatingStat(idx, 'squad', '+1/+1', 'var(--gold-color)');
                             }
                         });
                     }
 
+                    // JUICE: Particle burst and sound placeholder
+                    createParticleBurst(event ? {x: event.clientX, y: event.clientY} : null, 'var(--gold-color)', 15);
+                    
                     closeInspector();
                     updateUI();
                 } else { 
@@ -1663,17 +1906,23 @@
 
         function sacrificeMonster(index) {
             const sacrificed = state.squad[index];
+            if (!sacrificed) return;
+
+            // JUICE: Particle burst before removal
+            const slot = document.querySelectorAll('#squad-view .slot')[index];
+            const rect = slot.getBoundingClientRect();
+            createParticleBurst({x: rect.left + rect.width/2, y: rect.top + rect.height/2}, 'var(--health-color)', 20);
+
             state.squad[index] = null;
-            state.gold += 1; // Refund 1 gold (reduced from 2 since cards are cheaper now)
+            state.gold += 1; 
             
-            // Massive Rat Power: Beasts gain +1/+1 when a Beast is sold.
             if (state.character && state.character.id === 'mrat' && sacrificed.type === 'Beast') {
-                state.squad.forEach(m => {
+                state.squad.forEach((m, idx) => {
                     if (m && m.type === 'Beast') {
-                        m.atk += 1;
-                        m.hp += 1;
+                        m.atk += 1; m.hp += 1;
                         if (m.cAtk !== undefined) m.cAtk += 1;
                         if (m.cHp !== undefined) m.cHp += 1;
+                        showFloatingStat(idx, 'squad', '+1/+1', 'var(--beast-color)');
                     }
                 });
             }
@@ -1686,12 +1935,21 @@
 
         function mergeMonster(index, targets) {
             const mainMonster = state.squad[index];
+            const mainSlot = document.querySelectorAll('#squad-view .slot')[index];
+            const mainRect = mainSlot.getBoundingClientRect();
+
             let bonusAtk = 0;
             let bonusHp = 0;
             targets.forEach(tIdx => {
                 const target = state.squad[tIdx];
                 bonusAtk += target.atk;
                 bonusHp += target.hp;
+                
+                // JUICE: Fly target toward main
+                const targetSlot = document.querySelectorAll('#squad-view .slot')[tIdx];
+                const targetRect = targetSlot.getBoundingClientRect();
+                createParticleBurst({x: targetRect.left + targetRect.width/2, y: targetRect.top + targetRect.height/2}, 'var(--gold-color)', 10);
+                
                 state.squad[tIdx] = null;
             });
 
@@ -1701,7 +1959,6 @@
             
             runStats.merges++;
 
-            // Super Brain Power: Merging grants x1.5 the stats.
             if (state.character && state.character.id === 'brain') {
                 mainMonster.atk = Math.floor(mainMonster.atk * 1.5);
                 mainMonster.hp = Math.floor(mainMonster.hp * 1.5);
@@ -1709,6 +1966,9 @@
 
             mainMonster.cAtk = Math.max(1, mainMonster.atk);
             mainMonster.cHp = mainMonster.hp;
+            
+            // JUICE: Big burst at main slot
+            createParticleBurst({x: mainRect.left + mainRect.width/2, y: mainRect.top + mainRect.height/2}, 'var(--gold-color)', 30);
             
             closeInspector();
             updateUI();
@@ -1841,73 +2101,80 @@
             const a = battleData.ally[0];
             const e = battleData.enemy[0];
 
-            const allyFront = document.getElementById('ally-line').children[0];
-            const enemyFront = document.getElementById('enemy-line').children[0];
+            const allyFrontSlot = document.getElementById('ally-line').children[0];
+            const enemyFrontSlot = document.getElementById('enemy-line').children[0];
 
-            if (allyFront) allyFront.classList.add('clash-right');
-            if (enemyFront) enemyFront.classList.add('clash-left');
+            // JUICE: Projectile Attack
+            createProjectile(allyFrontSlot, enemyFrontSlot, a.type);
+            setTimeout(() => createProjectile(enemyFrontSlot, allyFrontSlot, e.type), 200);
 
             setTimeout(() => {
-                // Visual Damage
-                showEffect('ally-line', `-${e.cAtk}`, 'var(--health-color)');
-                showEffect('enemy-line', `-${a.cAtk}`, 'var(--health-color)');
-                document.getElementById('battle-view').classList.add('shake');
-                setTimeout(() => document.getElementById('battle-view').classList.remove('shake'), 200);
-
-                a.cHp -= e.cAtk;
-                e.cHp -= a.cAtk;
-
-                let delay = 0;
-
-                if (a.cHp <= 0 && allyFront) {
-                    allyFront.classList.remove('clash-right');
-                    allyFront.classList.add('defeated');
-                    delay = 500;
-                }
-                if (e.cHp <= 0 && enemyFront) {
-                    enemyFront.classList.remove('clash-left');
-                    enemyFront.classList.add('defeated');
-                    delay = 500;
-                }
+                if (allyFrontSlot) allyFrontSlot.classList.add('clash-right');
+                if (enemyFrontSlot) enemyFrontSlot.classList.add('clash-left');
 
                 setTimeout(() => {
-                    let deadAllies = [];
-                    let deadEnemies = [];
-
-                    if (a.cHp <= 0) deadAllies.push(battleData.ally.shift());
-                    if (e.cHp <= 0) deadEnemies.push(battleData.enemy.shift());
-
-                    renderBattle();
-
-                    deadAllies.forEach(dead => triggerDeathEffect(dead, 'battle', 'ally'));
-                    deadEnemies.forEach(dead => triggerDeathEffect(dead, 'battle', 'enemy'));
+                    // Visual Damage
+                    showFloatingStat(0, 'ally-line', `-${e.cAtk}`, 'var(--health-color)');
+                    showFloatingStat(0, 'enemy-line', `-${a.cAtk}`, 'var(--health-color)');
                     
-                    let additionalDeaths = true;
-                    while(additionalDeaths) {
-                        additionalDeaths = false;
-                        for (let i = 0; i < battleData.ally.length; i++) {
-                            if (battleData.ally[i].cHp <= 0) {
-                                const dead = battleData.ally.splice(i, 1)[0];
-                                triggerDeathEffect(dead, 'battle', 'ally');
-                                additionalDeaths = true;
-                                i--;
-                            }
-                        }
-                        for (let i = 0; i < battleData.enemy.length; i++) {
-                            if (battleData.enemy[i].cHp <= 0) {
-                                const dead = battleData.enemy.splice(i, 1)[0];
-                                triggerDeathEffect(dead, 'battle', 'enemy');
-                                additionalDeaths = true;
-                                i--;
-                            }
-                        }
+                    document.getElementById('battle-view').classList.add('shake');
+                    setTimeout(() => document.getElementById('battle-view').classList.remove('shake'), 200);
+
+                    a.cHp -= e.cAtk;
+                    e.cHp -= a.cAtk;
+
+                    let delay = 0;
+
+                    if (a.cHp <= 0 && allyFrontSlot) {
+                        allyFrontSlot.classList.remove('clash-right');
+                        allyFrontSlot.classList.add('defeated');
+                        delay = 500;
+                    }
+                    if (e.cHp <= 0 && enemyFrontSlot) {
+                        enemyFrontSlot.classList.remove('clash-left');
+                        enemyFrontSlot.classList.add('defeated');
+                        delay = 500;
                     }
 
-                    renderBattle(); // Re-render to show updated stats
+                    setTimeout(() => {
+                        let deadAllies = [];
+                        let deadEnemies = [];
 
-                }, delay);
+                        if (a.cHp <= 0) deadAllies.push(battleData.ally.shift());
+                        if (e.cHp <= 0) deadEnemies.push(battleData.enemy.shift());
 
-            }, 500);
+                        renderBattle();
+
+                        deadAllies.forEach(dead => triggerDeathEffect(dead, 'battle', 'ally'));
+                        deadEnemies.forEach(dead => triggerDeathEffect(dead, 'battle', 'enemy'));
+                        
+                        let additionalDeaths = true;
+                        while(additionalDeaths) {
+                            additionalDeaths = false;
+                            for (let i = 0; i < battleData.ally.length; i++) {
+                                if (battleData.ally[i].cHp <= 0) {
+                                    const dead = battleData.ally.splice(i, 1)[0];
+                                    triggerDeathEffect(dead, 'battle', 'ally');
+                                    additionalDeaths = true;
+                                    i--;
+                                }
+                            }
+                            for (let i = 0; i < battleData.enemy.length; i++) {
+                                if (battleData.enemy[i].cHp <= 0) {
+                                    const dead = battleData.enemy.splice(i, 1)[0];
+                                    triggerDeathEffect(dead, 'battle', 'enemy');
+                                    additionalDeaths = true;
+                                    i--;
+                                }
+                            }
+                        }
+
+                        renderBattle(); // Re-render to show updated stats
+
+                    }, delay);
+
+                }, 500);
+            }, 400);
 
             setTimeout(battleStep, 2500);
         }
@@ -2166,9 +2433,24 @@
             document.getElementById('shop-phase').style.display = 'flex';
             document.getElementById('controls').style.display = 'flex';
             
+            // JUICE: Round Income animation
+            const income = 10 + Math.floor(state.round / 2);
+            showFloatingStat(1, 'player-gold', `+${income} GOLD`, 'var(--gold-color)');
+            createCoinBurst(income);
+
             refreshShop();
             simulateAITurns();
             updateUI();
+        }
+
+        function createCoinBurst(amount) {
+            const goldEl = document.getElementById('player-gold');
+            const rect = goldEl.getBoundingClientRect();
+            for(let i=0; i<Math.min(amount, 15); i++) {
+                setTimeout(() => {
+                    createParticleBurst({x: rect.left + rect.width/2, y: rect.bottom + 20}, 'var(--gold-color)', 5);
+                }, i * 50);
+            }
         }
 
         /**
@@ -2250,15 +2532,39 @@
             document.getElementById('player-hp').innerHTML = `<img src="images/hp.png" class="icon-img"> ${state.hp}`;
             document.getElementById('player-gold').innerHTML = `<img src="images/bag1.png" class="coin-bag icon-img" style="transform: scale(1.5); margin-right: 5px;"> <img src="images/win-icon.png" class="icon-img"> ${state.gold}`;
 
+            // Update Trophy Progress Bar in Header if exists (we'll add it later to title screen, but update display everywhere)
+            updateTrophyDisplay();
+
             // Calculate squad with passives for display
             const effectiveSquad = calculateEffectiveStats(state.squad);
+
+            // Update Squad Summary Bar
+            updateSquadSummary(effectiveSquad);
+            updateBattlePreview();
 
             // Render Slots
             const squadSlots = document.querySelectorAll('#squad-view .slot');
             effectiveSquad.forEach((m, i) => renderCard(squadSlots[i], m));
 
             const shopSlots = document.querySelectorAll('#shop-view .slot');
-            state.shop.forEach((m, i) => renderCard(shopSlots[i], m, true));
+            state.shop.forEach((m, i) => {
+                const slot = shopSlots[i];
+                renderCard(slot, m, true);
+                
+                // Highlight discounted cards
+                if (m) {
+                    let totalDiscount = state.squad.filter(sm => sm !== null).reduce((sum, sm) => {
+                        if (sm.effect && sm.effect.startsWith("Cheap:")) return sum + parseInt(sm.effect.split(":")[1]);
+                        return sum;
+                    }, 0);
+                    if (totalDiscount > 0 && m.cost > 0) {
+                        const cardDiv = slot.querySelector('.card');
+                        if (cardDiv) cardDiv.classList.add('card-glow-green');
+                        const costDiv = slot.querySelector('.card-cost');
+                        if (costDiv) costDiv.style.color = '#2ecc71';
+                    }
+                }
+            });
 
             // Render Drawer
             if (state.characters && document.getElementById('character-drawer')) {
@@ -2281,6 +2587,100 @@
                     `;
                 });
             }
+        }
+
+        function updateSquadSummary(effectiveSquad) {
+            let totalAtk = 0;
+            let totalHp = 0;
+            let typeCounts = {};
+
+            effectiveSquad.forEach(m => {
+                if (m) {
+                    totalAtk += m.atk;
+                    totalHp += m.hp;
+                    typeCounts[m.type] = (typeCounts[m.type] || 0) + 1;
+                }
+            });
+
+            document.getElementById('total-squad-atk').innerText = totalAtk;
+            document.getElementById('total-squad-hp').innerText = totalHp;
+
+            const synergyContainer = document.getElementById('squad-type-synergies');
+            synergyContainer.innerHTML = '';
+
+            const typeIcons = {
+                Beast: '🐾', Human: '👥', Genetic: '🧬', Mech: '⚙️', Nature: '🌿', Cosmic: '✨'
+            };
+
+            Object.keys(typeCounts).forEach(type => {
+                const count = typeCounts[type];
+                const badge = document.createElement('div');
+                badge.className = `type-badge ${count >= 2 ? 'active' : ''}`;
+                badge.style.color = `var(--${type.toLowerCase()}-color)`;
+                badge.innerHTML = `${typeIcons[type]} ${count} ${type}`;
+                synergyContainer.appendChild(badge);
+            });
+
+            const captainBox = document.getElementById('captain-passive-reminder');
+            if (state.character) {
+                captainBox.innerHTML = `
+                    <div style="font-size: 1.5em;">${state.character.icon}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; color: var(--gold-color);">${state.character.name}</div>
+                        <div style="font-size: 0.8em; opacity: 0.8;">${state.character.desc}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateBattlePreview() {
+            const preview = document.getElementById('battle-preview-section');
+            let opponents = state.characters ? state.characters.filter(c => c.id !== state.character?.id && c.hp > 0) : [];
+            
+            if (opponents.length === 0) {
+                preview.style.display = 'none';
+                return;
+            }
+
+            // In this version, we don't know EXACTLY who we fight until we click Fight, 
+            // but we can show a "Potential Opponent" or the most dangerous one.
+            // For now, let's just pick a random one to "tease".
+            const teaserOpponent = opponents[0]; // Just show the top one or random
+            
+            const winProb = calculateWinProbability(state.squad, teaserOpponent);
+            
+            preview.style.display = 'flex';
+            preview.innerHTML = `
+                <div style="font-weight: bold; color: var(--text-color);">UPCOMING:</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.2em;">${teaserOpponent.icon}</span>
+                    <span style="font-weight: bold;">${teaserOpponent.name}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 0.8em; opacity: 0.7;">WIN CHANCE:</span>
+                    <div class="win-chance-bar">
+                        <div class="win-chance-fill" style="width: ${winProb}%"></div>
+                    </div>
+                    <span style="font-weight: bold; width: 40px;">${winProb}%</span>
+                </div>
+            `;
+        }
+
+        function calculateWinProbability(playerSquad, opponent) {
+            if (!opponent || !playerSquad) return 50;
+            
+            const playerStats = playerSquad.filter(m => m).reduce((acc, m) => ({ atk: acc.atk + m.atk, hp: acc.hp + m.hp }), { atk: 0, hp: 0 });
+            const enemyStats = opponent.squad.filter(m => m).reduce((acc, m) => ({ atk: acc.atk + m.atk, hp: acc.hp + m.hp }), { atk: 0, hp: 0 });
+            
+            const playerPower = playerStats.atk + playerStats.hp;
+            const enemyPower = enemyStats.atk + enemyStats.hp;
+            
+            if (playerPower === 0 && enemyPower === 0) return 50;
+            if (playerPower === 0) return 0;
+            if (enemyPower === 0) return 100;
+
+            const ratio = playerPower / (playerPower + enemyPower);
+            return Math.floor(ratio * 100);
         }
 
         function renderCard(slot, m, isShop = false) {
@@ -2513,6 +2913,118 @@
 
         function closeCredits() {
             document.getElementById('credits-modal').style.display = 'none';
+        }
+
+        /**
+         * JUICY VISUAL EFFECTS
+         */
+        function showFloatingStat(index, containerId, text, color) {
+            let container;
+            if (containerId === 'squad') container = document.getElementById('squad-view');
+            else container = document.getElementById(containerId);
+            
+            if (!container) return;
+            const target = container.children[index];
+            if (!target) return;
+
+            const rect = target.getBoundingClientRect();
+            const el = document.createElement('div');
+            el.className = 'floating-stat';
+            el.innerText = text;
+            el.style.color = color;
+            el.style.left = (rect.left + rect.width / 2) + 'px';
+            el.style.top = (rect.top + rect.height / 2) + 'px';
+            el.style.fontSize = '2em';
+            el.style.textShadow = '0 0 10px rgba(0,0,0,0.8)';
+            el.style.position = 'fixed';
+            
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1200);
+        }
+
+        function createParticleBurst(pos, color, count = 10) {
+            const centerX = pos ? pos.x : window.innerWidth / 2;
+            const centerY = pos ? pos.y : window.innerHeight / 2;
+
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.style.position = 'fixed';
+                p.style.width = '6px';
+                p.style.height = '6px';
+                p.style.background = color;
+                p.style.borderRadius = '50%';
+                p.style.left = centerX + 'px';
+                p.style.top = centerY + 'px';
+                p.style.zIndex = '10000';
+                p.style.pointerEvents = 'none';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 5;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                
+                document.body.appendChild(p);
+                
+                let life = 1;
+                const anim = () => {
+                    life -= 0.02;
+                    if (life <= 0) {
+                        p.remove();
+                        return;
+                    }
+                    p.style.left = parseFloat(p.style.left) + vx + 'px';
+                    p.style.top = parseFloat(p.style.top) + vy + 'px';
+                    p.style.opacity = life;
+                    requestAnimationFrame(anim);
+                };
+                requestAnimationFrame(anim);
+            }
+        }
+
+        function createProjectile(fromEl, toEl, type) {
+            if (!fromEl || !toEl) return;
+            const fromRect = fromEl.getBoundingClientRect();
+            const toRect = toEl.getBoundingClientRect();
+
+            const p = document.createElement('div');
+            p.style.position = 'fixed';
+            p.style.width = '20px';
+            p.style.height = '6px';
+            p.style.borderRadius = '3px';
+            p.style.zIndex = '500';
+            p.style.pointerEvents = 'none';
+            p.style.background = `var(--${type.toLowerCase()}-color)`;
+            p.style.boxShadow = `0 0 10px var(--${type.toLowerCase()}-color)`;
+
+            const startX = fromRect.left + fromRect.width / 2;
+            const startY = fromRect.top + fromRect.height / 2;
+            const endX = toRect.left + toRect.width / 2;
+            const endY = toRect.top + toRect.height / 2;
+
+            p.style.left = startX + 'px';
+            p.style.top = startY + 'px';
+            
+            const angle = Math.atan2(endY - startY, endX - startX);
+            p.style.transform = `rotate(${angle}rad)`;
+
+            document.body.appendChild(p);
+
+            const duration = 400;
+            const startTime = Date.now();
+
+            const anim = () => {
+                const now = Date.now();
+                const progress = (now - startTime) / duration;
+                if (progress >= 1) {
+                    p.remove();
+                    createParticleBurst({x: endX, y: endY}, `var(--${type.toLowerCase()}-color)`, 8);
+                    return;
+                }
+                p.style.left = startX + (endX - startX) * progress + 'px';
+                p.style.top = startY + (endY - startY) * progress + 'px';
+                requestAnimationFrame(anim);
+            };
+            requestAnimationFrame(anim);
         }
 
         init();
