@@ -740,7 +740,7 @@
     {
       "id": "k5",
       "name": "Exoskeleton",
-      "image": "images/exoskeleton.png",
+      "image": "images/mechasuit.png",
       "tier": "A",
       "type": "Mech",
       "atk": 9,
