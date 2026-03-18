@@ -2589,9 +2589,9 @@
             const modal = document.getElementById('battle-result-modal');
             const title = document.getElementById('battle-result-title');
             const desc = document.getElementById('battle-result-desc');
+            const btn = modal.querySelector('button');
             
             modal.style.display = 'flex';
-            const btn = modal.querySelector('button');
 
             const isPlayerDead = state.hp <= 0;
             let aliveOthers = [];
@@ -2630,6 +2630,20 @@
                 btn.onclick = () => location.reload();
                 createCoinShower();
             } else {
+                // Regular Round Result
+                if (draw) {
+                    title.innerText = "DRAW";
+                    title.style.color = 'var(--gold-color)';
+                    desc.innerHTML = `Stalemate! Both squads were defeated.<br>You earned ${earnedGold} Gold.`;
+                } else if (win) {
+                    title.innerText = "VICTORY!";
+                    title.style.color = 'var(--gold-color)';
+                    desc.innerHTML = `You won the round!<br>You earned ${earnedGold} Gold.`;
+                } else {
+                    title.innerText = "DEFEAT";
+                    title.style.color = 'var(--health-color)';
+                    desc.innerHTML = `You lost ${hpLoss} HP.<br>You earned ${earnedGold} Gold.`;
+                }
                 btn.innerText = "CONTINUE";
                 btn.onclick = closeBattleResult;
             }
