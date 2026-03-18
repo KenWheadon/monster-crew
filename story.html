@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>NODEFORGE ⚡</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Courier New', Courier, monospace;
+        background: #0f0f17;
+        color: #e0f7ff;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    header {
+        background: #000;
+        border-bottom: 2px solid #22d3ee;
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+        z-index: 50;
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .logo-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #22d3ee, #a78bfa);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        box-shadow: inset 0 0 12px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 32px;
+        background: linear-gradient(to right, #67e8f9, #c084fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: -1px;
+    }
+
+    .tagline {
+        font-size: 11px;
+        color: #67e8f9;
+        letter-spacing: 3px;
+        margin-top: -4px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .btn:hover { transform: scale(1.05); }
+    .btn:active  { transform: scale(0.97); }
+
+    .btn-new    { background: #1e293b; color: #a5f3fc; border: 1px solid #334155; }
+    .btn-save   { background: #10b981; color: white; box-shadow: 0 4px 15px rgba(16,185,129,0.4); }
+    .btn-load   { background: #8b5cf6; color: white; }
+    .btn-play   { background: linear-gradient(90deg, #ec4899, #f43f5e); color: white; font-size: 15px; box-shadow: 0 6px 20px rgba(236,72,153,0.5); }
+    .btn-clear  { background: #ef4444aa; color: white; font-size: 12px; }
+
+    .main-layout {
+        display: flex;
+        height: calc(100vh - 78px);
+    }
+
+    .palette {
+        width: 280px;
+        background: #111827;
+        border-right: 1px solid #334155;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .palette h2 {
+        color: #67e8f9;
+        font-size: 12px;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+    }
+
+    .palette-title {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 24px;
+    }
+
+    .node-template {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        cursor: grab;
+        user-select: none;
+        transition: all 0.2s;
+    }
+
+    .node-template:hover {
+        background: #253549;
+        border-color: #67e8f9;
+        transform: translateY(-2px);
+    }
+
+    .node-template:active {
+        cursor: grabbing;
+    }
+
+    .template-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
+    }
+
+    .workspace {
+        flex: 1;
+        position: relative;
+        overflow: auto;
+        background: #18181b;
+        background-image:
+            linear-gradient(to right, #27272a 1px, transparent 1px),
+            linear-gradient(to bottom, #27272a 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    #connections-svg {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    #nodes-container {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+    }
+
+    .node {
+        position: absolute;
+        width: 240px;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: black;
+        border: 4px solid #000;
+        border-radius: 20px;
+        padding: 16px;
+        box-shadow: 0 10px 30px -8px #67e8f9,
+                    0 0 0 3px #111827;
+        cursor: move;
+        pointer-events: auto;
+        transition: all 0.18s ease;
+    }
+
+    .node:hover {
+        box-shadow: 0 15px 40px -10px #67e8f9,
+                    0 0 0 5px #111827;
+        transform: scale(1.02);
+    }
+
+    .node.selected {
+        box-shadow: 0 0 50px 15px #67e8f9 !important;
+        border-color: #67e8f9 !important;
+        transform: scale(1.04);
+    }
+
+    .node-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .node-emoji {
+        font-size: 48px;
+    }
+
+    .delete-btn {
+        width: 24px;
+        height: 24px;
+        background: rgba(0,0,0,0.4);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .delete-btn:hover {
+        background: #ef4444;
+    }
+
+    .node-label {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 14px;
+        background: rgba(0,0,0,0.4);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 16px;
+        outline: none;
+    }
+
+    .node-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .port {
+        width: 36px;
+        height: 36px;
+        background: #000;
+        border: 4px solid white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: bold;
+        color: white;
+        box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .port:hover {
+        transform: scale(1.3);
+        box-shadow: 0 0 20px #67e8f9;
+    }
+
+    .power-display {
+        text-align: center;
+    }
+
+    .power-label {
+        font-size: 10px;
+        color: rgba(0,0,0,0.7);
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
+    .power-value {
+        font-size: 40px;
+        font-weight: bold;
+        line-height: 0.9;
+        color: black;
+    }
+
+    .connection {
+        stroke: #67e8f9;
+        stroke-width: 5;
+        stroke-linecap: round;
+        filter: drop-shadow(0 0 6px #67e8f9);
+    }
+
+    .temp-line {
+        stroke: #a5f3fc;
+        stroke-width: 6;
+        stroke-dasharray: 10 5;
+        animation: dash 1s linear infinite;
+    }
+
+    @keyframes dash {
+        to { stroke-dashoffset: -30; }
+    }
+
+    .inspector {
+        width: 320px;
+        background: #111827;
+        border-left: 1px solid #334155;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .inspector-placeholder {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .inspector-placeholder .big-icon {
+        font-size: 80px;
+        opacity: 0.15;
+        margin-bottom: 16px;
+    }
+
+    #inspector-content {
+        display: none;
+        flex-direction: column;
+        gap: 20px;
+        flex: 1;
+    }
+
+    .control-group {
+        background: rgba(0,0,0,0.3);
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    label {
+        display: block;
+        color: #67e8f9;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    input[type="text"], input[type="range"] {
+        width: 100%;
+        padding: 10px 16px;
+        background: #000;
+        border: 1px solid #67e8f9;
+        border-radius: 10px;
+        color: white;
+        font-size: 16px;
+    }
+
+    input[type="range"] {
+        accent-color: #67e8f9;
+    }
+
+    .delete-node-btn {
+        margin-top: auto;
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .delete-node-btn:hover {
+        background: #dc2626;
+    }
+
+    footer {
+        background: #000;
+        border-top: 2px solid #22d3ee;
+        padding: 8px 24px;
+        font-size: 12px;
+        color: #67e8f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .status {
+        color: #34d399;
+        font-weight: bold;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+    }
+
+    .modal-content {
+        background: #111827;
+        border: 2px solid #a78bfa;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 720px;
+        overflow: hidden;
+        animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes pop {
+        from { transform: scale(0.7) rotate(-6deg); opacity: 0; }
+        to   { transform: scale(1) rotate(0);   opacity: 1; }
+    }
+
+    .modal-header {
+        background: linear-gradient(90deg, #ec4899, #a78bfa);
+        padding: 20px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .modal-header h2 {
+        font-size: 28px;
+        color: white;
+    }
+
+    .close-btn {
+        width: 36px;
+        height: 36px;
+        background: rgba(255,255,255,0.25);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    .game-preview {
+        height: 380px;
+        background: #000;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #game-character {
+        font-size: 120px;
+        position: absolute;
+        bottom: 60px;
+        transition: all 0.4s;
+    }
+
+    #action-log {
+        position: absolute;
+        top: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #000;
+        border: 2px solid #67e8f9;
+        color: #67e8f9;
+        padding: 12px 32px;
+        border-radius: 999px;
+        font-weight: bold;
+        box-shadow: 0 0 30px rgba(103,232,249,0.5);
+        display: none;
+    }
+
+    /* XP bar */
+    .xp-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #111827;
+        padding: 8px 16px;
+        border-radius: 12px;
+        border: 1px solid #67e8f9;
+    }
+
+    .xp-bar-outer {
+        width: 120px;
+        height: 10px;
+        background: #1e293b;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .xp-bar-inner {
+        height: 100%;
+        background: linear-gradient(90deg, #fbbf24, #fef08a);
+        width: 65%;
+        transition: width 0.8s ease;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo-container">
+        <div class="logo-icon">⚡</div>
+        <div>
+            <h1>NODEFORGE</h1>
+            <div class="tagline">BUILD • CONNECT • CONQUER</div>
+        </div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:12px;">
+        <div class="xp-container">
+            <span style="font-size:22px;">⭐</span>
+            <div>
+                <span id="xp">420</span> <small>XP</small>
+            </div>
+            <div class="xp-bar-outer">
+                <div id="xp-bar" class="xp-bar-inner"></div>
+            </div>
+        </div>
+
+        <button class="btn btn-new" onclick="newProject()">NEW</button>
+        <button class="btn btn-save" onclick="saveProject()">💾 SAVE</button>
+        <button class="btn btn-load" onclick="loadProject()">📥 LOAD</button>
+        <button class="btn btn-play" onclick="playTest()">🚀 PLAY TEST</button>
+        <button class="btn btn-clear" onclick="clearAll()">CLEAR</button>
+    </div>
+</header>
+
+<div class="main-layout">
+    <!-- Palette -->
+    <div class="palette">
+        <h2>FEATURE LIBRARY</h2>
+        <div class="palette-title">DRAG TO BUILD</div>
+        <div id="palette"></div>
+
+        <div style="margin-top:auto; padding-top:32px; border-top:1px solid #334155; font-size:11px; color:#64748b; line-height:1.5;">
+            Connect outputs → inputs<br>
+            Build epic combos!<br>
+            Progress saves forever 🔥
+        </div>
+    </div>
+
+    <!-- Workspace -->
+    <div id="workspace" class="workspace"
+         ondrop="handleDrop(event)" ondragover="event.preventDefault()">
+        <svg id="connections-svg"></svg>
+        <div id="nodes-container"></div>
+    </div>
+
+    <!-- Inspector -->
+    <div class="inspector">
+        <h2 style="color:#67e8f9; font-size:12px; letter-spacing:2px; margin-bottom:16px;">INSPECTOR</h2>
+
+        <div id="inspector-empty" class="inspector-placeholder">
+            <div class="big-icon">⚡</div>
+            <div style="font-size:14px;">Click a node<br>to customize it</div>
+        </div>
+
+        <div id="inspector-content"></div>
+
+        <div style="margin-top:auto; padding-top:32px; border-top:1px solid #334155; font-size:11px; color:#64748b;">
+            <div style="display:flex; justify-content:space-between;">
+                <div>NODES: <span id="stat-nodes">0</span></div>
+                <div>CONNECTIONS: <span id="stat-conns">0</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div>
+        LOCAL STORAGE ENABLED • AUTO-SAVES ON REFRESH
+        <span onclick="showHelp()" style="margin-left:32px; cursor:pointer; text-decoration:underline;">HOW TO PLAY →</span>
+    </div>
+    <div id="status" class="status">READY TO FORGE</div>
+</footer>
+
+<!-- Play Modal -->
+<div id="play-modal" class="modal-backdrop" onclick="if(event.target===this) hidePlayModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <span style="font-size:40px;">🚀</span>
+                <div>
+                    <h2>PLAY TEST MODE</h2>
+                    <div style="font-size:12px; color:#f5d0fe;">YOUR FEATURE CHAIN IN ACTION</div>
+                </div>
+            </div>
+            <button class="close-btn" onclick="hidePlayModal()">×</button>
+        </div>
+
+        <div class="game-preview">
+            <div id="game-character">🧙‍♂️</div>
+            <div id="action-log"></div>
+            <div id="effects" style="position:absolute; inset:0; pointer-events:none;"></div>
+        </div>
+
+        <div style="padding:24px; background:#000; text-align:center; font-size:13px; color:#94a3b8;">
+            Press SPACE to trigger your chain
+            <button onclick="hidePlayModal()" style="margin-left:40px; padding:12px 32px; background:white; color:black; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">
+                RETURN TO FORGE
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div id="help-modal" class="modal-backdrop" onclick="if(event.target===this) hideHelp()">
+    <div class="modal-content" style="max-width:500px; background:#1e293b; border-color:#c084fc;">
+        <div style="padding:32px;">
+            <h2 style="font-size:24px; margin-bottom:24px; color:#c4b5fd;">HOW TO FORGE EPIC GAMES</h2>
+
+            <div style="display:flex; flex-direction:column; gap:16px; font-size:14px;">
+                <div style="display:flex; gap:16px;">
+                    <div style="width:32px; height:32px; background:#10b981; color:black; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">1</div>
+                    <div>Drag features from the left palette onto the grid</div>
+                </div>
+                <div style="display:flex; gap:16px;">
+                    <div style="width:32px; height:32px; background:#10b981; color:black; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">2</div>
+                    <div>Click glowing output port and drag to input port</div>
+                </div>
+                <div style="display:flex; gap:16px;">
+                    <div style="width:32px; height:32px; background:#10b981; color:black; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">3</div>
+                    <div>Click any node to edit name & power</div>
+                </div>
+                <div style="display:flex; gap:16px;">
+                    <div style="width:32px; height:32px; background:#10b981; color:black; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold;">4</div>
+                    <div>Hit PLAY TEST to see your creation come alive!</div>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:40px;">
+                <button onclick="hideHelp()" style="padding:16px 48px; background:#8b5cf6; color:white; border:none; border-radius:12px; font-size:18px; cursor:pointer;">
+                    LET'S GO FORGE!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ────────────────────────────────────────────────
+//  Same logic as before — only styling changed
+// ────────────────────────────────────────────────
+
+let nodes = [];
+let connections = [];
+let selectedNode = null;
+let isConnecting = false;
+let connectingFromId = null;
+let tempLine = null;
+let draggedNode = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let xp = 420;
+let nodeCounter = 0;
+
+const workspace = document.getElementById('workspace');
+const nodesContainer = document.getElementById('nodes-container');
+const svg = document.getElementById('connections-svg');
+
+const nodeTemplates = [
+    { type: 'trigger',   emoji: '🔥', label: 'TRIGGER',   color: 'linear-gradient(135deg, #f97316, #ef4444)', power: 30 },
+    { type: 'condition', emoji: '❓', label: 'CONDITION', color: 'linear-gradient(135deg, #10b981, #22d3ee)', power: 50 },
+    { type: 'action',    emoji: '⚔️', label: 'ACTION',    color: 'linear-gradient(135deg, #3b82f6, #6366f1)', power: 70 },
+    { type: 'effect',    emoji: '💥', label: 'EFFECT',    color: 'linear-gradient(135deg, #ec4899, #c084fc)', power: 90 }
+];
+
+function createNodeElement(type, x, y) {
+    const tmpl = nodeTemplates.find(t => t.type === type);
+    if (!tmpl) return null;
+
+    nodeCounter++;
+    const id = `node-${Date.now()}-${nodeCounter}`;
+
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.style.left = x + 'px';
+    node.style.top  = y + 'px';
+    node.dataset.id    = id;
+    node.dataset.type  = type;
+    node.dataset.power = tmpl.power;
+    node.style.background = tmpl.color;
+
+    node.innerHTML = `
+        <div class="node-header">
+            <div class="node-emoji">${tmpl.emoji}</div>
+            <button class="delete-btn" onclick="deleteNode('${id}'); event.stopPropagation()">×</button>
+        </div>
+
+        <div contenteditable="true" spellcheck="false" class="node-label">
+            ${tmpl.label}
+        </div>
+
+        <div class="node-footer">
+            <div class="port input-port">IN</div>
+
+            <div class="power-display">
+                <div class="power-label">PWR</div>
+                <div class="power-value">${tmpl.power}</div>
+            </div>
+
+            <div class="port output-port">OUT</div>
+        </div>
+    `;
+
+    node.addEventListener('mousedown', startNodeDrag);
+    node.addEventListener('click', e => {
+        if (!e.target.closest('.port') && !draggedNode) {
+            selectNode(node);
+        }
+    });
+
+    node.querySelector('.input-port').addEventListener('mouseup', handleInputPortUp);
+    node.querySelector('.output-port').addEventListener('mousedown', e => {
+        e.stopPropagation();
+        startConnection(node);
+    });
+
+    nodesContainer.appendChild(node);
+    nodes.push(node);
+    return node;
+}
+
+// ─── Drag node ───────────────────────────────────────
+function startNodeDrag(e) {
+    if (e.target.classList.contains('port') || e.target.isContentEditable) return;
+    draggedNode = e.currentTarget;
+
+    const rect = draggedNode.getBoundingClientRect();
+    const wsRect = workspace.getBoundingClientRect();
+
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+
+    document.addEventListener('mousemove', doNodeDrag);
+    document.addEventListener('mouseup',   stopNodeDrag);
+}
+
+function doNodeDrag(e) {
+    if (!draggedNode) return;
+
+    const wsRect = workspace.getBoundingClientRect();
+    let nx = e.clientX - wsRect.left + workspace.scrollLeft - dragOffsetX;
+    let ny = e.clientY - wsRect.top  + workspace.scrollTop  - dragOffsetY;
+
+    nx = Math.max(20, Math.min(nx, workspace.scrollWidth  - 280));
+    ny = Math.max(20, Math.min(ny, workspace.scrollHeight - 200));
+
+    draggedNode.style.left = nx + 'px';
+    draggedNode.style.top  = ny + 'px';
+
+    drawConnections();
+}
+
+function stopNodeDrag() {
+    document.removeEventListener('mousemove', doNodeDrag);
+    document.removeEventListener('mouseup',   stopNodeDrag);
+    draggedNode = null;
+    updateStats();
+}
+
+// ─── Connections ─────────────────────────────────────
+function startConnection(node) {
+    isConnecting = true;
+    connectingFromId = node.dataset.id;
+
+    tempLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    tempLine.classList.add('temp-line');
+    svg.appendChild(tempLine);
+
+    document.addEventListener('mousemove', updateTempLine);
+}
+
+function updateTempLine(e) {
+    if (!tempLine || !isConnecting) return;
+
+    const fromNode = document.querySelector(`[data-id="${connectingFromId}"]`);
+    if (!fromNode) return;
+
+    const out = fromNode.querySelector('.output-port').getBoundingClientRect();
+    const ws  = workspace.getBoundingClientRect();
+
+    const x1 = out.left - ws.left + workspace.scrollLeft + 18;
+    const y1 = out.top  - ws.top  + workspace.scrollTop  + 18;
+    const x2 = e.clientX - ws.left + workspace.scrollLeft;
+    const y2 = e.clientY - ws.top  + workspace.scrollTop;
+
+    tempLine.setAttribute('x1', x1);
+    tempLine.setAttribute('y1', y1);
+    tempLine.setAttribute('x2', x2);
+    tempLine.setAttribute('y2', y2);
+}
+
+function handleInputPortUp(e) {
+    if (!isConnecting) return;
+
+    const toNode = e.currentTarget.closest('.node');
+    if (!toNode || toNode.dataset.id === connectingFromId) {
+        cancelConnection();
+        return;
+    }
+
+    connections.push({ from: connectingFromId, to: toNode.dataset.id });
+    drawConnections();
+    updateStats();
+    addXP(25);
+    showStatus("CHAIN LINKED 🔥");
+
+    cancelConnection();
+}
+
+function cancelConnection() {
+    isConnecting = false;
+    connectingFromId = null;
+    if (tempLine) { tempLine.remove(); tempLine = null; }
+    document.removeEventListener('mousemove', updateTempLine);
+}
+
+function drawConnections() {
+    svg.innerHTML = '';
+
+    connections.forEach(c => {
+        const a = document.querySelector(`[data-id="${c.from}"]`);
+        const b = document.querySelector(`[data-id="${c.to}"]`);
+        if (!a || !b) return;
+
+        const out = a.querySelector('.output-port').getBoundingClientRect();
+        const inp = b.querySelector('.input-port').getBoundingClientRect();
+        const ws  = workspace.getBoundingClientRect();
+
+        const x1 = out.left - ws.left + workspace.scrollLeft + 18;
+        const y1 = out.top  - ws.top  + workspace.scrollTop  + 18;
+        const x2 = inp.left - ws.left + workspace.scrollLeft + 18;
+        const y2 = inp.top  - ws.top  + workspace.scrollTop  + 18;
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+        line.classList.add('connection');
+        svg.appendChild(line);
+    });
+}
+
+// ─── Selection & Inspector ───────────────────────────
+function selectNode(node) {
+    if (selectedNode) selectedNode.classList.remove('selected');
+    selectedNode = node;
+    node.classList.add('selected');
+    renderInspector();
+}
+
+function renderInspector() {
+    document.getElementById('inspector-empty').style.display = 'none';
+    const cont = document.getElementById('inspector-content');
+    cont.style.display = 'flex';
+    cont.innerHTML = '';
+
+    const power = parseInt(selectedNode.dataset.power);
+
+    cont.innerHTML = `
+        <div class="control-group">
+            <label>NODE TYPE</label>
+            <div style="font-size:24px; font-weight:bold;">${selectedNode.dataset.type.toUpperCase()}</div>
+        </div>
+
+        <div class="control-group">
+            <label>FEATURE NAME</label>
+            <input type="text" id="name-input" value="${selectedNode.querySelector('.node-label').textContent.trim()}"
+                   oninput="updateNodeLabel(this)">
+        </div>
+
+        <div class="control-group">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <label>POWER LEVEL</label>
+                <span id="power-num" style="font-size:20px; font-weight:bold;">${power}</span>
+            </div>
+            <input type="range" min="10" max="100" step="5" value="${power}" oninput="updatePower(this)">
+        </div>
+
+        <button class="delete-node-btn" onclick="deleteNode('${selectedNode.dataset.id}')">
+            DELETE NODE
+        </button>
+    `;
+}
+
+function updateNodeLabel(el) {
+    if (selectedNode) selectedNode.querySelector('.node-label').textContent = el.value;
+}
+
+function updatePower(range) {
+    if (!selectedNode) return;
+    selectedNode.dataset.power = range.value;
+    selectedNode.querySelector('.power-value').textContent = range.value;
+    document.getElementById('power-num').textContent = range.value;
+}
+
+function deleteNode(id) {
+    const node = document.querySelector(`[data-id="${id}"]`);
+    if (!node) return;
+
+    connections = connections.filter(c => c.from !== id && c.to !== id);
+    node.remove();
+    nodes = nodes.filter(n => n !== node);
+
+    if (selectedNode === node) {
+        selectedNode = null;
+        document.getElementById('inspector-empty').style.display = 'flex';
+        document.getElementById('inspector-content').style.display = 'none';
+    }
+
+    drawConnections();
+    updateStats();
+    addXP(10);
+}
+
+// ─── Drop new node ───────────────────────────────────
+function handleDrop(e) {
+    e.preventDefault();
+    const type = e.dataTransfer.getData('text/plain');
+    if (!type) return;
+
+    const rect = workspace.getBoundingClientRect();
+    const x = e.clientX - rect.left + workspace.scrollLeft - 120;
+    const y = e.clientY - rect.top  + workspace.scrollTop  - 80;
+
+    const node = createNodeElement(type, Math.max(50,x), Math.max(50,y));
+    if (node) {
+        addXP(35);
+        showStatus("NEW FEATURE ADDED!");
+        updateStats();
+    }
+}
+
+function populatePalette() {
+    const pal = document.getElementById('palette');
+    pal.innerHTML = '';
+
+    nodeTemplates.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'node-template';
+        div.draggable = true;
+        div.innerHTML = `
+            <div class="template-icon" style="background:${t.color};">${t.emoji}</div>
+            <div>
+                <div style="font-size:18px; font-weight:bold;">${t.label}</div>
+                <div style="font-size:11px; color:#94a3b8;">Drag me!</div>
+            </div>
+        `;
+        div.ondragstart = ev => ev.dataTransfer.setData('text/plain', t.type);
+        pal.appendChild(div);
+    });
+}
+
+// ─── Utils ───────────────────────────────────────────
+function updateStats() {
+    document.getElementById('stat-nodes').textContent = nodes.length;
+    document.getElementById('stat-conns').textContent = connections.length;
+}
+
+function addXP(amount) {
+    xp += amount;
+    if (xp > 999) xp = 999;
+    document.getElementById('xp').textContent = xp;
+    document.getElementById('xp-bar').style.width = Math.min(100, (xp/999)*100) + '%';
+}
+
+function saveProject() {
+    const data = {
+        nodes: nodes.map(n => ({
+            id:    n.dataset.id,
+            type:  n.dataset.type,
+            power: n.dataset.power,
+            x:     parseFloat(n.style.left),
+            y:     parseFloat(n.style.top),
+            label: n.querySelector('.node-label').textContent.trim()
+        })),
+        connections,
+        xp,
+        timestamp: Date.now()
+    };
+
+    localStorage.setItem('nodeforge_save', JSON.stringify(data));
+    showStatus("💾 GAME SAVED!");
+    addXP(80);
+}
+
+function loadProject() {
+    const json = localStorage.getItem('nodeforge_save');
+    if (!json) return showStatus("No save found");
+
+    clearAll(false);
+    const data = JSON.parse(json);
+
+    data.nodes.forEach(n => {
+        const node = createNodeElement(n.type, n.x, n.y);
+        if (node) {
+            node.dataset.power = n.power;
+            node.querySelector('.node-label').textContent = n.label;
+            node.querySelector('.power-value').textContent = n.power;
+        }
+    });
+
+    connections = data.connections || [];
+    drawConnections();
+    updateStats();
+
+    xp = data.xp || 420;
+    document.getElementById('xp').textContent = xp;
+    document.getElementById('xp-bar').style.width = Math.min(100, (xp/999)*100) + '%';
+
+    showStatus("🪄 GAME LOADED!");
+}
+
+function clearAll(ask = true) {
+    if (ask && !confirm('Clear everything?')) return;
+
+    nodes.forEach(n => n.remove());
+    nodes = [];
+    connections = [];
+    svg.innerHTML = '';
+    selectedNode = null;
+    document.getElementById('inspector-empty').style.display = 'flex';
+    document.getElementById('inspector-content').style.display = 'none';
+    updateStats();
+    showStatus("WORLD RESET");
+}
+
+function newProject() {
+    if (nodes.length > 0 && !confirm('Start fresh?')) return;
+    clearAll(false);
+    xp = 100;
+    document.getElementById('xp').textContent = xp;
+    document.getElementById('xp-bar').style.width = '10%';
+    showStatus("🌟 FRESH ADVENTURE");
+}
+
+function playTest() {
+    if (!nodes.length) return alert("Build something first!");
+    document.getElementById('play-modal').style.display = 'flex';
+
+    const char = document.getElementById('game-character');
+    let i = 0;
+
+    const iv = setInterval(() => {
+        if (document.getElementById('play-modal').style.display !== 'flex') {
+            clearInterval(iv);
+            return;
+        }
+        i++;
+        char.style.transform = `translateX(${Math.sin(i*0.4)*60}px) rotate(${Math.sin(i*0.8)*20}deg)`;
+        if (Math.random() > 0.65) showActionBubble();
+        if (Math.random() > 0.7) spawnEffect();
+    }, 200);
+
+    const keyListener = e => {
+        if (e.key === ' ' && document.getElementById('play-modal').style.display === 'flex') {
+            e.preventDefault();
+            showActionBubble(true);
+        }
+    };
+    document.addEventListener('keydown', keyListener, {once: true});
+}
+
+function showActionBubble(big = false) {
+    const el = document.getElementById('action-log');
+    const msgs = ["TRIGGER!", "CONDITION ✓", "ACTION ⚔️", "EFFECT 💥", "COMBO x"+(Math.floor(Math.random()*6)+2)];
+    el.textContent = msgs[Math.floor(Math.random()*msgs.length)];
+    el.style.display = 'block';
+    if (big) el.style.transform = 'translateX(-50%) scale(1.3)';
+    setTimeout(() => el.style.display = 'none', 800);
+}
+
+function spawnEffect() {
+    const div = document.createElement('div');
+    div.style.position = 'absolute';
+    div.style.fontSize = (40 + Math.random()*60) + 'px';
+    div.style.left = (20 + Math.random()*60) + '%';
+    div.style.top  = (10 + Math.random()*60) + '%';
+    div.style.animation = 'floatEffect 1.6s forwards';
+    div.textContent = ['💥','✨','🔥','⚡','🌟'][Math.floor(Math.random()*5)];
+    document.getElementById('effects').appendChild(div);
+    setTimeout(() => div.remove(), 1800);
+}
+
+function hidePlayModal() {
+    document.getElementById('play-modal').style.display = 'none';
+}
+
+function showHelp() {
+    document.getElementById('help-modal').style.display = 'flex';
+}
+
+function hideHelp() {
+    document.getElementById('help-modal').style.display = 'none';
+}
+
+function showStatus(msg) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.style.color = '#67e8f9';
+    setTimeout(() => el.textContent = "READY TO FORGE", 1800);
+}
+
+// ─── Init ────────────────────────────────────────────
+function init() {
+    populatePalette();
+
+    if (!localStorage.getItem('nodeforge_save')) {
+        setTimeout(() => {
+            const n1 = createNodeElement('trigger',   160, 180);
+            const n2 = createNodeElement('condition', 500, 140);
+            const n3 = createNodeElement('action',    460, 380);
+            const n4 = createNodeElement('effect',    800, 260);
+
+            connections = [
+                {from: n1.dataset.id, to: n2.dataset.id},
+                {from: n2.dataset.id, to: n3.dataset.id},
+                {from: n3.dataset.id, to: n4.dataset.id}
+            ];
+            drawConnections();
+            updateStats();
+            addXP(120);
+        }, 400);
+    } else {
+        setTimeout(loadProject, 300);
+    }
+
+    workspace.addEventListener('click', e => {
+        if (e.target.id === 'workspace' || e.target.id === 'nodes-container') {
+            if (selectedNode) {
+                selectedNode.classList.remove('selected');
+                selectedNode = null;
+                document.getElementById('inspector-empty').style.display = 'flex';
+                document.getElementById('inspector-content').style.display = 'none';
+            }
+        }
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            saveProject();
+        }
+        if (e.key === 'Delete' && selectedNode) {
+            deleteNode(selectedNode.dataset.id);
+        }
+    });
+}
+
+window.onload = init;
+</script>
+</body>
+</html>

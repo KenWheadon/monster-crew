@@ -1366,6 +1366,13 @@
                 <div id="ins-synergy-hint" style="color: #2ecc71; font-size: 0.9em; margin-bottom: 15px; display: none; background: rgba(46, 204, 113, 0.1); padding: 8px; border-radius: 5px;"></div>
                 <div id="ins-flavor" class="ins-flavor">He just wants to go home and nap.</div>
                 
+                <div id="ins-active-modifiers" style="margin-top: 15px; text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="font-size: 0.7em; color: var(--gold-color); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; font-weight: bold;">Stat Modifiers</div>
+                    <div id="ins-modifiers-list" style="max-height: 100px; overflow-y: auto;">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
                 <div id="ins-actions" style="margin-top: auto; display:flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
                     <button class="btn-main" id="ins-buy-btn">BUY (5<img src="images/win-icon.png" class="icon-img">)</button>
                     <button class="btn-sec" id="ins-sac-btn">SACRIFICE</button>
@@ -1742,8 +1749,13 @@
             checkTutorial(); // Check tutorial on start
         }
 
-        function syncToSquad(clonedMonster, stat, amount, side = 'ally') {
+        function syncToSquad(clonedMonster, stat, amount, side = 'ally', source = 'Combat Effect') {
             if (!clonedMonster || !clonedMonster.instId) return;
+            
+            // Update the clone for the inspector during battle
+            if (!clonedMonster.modifiers) clonedMonster.modifiers = [];
+            clonedMonster.modifiers.push({ name: source, atk: stat === 'atk' ? amount : 0, hp: stat === 'hp' ? amount : 0 });
+
             let squad = null;
             if (side === 'ally') squad = state.squad;
             else if (side === 'enemy' && state.currentOpponent) {
@@ -1756,11 +1768,31 @@
                     original[stat] += amount;
                     if (original[stat] < 1) original[stat] = 1; // Min stat is 1
                     
+                    // Track permanent modifiers from battle (e.g. Weak effect)
+                    if (!original.modifiers) original.modifiers = [];
+                    original.modifiers.push({ name: source, atk: stat === 'atk' ? amount : 0, hp: stat === 'hp' ? amount : 0 });
+
                     // Sync combat properties if they exist
                     if (stat === 'atk') original.cAtk = original.atk;
                     if (stat === 'hp') original.cHp = original.hp;
                 }
             }
+        }
+
+        function scaleEffectValue(effectStr, level) {
+            if (!effectStr) return "";
+            // Regex to find numbers after : or / (e.g. Team:1, Extra:1/1, Weak:1)
+            // We want to multiply these values by the level
+            return effectStr.replace(/(\d+)/g, (match) => {
+                return parseInt(match) * level;
+            });
+        }
+
+        function scaleEffectDesc(descStr, level) {
+            if (!descStr) return "";
+            return descStr.replace(/\+(\d+)/g, (match, val) => {
+                return "+" + (parseInt(val) * level);
+            });
         }
 
         function getWeightedRandomTier(level) {
@@ -1774,6 +1806,55 @@
                 if (rand <= sum) return TIER_NAMES[i];
             }
             return "E";
+        }
+
+        function getMonsterForShop(tier, shopper = state.character) {
+            let pool = getAvailableMonsters(tier);
+            if (pool.length === 0) {
+                // Fallback to previous tiers if current tier is empty
+                let idx = TIER_NAMES.indexOf(tier);
+                while (idx > 0 && pool.length === 0) {
+                    idx--;
+                    tier = TIER_NAMES[idx];
+                    pool = getAvailableMonsters(tier);
+                }
+            }
+            if (pool.length === 0) return null;
+
+            if (!shopper || !shopper.typeWeights || shopper.typeWeights === "equal") {
+                return pool[Math.floor(Math.random() * pool.length)];
+            }
+
+            // Type-First Selection for more robust archetypes
+            // 1. Identify which types are actually in this tier's pool
+            const availableTypes = [...new Set(pool.map(m => m.type))];
+            
+            // 2. Get shopper weights for these specific types
+            let typeWeights = {};
+            let totalWeight = 0;
+            availableTypes.forEach(t => {
+                let w = shopper.typeWeights[t] || 10;
+                typeWeights[t] = w;
+                totalWeight += w;
+            });
+
+            // 3. Roll for type
+            let rand = Math.random() * totalWeight;
+            let sum = 0;
+            let selectedType = availableTypes[0];
+            for (let t of availableTypes) {
+                sum += typeWeights[t];
+                if (rand <= sum) {
+                    selectedType = t;
+                    break;
+                }
+            }
+
+            // 4. Pick random monster of that type from the tier pool
+            const typePool = pool.filter(m => m.type === selectedType);
+            if (typePool.length === 0) return pool[Math.floor(Math.random() * pool.length)]; // Final fallback
+            
+            return typePool[Math.floor(Math.random() * typePool.length)];
         }
 
         function getAvailableMonsters(tier) {
@@ -1855,29 +1936,7 @@
                     // Generate a virtual shop for AI
                     let aiShop = [0, 1, 2].map(() => {
                         let tier = getWeightedRandomTier(state.round);
-                        let pool = getAvailableMonsters(tier);
-                        while (pool.length === 0 && tier !== "E") {
-                            let idx = TIER_NAMES.indexOf(tier);
-                            tier = TIER_NAMES[idx - 1];
-                            pool = getAvailableMonsters(tier);
-                        }
-                        let selected;
-                        if (!ai.typeWeights || ai.typeWeights === "equal") {
-                            selected = pool[Math.floor(Math.random() * pool.length)];
-                        } else {
-                            let total = 0;
-                            let weighted = pool.map(m => {
-                                let w = ai.typeWeights[m.type] || 10;
-                                total += w;
-                                return { m, w };
-                            });
-                            let r = Math.random() * total;
-                            let s = 0;
-                            for (let item of weighted) {
-                                s += item.w;
-                                if (r <= s) { selected = item.m; break; }
-                            }
-                        }
+                        let selected = getMonsterForShop(tier, ai);
                         return selected ? { ...selected, cAtk: Math.max(1, selected.atk), instId: Math.random() } : null;
                     }).filter(m => m !== null);
 
@@ -1967,39 +2026,8 @@
         function refreshShop() {
             state.shop = Array(state.shopSize).fill(null).map(() => {
                 let tier = getWeightedRandomTier(state.round);
-                let pool = getAvailableMonsters(tier);
-                // Fallback in case a tier has no monsters
-                while (pool.length === 0) {
-                    let idx = TIER_NAMES.indexOf(tier);
-                    if (idx > 0) tier = TIER_NAMES[idx - 1];
-                    else break;
-                    pool = getAvailableMonsters(tier);
-                }
-
-                let selectedMonster;
-                if (!state.character || state.character.typeWeights === "equal") {
-                    selectedMonster = pool[Math.floor(Math.random() * pool.length)];
-                } else {
-                    let totalWeight = 0;
-                    let weightedPool = pool.map(m => {
-                        let w = state.character.typeWeights[m.type] || 10;
-                        totalWeight += w;
-                        return { monster: m, weight: w };
-                    });
-
-                    let rand = Math.random() * totalWeight;
-                    let sum = 0;
-                    for(let item of weightedPool) {
-                        sum += item.weight;
-                        if(rand <= sum) {
-                            selectedMonster = item.monster;
-                            break;
-                        }
-                    }
-                    if(!selectedMonster) selectedMonster = pool[0];
-                }
-
-                return { ...selectedMonster, instId: Math.random() };
+                let selectedMonster = getMonsterForShop(tier);
+                return selectedMonster ? { ...selectedMonster, instId: Math.random() } : null;
             });
             updateUI();
         }
@@ -2031,9 +2059,10 @@
                 
                 // Add new slot to shop
                 let tier = getWeightedRandomTier(state.round);
-                let pool = getAvailableMonsters(tier);
-                let selectedMonster = pool[Math.floor(Math.random() * pool.length)];
-                state.shop.push({ ...selectedMonster, instId: Math.random() });
+                let selectedMonster = getMonsterForShop(tier);
+                if (selectedMonster) {
+                    state.shop.push({ ...selectedMonster, instId: Math.random() });
+                }
                 
                 logHistory(`Expanded Shop capacity to ${state.shopSize} (Cost: ${cost} Gold)`);
                 updateUI();
@@ -2075,7 +2104,45 @@
             document.getElementById('ins-effect').innerText = monster.effectDesc;
             document.getElementById('ins-flavor').innerText = `"${monster.flavor}"`;
 
-            // Buttons
+            // Active Modifiers Section
+            const modifierContainer = document.getElementById('ins-modifiers-list');
+            if (modifierContainer) {
+                modifierContainer.innerHTML = '';
+                const allMods = [...(monster.modifiers || []), ...(monster.tempModifiers || [])];
+                
+                if (allMods.length === 0) {
+                    modifierContainer.innerHTML = '<div style="color:#666; font-style:italic;">No active modifiers</div>';
+                } else {
+                    // Group similar modifiers
+                    const grouped = {};
+                    allMods.forEach(m => {
+                        const key = m.name;
+                        if (!grouped[key]) grouped[key] = { atk: 0, hp: 0, count: 0 };
+                        grouped[key].atk += m.atk || 0;
+                        grouped[key].hp += m.hp || 0;
+                        grouped[key].count++;
+                    });
+
+                    Object.keys(grouped).forEach(name => {
+                        const m = grouped[name];
+                        const div = document.createElement('div');
+                        div.style.display = 'flex';
+                        div.style.justifyContent = 'space-between';
+                        div.style.padding = '4px 0';
+                        div.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                        
+                        const statText = [];
+                        if (m.atk !== 0) statText.push(`<span class="c-atk">${m.atk > 0 ? '+' : ''}${m.atk}⚔️</span>`);
+                        if (m.hp !== 0) statText.push(`<span class="c-hp">${m.hp > 0 ? '+' : ''}${m.hp}❤</span>`);
+                        
+                        div.innerHTML = `
+                            <span style="color:#eee; font-size:0.9em">${name}${m.count > 1 ? ` (x${m.count})` : ''}</span>
+                            <span>${statText.join(' ')}</span>
+                        `;
+                        modifierContainer.appendChild(div);
+                    });
+                }
+            }
             const buyBtn = document.getElementById('ins-buy-btn');
             const sacBtn = document.getElementById('ins-sac-btn');
             const mergeBtn = document.getElementById('ins-merge-btn');
@@ -2205,6 +2272,8 @@
                                 if (m.cAtk !== undefined) m.cAtk += 1;
                                 if (m.cHp !== undefined) m.cHp += 1;
                                 showFloatingStat(idx, 'squad', '+1/+1', 'var(--gold-color)');
+                                if (!m.modifiers) m.modifiers = [];
+                                m.modifiers.push({ name: 'Captain Vance (Resonance)', atk: 1, hp: 1 });
                                 logHistory(`- ${m.name} (Slot ${idx+1}) gained +1/+1 (new stats: ${m.atk}/${m.hp})`);
                             }
                         });
@@ -2247,6 +2316,8 @@
                         if (m.cAtk !== undefined) m.cAtk += 1;
                         if (m.cHp !== undefined) m.cHp += 1;
                         showFloatingStat(idx, 'squad', '+1/+1', 'var(--beast-color)');
+                        if (!m.modifiers) m.modifiers = [];
+                        m.modifiers.push({ name: 'Captain Massive Rat (Scavenge)', atk: 1, hp: 1 });
                         logHistory(`- ${m.name} (Slot ${idx+1}) gained +1/+1 (new stats: ${m.atk}/${m.hp})`);
                     }
                 });
@@ -2320,15 +2391,28 @@
                 mainMonster.atk += bonusAtk;
                 mainMonster.hp += bonusHp;
                 mainMonster.level = (mainMonster.level || 1) + 1;
-                logHistory(`Merged into Level ${mainMonster.level} ${mainMonster.name}. Gained +${bonusAtk}/+${bonusHp}.`);
+                
+                // Track Merge Modifiers
+                if (!mainMonster.modifiers) mainMonster.modifiers = [];
+                mainMonster.modifiers.push({ name: 'Merged Stats', atk: bonusAtk, hp: bonusHp });
+
+                // Scale Effect Values
+                const originalEffect = mainMonster.effect;
+                mainMonster.effect = scaleEffectValue(mainMonster.effect, mainMonster.level);
+                mainMonster.effectDesc = scaleEffectDesc(mainMonster.effectDesc, mainMonster.level);
+
+                logHistory(`Merged into Level ${mainMonster.level} ${mainMonster.name}. Gained +${bonusAtk}/+${bonusHp}. Effect scaled!`);
                 
                 runStats.merges++;
 
                 if (state.character && state.character.id === 'brain') {
                     const oldAtk = mainMonster.atk;
                     const oldHp = mainMonster.hp;
-                    mainMonster.atk = Math.floor(mainMonster.atk * 1.5);
-                    mainMonster.hp = Math.floor(mainMonster.hp * 1.5);
+                    const bonusA = Math.floor(mainMonster.atk * 0.5);
+                    const bonusH = Math.floor(mainMonster.hp * 0.5);
+                    mainMonster.atk += bonusA;
+                    mainMonster.hp += bonusH;
+                    mainMonster.modifiers.push({ name: 'Captain Brain Power (50% Boost)', atk: bonusA, hp: bonusH });
                     logHistory(`Captain Brain Power: Stats increased by 50% on merge (${oldAtk}/${oldHp} -> ${mainMonster.atk}/${mainMonster.hp})`);
                 }
 
@@ -2421,7 +2505,7 @@
                     battleData.ally.forEach(other => {
                         if (other !== m && other.type === m.type) {
                             other.cAtk += x;
-                            syncToSquad(other, 'atk', x, 'ally');
+                            syncToSquad(other, 'atk', x, 'ally', `Team (${m.name})`);
                             logHistory(`Effect: Ally Team (${m.name}) -> ${other.name} gains +${x} Atk (Total: ${other.cAtk})`);
                         }
                     });
@@ -2433,15 +2517,15 @@
                     if (othersOfSameType.length === 0) {
                         m.cAtk += x;
                         m.cHp += x;
-                        syncToSquad(m, 'atk', x, 'ally');
-                        syncToSquad(m, 'hp', x, 'ally');
+                        syncToSquad(m, 'atk', x, 'ally', 'Solo Synergy');
+                        syncToSquad(m, 'hp', x, 'ally', 'Solo Synergy');
                         logHistory(`Effect: Ally Solo (${m.name}) -> Gains +${x}/+${x} (Total: ${m.cAtk}/${m.cHp})`);
                     }
                 }
                 // Inner Dread Power: Cosmics gain +2/+0 at start of combat.
                 if (state.character && state.character.id === 'dread' && m.type === 'Cosmic') {
                     m.cAtk += 2;
-                    syncToSquad(m, 'atk', 2, 'ally');
+                    syncToSquad(m, 'atk', 2, 'ally', 'Captain Inner Dread');
                     logHistory(`Captain Inner Dread: Ally ${m.name} gains +2 Atk (Total: ${m.cAtk})`);
                 }
             });
@@ -2453,7 +2537,7 @@
                     battleData.enemy.forEach(other => {
                         if (other !== m && other.type === m.type) {
                             other.cAtk += x;
-                            syncToSquad(other, 'atk', x, 'enemy');
+                            syncToSquad(other, 'atk', x, 'enemy', `Team (${m.name})`);
                             logHistory(`Effect: Enemy Team (${m.name}) -> ${other.name} gains +${x} Atk (Total: ${other.cAtk})`);
                         }
                     });
@@ -2464,15 +2548,15 @@
                     if (othersOfSameType.length === 0) {
                         m.cAtk += x;
                         m.cHp += x;
-                        syncToSquad(m, 'atk', x, 'enemy');
-                        syncToSquad(m, 'hp', x, 'enemy');
+                        syncToSquad(m, 'atk', x, 'enemy', 'Solo Synergy');
+                        syncToSquad(m, 'hp', x, 'enemy', 'Solo Synergy');
                         logHistory(`Effect: Enemy Solo (${m.name}) -> Gains +${x}/+${x} (Total: ${m.cAtk}/${m.cHp})`);
                     }
                 }
                 // AI Inner Dread check
                 if (state.currentOpponent && state.currentOpponent.id === 'dread' && m.type === 'Cosmic') {
                     m.cAtk += 2;
-                    syncToSquad(m, 'atk', 2, 'enemy');
+                    syncToSquad(m, 'atk', 2, 'enemy', 'Captain Inner Dread');
                     logHistory(`Captain Inner Dread: Enemy ${m.name} gains +2 Atk (Total: ${m.cAtk})`);
                 }
             });
@@ -2599,9 +2683,13 @@
                 targets.forEach(m => {
                     if (context === 'battle') {
                         m.cHp += x;
-                        syncToSquad(m, 'hp', x, side);
+                        syncToSquad(m, 'hp', x, side, `Honor (${deadMonster.name})`);
                         logHistory(`- ${m.name} HP: ${m.cHp - x} -> ${m.cHp}`);
-                    } else m.hp += x;
+                    } else {
+                        m.hp += x;
+                        if (!m.modifiers) m.modifiers = [];
+                        m.modifiers.push({ name: `Honor (${deadMonster.name})`, atk: 0, hp: x });
+                    }
                 });
                 if (context === 'battle') showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', `+${x} HP`, 'var(--nature-color)');
             }
@@ -2614,9 +2702,13 @@
                 targets.forEach(m => {
                     if (context === 'battle') {
                         m.cAtk += x;
-                        syncToSquad(m, 'atk', x, side);
+                        syncToSquad(m, 'atk', x, side, `Anger (${deadMonster.name})`);
                         logHistory(`- ${m.name} Atk: ${m.cAtk - x} -> ${m.cAtk}`);
-                    } else m.atk += x;
+                    } else {
+                        m.atk += x;
+                        if (!m.modifiers) m.modifiers = [];
+                        m.modifiers.push({ name: `Anger (${deadMonster.name})`, atk: x, hp: 0 });
+                    }
                 });
                 if (context === 'battle') showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', `+${x} ATK`, 'var(--beast-color)');
             }
@@ -2631,8 +2723,8 @@
                 randEnemy.cHp = Math.max(1, randEnemy.cHp - x); 
                 
                 // Subtractions are now permanent as per request
-                syncToSquad(randEnemy, 'atk', -x, side === 'ally' ? 'enemy' : 'ally');
-                syncToSquad(randEnemy, 'hp', -x, side === 'ally' ? 'enemy' : 'ally');
+                syncToSquad(randEnemy, 'atk', -x, side === 'ally' ? 'enemy' : 'ally', `Weak (${deadMonster.name})`);
+                syncToSquad(randEnemy, 'hp', -x, side === 'ally' ? 'enemy' : 'ally', `Weak (${deadMonster.name})`);
                 logHistory(`- ${randEnemy.name} stats: ${randEnemy.cAtk + x}/${randEnemy.cHp + x} -> ${randEnemy.cAtk}/${randEnemy.cHp}`);
 
                 showEffect(side === 'ally' ? 'enemy-line' : 'ally-line', `-${x}/-${x}`, 'var(--health-color)');
@@ -2661,9 +2753,13 @@
                     if (m.type === 'Nature') {
                         if (context === 'battle') {
                             m.cHp += 1;
-                            syncToSquad(m, 'hp', 1, side);
+                            syncToSquad(m, 'hp', 1, side, 'Captain Snappy Pete');
                             logHistory(`- ${m.name} HP: ${m.cHp - 1} -> ${m.cHp}`);
-                        } else m.hp += 1;
+                        } else {
+                            m.hp += 1;
+                            if (!m.modifiers) m.modifiers = [];
+                            m.modifiers.push({ name: 'Snappy Pete (Nature Pulse)', atk: 0, hp: 1 });
+                        }
                     }
                 });
             }
@@ -2929,7 +3025,7 @@
 
         function calculateEffectiveStats(squad) {
             if (!squad) return [];
-            let result = squad.map(m => m ? { ...m, atk: m.atk, hp: m.hp } : null);
+            let result = squad.map(m => m ? { ...m, atk: m.atk, hp: m.hp, tempModifiers: [] } : null);
 
             result.forEach((m, i) => {
                 if (!m) return;
@@ -2939,6 +3035,7 @@
                     result.forEach((other, j) => {
                         if (other && i !== j && other.type === m.type) {
                             other.atk += x;
+                            other.tempModifiers.push({ name: `${m.name}'s Team Effect`, atk: x, hp: 0 });
                         }
                     });
                 }
@@ -2949,6 +3046,7 @@
                     if (othersOfSameType.length === 0) {
                         m.atk += x;
                         m.hp += x;
+                        m.tempModifiers.push({ name: `Solo Synergy`, atk: x, hp: x });
                     }
                 }
             });
@@ -2976,7 +3074,10 @@
             for (let i = 0; i < state.squadSize; i++) {
                 const slot = document.createElement('div');
                 slot.className = 'slot';
-                slot.onclick = () => inspectSlot('squad', i, slot);
+                const effectiveMonster = effectiveSquad[i];
+                slot.onclick = () => {
+                    if (effectiveMonster) openInspector(effectiveMonster, 'squad', i, slot);
+                };
                 
                 // Drag & Drop Reordering
                 slot.draggable = true;

@@ -906,12 +906,12 @@
       "locked": false,
       "unlockPrice": 0,
       "typeWeights": {
-        "Beast": 14,
-        "Human": 30,
-        "Genetic": 14,
-        "Mech": 14,
-        "Nature": 14,
-        "Cosmic": 14
+        "Beast": 10,
+        "Human": 50,
+        "Genetic": 10,
+        "Mech": 10,
+        "Nature": 10,
+        "Cosmic": 10
       },
       "icon": "<img src='images/commander.png' class='char-img'>"
     },
@@ -923,12 +923,12 @@
       "locked": false,
       "unlockPrice": 0,
       "typeWeights": {
-        "Beast": 30,
-        "Human": 14,
-        "Genetic": 14,
-        "Mech": 14,
-        "Nature": 14,
-        "Cosmic": 14
+        "Beast": 50,
+        "Human": 10,
+        "Genetic": 10,
+        "Mech": 10,
+        "Nature": 10,
+        "Cosmic": 10
       },
       "icon": "<img src='images/massive-rat.png' class='char-img'>"
     },
@@ -940,12 +940,12 @@
       "locked": true,
       "unlockPrice": 20,
       "typeWeights": {
-        "Beast": 14,
-        "Human": 14,
-        "Genetic": 30,
-        "Mech": 14,
-        "Nature": 14,
-        "Cosmic": 14
+        "Beast": 10,
+        "Human": 10,
+        "Genetic": 50,
+        "Mech": 10,
+        "Nature": 10,
+        "Cosmic": 10
       },
       "icon": "<img src='images/superbrain.png' class='char-img'>"
     },
@@ -957,12 +957,12 @@
       "locked": true,
       "unlockPrice": 15,
       "typeWeights": {
-        "Beast": 14,
-        "Human": 14,
-        "Genetic": 14,
-        "Mech": 14,
-        "Nature": 30,
-        "Cosmic": 14
+        "Beast": 10,
+        "Human": 10,
+        "Genetic": 10,
+        "Mech": 10,
+        "Nature": 50,
+        "Cosmic": 10
       },
       "icon": "<img src='images/snappy-pete.png' class='char-img'>"
     },
@@ -974,12 +974,12 @@
       "locked": true,
       "unlockPrice": 25,
       "typeWeights": {
-        "Beast": 14,
-        "Human": 14,
-        "Genetic": 14,
-        "Mech": 14,
-        "Nature": 14,
-        "Cosmic": 30
+        "Beast": 10,
+        "Human": 10,
+        "Genetic": 10,
+        "Mech": 10,
+        "Nature": 10,
+        "Cosmic": 50
       },
       "icon": "<img src='images/innerdread.png' class='char-img'>"
     },
@@ -991,12 +991,12 @@
       "locked": true,
       "unlockPrice": 15,
       "typeWeights": {
-        "Beast": 14,
-        "Human": 14,
-        "Genetic": 14,
-        "Mech": 30,
-        "Nature": 14,
-        "Cosmic": 14
+        "Beast": 10,
+        "Human": 10,
+        "Genetic": 10,
+        "Mech": 50,
+        "Nature": 10,
+        "Cosmic": 10
       },
       "icon": "<img src='images/pancake.png' class='char-img'>"
     }
