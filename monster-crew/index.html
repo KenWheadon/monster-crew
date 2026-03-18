@@ -240,6 +240,8 @@
             width: 100%;
         }
 
+        #squad-view { height:46%}
+
         #shop-view { border-top: 1px solid rgba(255,255,255,0.1); }
 
         /* MONSTER CARDS */
@@ -1208,6 +1210,7 @@
             <div class="stat" id="round-display">ROUND 1</div>
             <div class="stat" id="player-hp"><img src="images/hp.png" class="icon-img"> 20</div>
             <div class="stat" id="player-gold"><img src="images/bag1.png" class="icon-img" style="transform: scale(1.5); margin-right: 18px;"> <img src="images/win-icon.png" class="icon-img"> 15</div>
+            <button class="btn-sec" onclick="openHistory()" style="padding: 5px 15px; font-size: 0.8em;">📜 HISTORY</button>
         </header>
 
         <main>
@@ -1325,6 +1328,13 @@
             <div id="character-list" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
                 <!-- Cards inserted by JS -->
             </div>
+            <!-- Test Controls -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <div style="font-size: 1.5em; color: var(--gold-color); display: flex; align-items: center; gap: 10px;">
+                     🏆 <span id="selection-trophy-count">0</span>
+                </div>
+                <button class="btn-sec" onclick="addTestTrophies()" style="background: #3498db; color: white; border: 2px solid white; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);">TEST: +100 TROPHIES</button>
+            </div>
         </div>
     </div>
 
@@ -1364,40 +1374,18 @@
     </div>
 
     <button id="help-btn" onclick="openGlossary()" style="position: fixed; bottom: 20px; right: 20px; border-radius: 50%; width: 50px; height: 50px; font-size: 1.8em; background: rgba(0,0,0,0.6); border: 2px solid var(--gold-color); color: var(--gold-color); cursor: pointer; z-index: 4500; display: flex; align-items: center; justify-content: center; transition: 0.3s;">?</button>
-    <div id="shop-level-modal" onclick="closeShopLevelPopup()">
-        <div class="flip-card" id="shop-flip-card" onclick="event.stopPropagation()">
-            <div class="flip-card-front" onclick="document.getElementById('shop-flip-card').classList.add('flipped')">
-                <div style="position: absolute; top: 20px; right: 20px; font-size: 1.5em;">ℹ️</div>
-                <h2 style="color: var(--gold-color); margin-bottom: 5px;">SHOP CHANCES</h2>
-                <div style="font-size: 1.8em; font-weight: bold; margin-bottom: 30px; color: white;">LEVEL <span id="popup-shop-level">1</span></div>
-                
-                <div id="tier-chances-container" style="width: 100%; flex: 1;">
-                    <!-- Filled by JS -->
-                </div>
+        </div>
+    </div>
 
-                <div style="margin-top: 20px; color: #888; font-size: 0.9em; font-style: italic; animation: pulse 2s infinite;">Click to see all level chances ➔</div>
-                <button class="btn-sec" onclick="event.stopPropagation(); closeShopLevelPopup()" style="margin-top: 20px; width: 100%;">CLOSE</button>
+    <div id="history-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9200; display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px);">
+        <div class="result-inner" onclick="event.stopPropagation()" style="width: 600px; max-width: 95%; max-height: 80vh; display: flex; flex-direction: column;">
+            <h1 style="color: var(--gold-color); margin-bottom: 20px;">EVENT HISTORY</h1>
+            <div id="history-content" style="flex: 1; overflow-y: auto; text-align: left; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-bottom: 20px; font-family: 'Courier New', Courier, monospace; font-size: 0.9em; line-height: 1.4;">
+                <!-- Logs inserted here -->
             </div>
-            <div class="flip-card-back">
-                <h2 style="color: var(--gold-color); margin-bottom: 15px;">FULL PROBABILITIES</h2>
-                <div style="flex: 1; overflow-y: auto; width: 100%;">
-                    <table class="weights-table">
-                        <thead>
-                            <tr>
-                                <th>LVL</th>
-                                <th>E</th>
-                                <th>D</th>
-                                <th>C</th>
-                                <th>B</th>
-                                <th>A</th>
-                            </tr>
-                        </thead>
-                        <tbody id="full-weights-table">
-                            <!-- Filled by JS -->
-                        </tbody>
-                    </table>
-                </div>
-                <button class="btn-sec" onclick="document.getElementById('shop-flip-card').classList.remove('flipped')" style="margin-top: 20px; width: 100%;">BACK</button>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn-sec" onclick="clearHistory()" style="background: #666;">CLEAR</button>
+                <button class="btn-main" onclick="closeHistory()" style="width: 200px;">CLOSE</button>
             </div>
         </div>
     </div>
@@ -1482,6 +1470,8 @@
                 document.getElementById('main-trophy-count').innerText = metaProgress.trophies;
             if (document.getElementById('store-trophy-count'))
                 document.getElementById('store-trophy-count').innerText = metaProgress.trophies;
+            if (document.getElementById('selection-trophy-count'))
+                document.getElementById('selection-trophy-count').innerText = metaProgress.trophies;
 
             // Updated Progress Bar logic
             const milestones = [10, 25, 50, 100, 250, 500, 1000];
@@ -1497,9 +1487,41 @@
             if (label) label.innerText = `NEXT REWARD AT ${nextMilestone} 🏆 (${nextMilestone - currentTrophies} LEFT)`;
         }
 
+        function addTestTrophies() {
+            metaProgress.trophies += 100;
+            saveProgress();
+            logHistory("DEBUG: Gained 100 Trophies via Test Button");
+            renderCharacterSelection();
+        }
 
 
 
+
+
+        let battleHistory = [];
+
+        function logHistory(msg) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            battleHistory.push(`[${time}] ${msg}`);
+            if (battleHistory.length > 200) battleHistory.shift(); // Cap logs
+        }
+
+        function openHistory() {
+            const container = document.getElementById('history-content');
+            container.innerHTML = battleHistory.length === 0 ? '<div style="color:#666; text-align:center;">No history recorded yet.</div>' : 
+                battleHistory.map(log => `<div>${log}</div>`).join('');
+            document.getElementById('history-modal').style.display = 'flex';
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function closeHistory() {
+            document.getElementById('history-modal').style.display = 'none';
+        }
+
+        function clearHistory() {
+            battleHistory = [];
+            openHistory();
+        }
 
         let state = {
             round: 1, gold: 5, hp: 10, 
@@ -1536,6 +1558,7 @@
         function startGame() {
             document.getElementById('title-screen').style.display = 'none';
             document.getElementById('character-select-modal').style.display = 'flex';
+            updateTrophyDisplay();
             renderCharacterSelection();
         }
 
@@ -1683,6 +1706,12 @@
             state.characters.forEach(ai => {
                 if (ai.id === state.character?.id || ai.hp <= 0) return;
                 
+                // AI Gold scales with round to prevent 5 monsters in Round 1
+                // Formula: 3 gold base + 2 per round after 1st.
+                // This gives 3 gold in Rd 1, 5 in Rd 2, etc.
+                let aiRoundGold = 3 + (state.round - 1) * 2;
+                ai.gold = aiRoundGold;
+
                 // Helper to calculate AI costs
                 const getAICost = (monster) => {
                     let discount = ai.squad.filter(sm => sm !== null).reduce((sum, sm) => {
@@ -1740,6 +1769,10 @@
 
                 let loopGuard = 100; // Increased guard for better spending
                 while (ai.gold > 0 && loopGuard-- > 0) {
+                    // Capping AI squad size by round to prevent overly large squads early
+                    const maxUnits = Math.min(5, 1 + Math.floor(state.round / 2));
+                    const currentUnits = ai.squad.filter(s => s !== null).length;
+
                     // Generate a virtual shop for AI
                     let aiShop = [0, 1, 2].map(() => {
                         let tier = getWeightedRandomTier(state.round);
@@ -1802,13 +1835,13 @@
                         let cost = getAICost(m);
                         if (ai.gold >= cost) {
                             let emptyIdx = ai.squad.indexOf(null);
-                            if (emptyIdx !== -1) {
+                            if (emptyIdx !== -1 && currentUnits < maxUnits) {
                                 ai.gold -= cost;
                                 ai.squad[emptyIdx] = { ...m, cAtk: Math.max(1, m.atk), cHp: m.hp };
                                 applyAIBuyPowers(m);
                                 acted = true;
                                 break;
-                            } else {
+                            } else if (emptyIdx === -1) {
                                 // Squad full, evaluate replacement
                                 let worstIdx = -1;
                                 let worstVal = Infinity;
@@ -1895,6 +1928,7 @@
         function rerollShop() {
             if (state.gold >= 1) {
                 state.gold--;
+                logHistory("Rerolled Shop (Cost: 1 Gold)");
                 refreshShop();
             }
         }
@@ -1939,9 +1973,9 @@
             const sacBtn = document.getElementById('ins-sac-btn');
             const mergeBtn = document.getElementById('ins-merge-btn');
 
-            let totalDiscount = state.squad.filter(m => m !== null).reduce((sum, sm) => {
-                if (sm.effect && sm.effect.startsWith("Cheap:")) {
-                    return sum + parseInt(sm.effect.split(":")[1]);
+            let totalDiscount = state.squad.filter(m => m !== null).reduce((sum, m) => {
+                if (m.effect && m.effect.startsWith("Cheap:")) {
+                    return sum + parseInt(m.effect.split(":")[1]);
                 }
                 return sum;
             }, 0);
@@ -1965,8 +1999,8 @@
             let neededForMerge = (monster.effect === "Twin") ? 1 : 2;
             if (type === 'squad') {
                 for (let i = 0; i < state.squad.length; i++) {
-                    const sm = state.squad[i];
-                    if (sm && sm.id === monster.id && (sm.level || 1) === lvl && i !== index) {
+                    const m = state.squad[i];
+                    if (m && m.id === monster.id && (m.level || 1) === lvl && i !== index) {
                         mergeTargets.push(i);
                     }
                 }
@@ -2040,7 +2074,7 @@
             if (!monster) return;
             let totalDiscount = state.squad.filter(m => m !== null).reduce((sum, m) => {
                 if (m.effect && m.effect.startsWith("Cheap:")) {
-                    return sum + parseInt(sm.effect.split(":")[1]);
+                    return sum + parseInt(m.effect.split(":")[1]);
                 }
                 return sum;
             }, 0);
@@ -2056,12 +2090,14 @@
 
                     // Captain Vance Power
                     if (state.character && state.character.id === 'vance' && monster.type === 'Human') {
+                        logHistory(`Captain Vance: Resonance triggered by buying ${monster.name}.`);
                         state.squad.forEach((m, idx) => {
                             if (m && m.type === 'Human') {
                                 m.atk += 1; m.hp += 1;
                                 if (m.cAtk !== undefined) m.cAtk += 1;
                                 if (m.cHp !== undefined) m.cHp += 1;
                                 showFloatingStat(idx, 'squad', '+1/+1', 'var(--gold-color)');
+                                logHistory(`- ${m.name} (Slot ${idx+1}) gained +1/+1 (new stats: ${m.atk}/${m.hp})`);
                             }
                         });
                     }
@@ -2090,14 +2126,17 @@
 
             state.squad[index] = null;
             state.gold += 1; 
+            logHistory(`Sacrificed ${sacrificed.name} (Slot ${index+1}) for 1 Gold.`);
             
             if (state.character && state.character.id === 'mrat' && sacrificed.type === 'Beast') {
+                logHistory(`Captain Massive Rat: Scavenge triggered by sacrificing ${sacrificed.name}.`);
                 state.squad.forEach((m, idx) => {
                     if (m && m.type === 'Beast') {
                         m.atk += 1; m.hp += 1;
                         if (m.cAtk !== undefined) m.cAtk += 1;
                         if (m.cHp !== undefined) m.cHp += 1;
                         showFloatingStat(idx, 'squad', '+1/+1', 'var(--beast-color)');
+                        logHistory(`- ${m.name} (Slot ${idx+1}) gained +1/+1 (new stats: ${m.atk}/${m.hp})`);
                     }
                 });
             }
@@ -2131,12 +2170,16 @@
             mainMonster.atk += bonusAtk;
             mainMonster.hp += bonusHp;
             mainMonster.level = (mainMonster.level || 1) + 1;
+            logHistory(`Merged into Level ${mainMonster.level} ${mainMonster.name}. Gained +${bonusAtk}/+${bonusHp}.`);
             
             runStats.merges++;
 
             if (state.character && state.character.id === 'brain') {
+                const oldAtk = mainMonster.atk;
+                const oldHp = mainMonster.hp;
                 mainMonster.atk = Math.floor(mainMonster.atk * 1.5);
                 mainMonster.hp = Math.floor(mainMonster.hp * 1.5);
+                logHistory(`Captain Brain Power: Stats increased by 50% on merge (${oldAtk}/${oldHp} -> ${mainMonster.atk}/${mainMonster.hp})`);
             }
 
             mainMonster.cAtk = Math.max(1, mainMonster.atk);
@@ -2162,8 +2205,10 @@
             let opponents = state.characters ? state.characters.filter(c => c.id !== state.character?.id && c.hp > 0) : [];
             if (opponents.length > 0) {
                 state.currentOpponent = opponents[Math.floor(Math.random() * opponents.length)];
+                logHistory(`--- Battle Start: Round ${state.round} vs ${state.currentOpponent.name} ---`);
             } else {
                 state.currentOpponent = null;
+                logHistory(`--- Battle Start: Round ${state.round} (No Opponent) ---`);
             }
 
             const combatInfo = document.getElementById('combat-info');
@@ -2181,13 +2226,26 @@
                 }
             }
 
-            // Clone squad and generate enemies
-            battleData.ally = state.squad.filter(s => s !== null).map(s => ({ ...s, cHp: s.hp, cAtk: s.atk }));
+            // Clone squad and generate enemies with guaranteed numeric stats
+            battleData.ally = state.squad.filter(s => s !== null).map(s => ({ 
+                ...s, 
+                cHp: Number(s.hp) || 1, 
+                cAtk: Number(s.atk) || 1,
+                hp: Number(s.hp) || 1,
+                atk: Number(s.atk) || 1
+            }));
             
             if (state.currentOpponent) {
                 let op = state.characters.find(c => c.id === state.currentOpponent.id);
                 if (op && op.squad) {
-                    battleData.enemy = op.squad.filter(s => s !== null).map(s => ({ ...s, cHp: s.hp, cAtk: s.atk }));
+                    // Filter out nulls and ensure numeric stats
+                    battleData.enemy = op.squad.filter(s => s !== null).map(s => ({ 
+                        ...s, 
+                        cHp: Number(s.hp) || 1, 
+                        cAtk: Number(s.atk) || 1,
+                        hp: Number(s.hp) || 1,
+                        atk: Number(s.atk) || 1
+                    }));
                 } else {
                     battleData.enemy = [];
                 }
@@ -2210,6 +2268,7 @@
                         if (other !== m && other.type === m.type) {
                             other.cAtk += x;
                             syncToSquad(other, 'atk', x, 'ally');
+                            logHistory(`Effect: Ally Team (${m.name}) -> ${other.name} gains +${x} Atk (Total: ${other.cAtk})`);
                         }
                     });
                 }
@@ -2222,12 +2281,14 @@
                         m.cHp += x;
                         syncToSquad(m, 'atk', x, 'ally');
                         syncToSquad(m, 'hp', x, 'ally');
+                        logHistory(`Effect: Ally Solo (${m.name}) -> Gains +${x}/+${x} (Total: ${m.cAtk}/${m.cHp})`);
                     }
                 }
                 // Inner Dread Power: Cosmics gain +2/+0 at start of combat.
                 if (state.character && state.character.id === 'dread' && m.type === 'Cosmic') {
                     m.cAtk += 2;
                     syncToSquad(m, 'atk', 2, 'ally');
+                    logHistory(`Captain Inner Dread: Ally ${m.name} gains +2 Atk (Total: ${m.cAtk})`);
                 }
             });
 
@@ -2239,6 +2300,7 @@
                         if (other !== m && other.type === m.type) {
                             other.cAtk += x;
                             syncToSquad(other, 'atk', x, 'enemy');
+                            logHistory(`Effect: Enemy Team (${m.name}) -> ${other.name} gains +${x} Atk (Total: ${other.cAtk})`);
                         }
                     });
                 }
@@ -2250,12 +2312,14 @@
                         m.cHp += x;
                         syncToSquad(m, 'atk', x, 'enemy');
                         syncToSquad(m, 'hp', x, 'enemy');
+                        logHistory(`Effect: Enemy Solo (${m.name}) -> Gains +${x}/+${x} (Total: ${m.cAtk}/${m.cHp})`);
                     }
                 }
                 // AI Inner Dread check
                 if (state.currentOpponent && state.currentOpponent.id === 'dread' && m.type === 'Cosmic') {
                     m.cAtk += 2;
                     syncToSquad(m, 'atk', 2, 'enemy');
+                    logHistory(`Captain Inner Dread: Enemy ${m.name} gains +2 Atk (Total: ${m.cAtk})`);
                 }
             });
 
@@ -2275,6 +2339,8 @@
 
             const a = battleData.ally[0];
             const e = battleData.enemy[0];
+
+            logHistory(`Combat: ${a.name} (${a.cAtk}/${a.cHp}) clashes with ${e.name} (${e.cAtk}/${e.cHp})`);
 
             const allyFrontSlot = document.getElementById('ally-line').children[0];
             const enemyFrontSlot = document.getElementById('enemy-line').children[0];
@@ -2297,6 +2363,7 @@
 
                     a.cHp -= e.cAtk;
                     e.cHp -= a.cAtk;
+                    logHistory(`Result: ${a.name} HP -> ${a.cHp}, ${e.name} HP -> ${e.cHp}`);
 
                     let delay = 0;
 
@@ -2304,11 +2371,13 @@
                         allyFrontSlot.classList.remove('clash-right');
                         allyFrontSlot.classList.add('defeated');
                         delay = 500;
+                        logHistory(`Defeated: Ally ${a.name} has fallen.`);
                     }
                     if (e.cHp <= 0 && enemyFrontSlot) {
                         enemyFrontSlot.classList.remove('clash-left');
                         enemyFrontSlot.classList.add('defeated');
                         delay = 500;
+                        logHistory(`Defeated: Enemy ${e.name} has fallen.`);
                     }
 
                     setTimeout(() => {
@@ -2354,6 +2423,8 @@
             setTimeout(battleStep, 2500);
         }
 
+
+
         function triggerDeathEffect(deadMonster, context, side = 'ally') {
             if (!deadMonster) return;
 
@@ -2369,10 +2440,12 @@
             if (deadMonster.effect && deadMonster.effect.startsWith("Honor:")) {
                 const x = parseInt(deadMonster.effect.split(":")[1]);
                 runStats.effectTriggers.Honor++;
+                logHistory(`Effect: Honor (${deadMonster.name} death) -> Friendly units gain +${x} HP.`);
                 targets.forEach(m => {
                     if (context === 'battle') {
                         m.cHp += x;
                         syncToSquad(m, 'hp', x, side);
+                        logHistory(`- ${m.name} HP: ${m.cHp - x} -> ${m.cHp}`);
                     } else m.hp += x;
                 });
                 if (context === 'battle') showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', `+${x} HP`, 'var(--nature-color)');
@@ -2382,10 +2455,12 @@
             if (deadMonster.effect && deadMonster.effect.startsWith("Anger:")) {
                 const x = parseInt(deadMonster.effect.split(":")[1]);
                 runStats.effectTriggers.Anger++;
+                logHistory(`Effect: Anger (${deadMonster.name} death) -> Friendly units gain +${x} Atk.`);
                 targets.forEach(m => {
                     if (context === 'battle') {
                         m.cAtk += x;
                         syncToSquad(m, 'atk', x, side);
+                        logHistory(`- ${m.name} Atk: ${m.cAtk - x} -> ${m.cAtk}`);
                     } else m.atk += x;
                 });
                 if (context === 'battle') showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', `+${x} ATK`, 'var(--beast-color)');
@@ -2396,12 +2471,14 @@
                 const x = parseInt(deadMonster.effect.split(":")[1]);
                 runStats.effectTriggers.Weak++;
                 const randEnemy = enemies[Math.floor(Math.random() * enemies.length)];
+                logHistory(`Effect: Weak (${deadMonster.name} death) -> Enemy ${randEnemy.name} loses -${x}/-${x}.`);
                 randEnemy.cAtk = Math.max(1, randEnemy.cAtk - x);
                 randEnemy.cHp = Math.max(1, randEnemy.cHp - x); 
                 
                 // Subtractions are now permanent as per request
                 syncToSquad(randEnemy, 'atk', -x, side === 'ally' ? 'enemy' : 'ally');
                 syncToSquad(randEnemy, 'hp', -x, side === 'ally' ? 'enemy' : 'ally');
+                logHistory(`- ${randEnemy.name} stats: ${randEnemy.cAtk + x}/${randEnemy.cHp + x} -> ${randEnemy.cAtk}/${randEnemy.cHp}`);
 
                 showEffect(side === 'ally' ? 'enemy-line' : 'ally-line', `-${x}/-${x}`, 'var(--health-color)');
             }
@@ -2412,10 +2489,11 @@
                 const x = parseInt(stats[0]);
                 const y = parseInt(stats[1]);
                 const spawn = { 
-                    id: "spawn", name: "Token", image: "images/ghost.png", type: "Cosmic", 
+                    id: "spawn", name: "Token", image: "images/token.png", type: "Cosmic", effectDesc:"A small rift of horror.",
                     atk: x, hp: y, cAtk: x, cHp: y, tier: "E", effectDesc: "Spawned token." 
                 };
                 runStats.tokensSummoned++;
+                logHistory(`Effect: Extra (${deadMonster.name} death) -> Spawned ${spawn.name} (${x}/${y}).`);
                 if (side === 'ally') battleData.ally.push(spawn);
                 else battleData.enemy.push(spawn);
             }
@@ -2423,11 +2501,13 @@
             // Snappy Pete Power: Nature get +0/+1 when a Nature dies.
             const currentCaptain = (context === 'battle' && side === 'enemy') ? state.currentOpponent : state.character;
             if (currentCaptain && currentCaptain.id === 'pete' && deadMonster.type === 'Nature') {
+                logHistory(`Captain Snappy Pete: Nature Pulse triggered by ${deadMonster.name} death.`);
                 targets.forEach(m => {
                     if (m.type === 'Nature') {
                         if (context === 'battle') {
                             m.cHp += 1;
                             syncToSquad(m, 'hp', 1, side);
+                            logHistory(`- ${m.name} HP: ${m.cHp - 1} -> ${m.cHp}`);
                         } else m.hp += 1;
                     }
                 });
@@ -2440,6 +2520,7 @@
                         id: "spawn_cosmic", name: "Nano Spider", image: "images/spider.png", type: "Cosmic", 
                         atk: 1, hp: 1, cAtk: 1, cHp: 1, tier: "E", effectDesc: "Spawned by Pancake." 
                     };
+                    logHistory(`Captain Pancake: Mech Scrap triggered -> Spawned ${spawn.name} (1/1).`);
                     if (side === 'ally') battleData.ally.push(spawn);
                     else battleData.enemy.push(spawn);
                 }
@@ -2453,12 +2534,13 @@
             let opponentHpLoss = 0;
 
             if (draw) {
-                // It's a draw, neither side takes damage
+                logHistory(`--- Battle End: DRAW ---`);
             } else if (!win) {
                 const aliveMonsters = battleData.enemy.length;
                 hpLoss = state.round + aliveMonsters;
                 state.hp -= hpLoss;
                 if (state.hp <= 0) state.hp = 0;
+                logHistory(`--- Battle End: DEFEAT (-${hpLoss} Player HP) ---`);
                 
                 if (state.characters) {
                     let pChar = state.characters.find(c => c.id === state.character.id);
@@ -2468,6 +2550,7 @@
                 if (state.currentOpponent) {
                     const aliveMonsters = battleData.ally.length;
                     opponentHpLoss = state.round + aliveMonsters;
+                    logHistory(`--- Battle End: VICTORY (-${opponentHpLoss} ${state.currentOpponent.name} HP) ---`);
                     
                     let op = state.characters.find(c => c.id === state.currentOpponent.id);
                     if (op) {
@@ -2493,6 +2576,7 @@
             state.shopLevel = Math.min(state.round, 10);
             const earnedGold = 10 + Math.floor(state.round / 2);
             state.gold += earnedGold;
+            logHistory(`Advancing to Round ${state.round}. Gained ${earnedGold} Gold.`);
             
             if (state.characters) {
                 state.characters.forEach(ai => {
@@ -2882,7 +2966,7 @@
                     <span style="font-size: 1.2em;">${teaserOpponent.icon}</span>
                     <span style="font-weight: bold;">${teaserOpponent.name}</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;flex-direction:column">
                     <span style="font-size: 0.8em; opacity: 0.7;">WIN CHANCE:</span>
                     <div class="win-chance-bar">
                         <div class="win-chance-fill" style="width: ${winProb}%"></div>

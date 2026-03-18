@@ -62,7 +62,7 @@
       "hp": 1,
       "cost": 4,
       "effect": "Solo:2",
-      "effectDesc": "SOLO: +2/+2 if there are no other Cosmics.",
+      "effectDesc": "SOLO: Gain +2/+2 if there are no other Cosmics.",
       "flavor": "Watches from the stars."
     },
     {
@@ -398,7 +398,7 @@
       "hp": 3,
       "cost": 9,
       "effect": "Solo:5",
-      "effectDesc": "SOLO: +5/+5 if there are no other Cosmics.",
+      "effectDesc": "SOLO: Gain +5/+5 if there are no other Cosmics.",
       "flavor": "Sees all futures."
     },
     {
@@ -484,7 +484,7 @@
       "hp": 4,
       "cost": 10,
       "effect": "Solo:5",
-      "effectDesc": "SOLO: +5/+5 if there are no other Cosmics.",
+      "effectDesc": "SOLO: Gain +5/+5 if there are no other Cosmics.",
       "flavor": "Watches every move.",
       "locked": true,
       "unlockPrice": 15
@@ -734,7 +734,7 @@
       "hp": 11,
       "cost": 18,
       "effect": "Solo:8",
-      "effectDesc": "SOLO: +8/+8 if there are no other Cosmics.",
+      "effectDesc": "SOLO: Gain +8/+8 if there are no other Cosmics.",
       "flavor": "Devours starlight."
     },
     {
