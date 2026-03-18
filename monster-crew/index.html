@@ -236,7 +236,6 @@
             padding: 5px 10px;
             background: rgba(0,0,0,0.3);
             min-height: 140px;
-            overflow-x: auto;
             width: 100%;
         }
 
@@ -256,6 +255,12 @@
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
+        .slot.filled {
+            cursor: grab;
+        }
+        .slot.filled:active {
+            cursor: grabbing;
+        }
 
         .slot.filled.Beast { border-color: var(--beast-color); }
         .slot.filled.Human { border-color: var(--human-color); }
@@ -265,6 +270,7 @@
         .slot.filled.Cosmic { border-color: var(--cosmic-color); }
 
         .slot:hover { transform: scale(1.05); border-color: var(--text-color); box-shadow: 0 0 15px var(--text-color); }
+        .slot.drag-over { border: 2px dashed var(--gold-color); background: rgba(255, 215, 0, 0.1); transform: scale(1.1); }
 
         .card {
             width: 100%; height: 100%;
@@ -1304,25 +1310,22 @@
 
 
 
-                    <div id="squad-view">
-                        <div class="slot" onclick="inspectSlot('squad', 0, this)"></div>
-                        <div class="slot" onclick="inspectSlot('squad', 1, this)"></div>
-                        <div class="slot" onclick="inspectSlot('squad', 2, this)"></div>
-                        <div class="slot" onclick="inspectSlot('squad', 3, this)"></div>
-                        <div class="slot" onclick="inspectSlot('squad', 4, this)"></div>
-                    </div>
+                    <div id="squad-view"></div>
 
                     <div id="shop-view">
                         <div class="shop-header">
-                            <div class="stat shop-level-container" id="shop-level-display" onclick="openShopLevelPopup()">
+                            <div class="stat shop-level-display shop-level-container" id="shop-level-display" onclick="openShopLevelPopup()">
                                 <img src="images/demon.png" class="icon-img" style="height: 1.5em; width: auto; filter: none;">
                                 <span>SHOP LVL <span id="shop-level-num">1</span></span>
                             </div>
-                            <img src="images/demon.png" alt="Shopkeeper" style="height: 180px; object-fit: contain; margin-right: 20px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));">
+                            <img src="images/demon.png" alt="Shopkeeper" style="height: 140px; object-fit: contain; margin-right: 20px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));">
                         </div>
-                        <div class="slot" onclick="inspectSlot('shop', 0, this)" oncontextmenu="buyMonster(0, event); return false;"></div>
-                        <div class="slot" onclick="inspectSlot('shop', 1, this)" oncontextmenu="buyMonster(1, event); return false;"></div>
-                        <div class="slot" onclick="inspectSlot('shop', 2, this)" oncontextmenu="buyMonster(2, event); return false;"></div>
+                        <div id="shop-view-slots" style="display: flex; gap: 10px; align-items: center;"></div>
+                    </div>
+                    
+                    <div id="expansion-controls" style="display: flex; gap: 10px; justify-content: center; padding: 10px; background: rgba(0,0,0,0.4); border-top: 1px solid rgba(255,255,255,0.1);">
+                        <button id="btn-expand-squad" class="btn-sec" onclick="expandSquad()" style="font-size: 0.8em; padding: 8px 15px;"></button>
+                        <button id="btn-expand-shop" class="btn-sec" onclick="expandShop()" style="font-size: 0.8em; padding: 8px 15px;"></button>
                     </div>
                 </div>
 
@@ -1506,7 +1509,8 @@
             merges: 0,
             effectTriggers: { Honor: 0, Anger: 0, Weak: 0, Extra: 0, Team: 0, Solo: 0, Twin: 0, Cheap: 0 },
             maxGold: 0,
-            tokensSummoned: 0
+            tokensSummoned: 0,
+            trophiesEarned: 0
         };
 
         const ACHIEVEMENT_DEFINITIONS = [
@@ -1596,6 +1600,8 @@
             shopLevel: 1,
             squad: [null, null, null, null, null],
             shop: [null, null, null],
+            squadSize: 5,
+            shopSize: 3,
             isPaused: false,
             currentlyInspecting: null,
             character: null,
@@ -1645,6 +1651,10 @@
             state.hp = startHP;
             state.gold = startGold;
             state.round = 1;
+            state.squadSize = 5;
+            state.shopSize = 3;
+            state.squad = [null, null, null, null, null];
+            state.shop = [null, null, null];
             
             // Reset Run Stats
             runStats = {
@@ -1653,7 +1663,8 @@
                 merges: 0,
                 effectTriggers: { Honor: 0, Anger: 0, Weak: 0, Extra: 0, Team: 0, Solo: 0, Twin: 0, Cheap: 0 },
                 maxGold: 0,
-                tokensSummoned: 0
+                tokensSummoned: 0,
+                trophiesEarned: 0
             };
 
             state.characters = CHARACTERS.map(c => ({
@@ -1954,7 +1965,7 @@
         }
 
         function refreshShop() {
-            state.shop = state.shop.map(() => {
+            state.shop = Array(state.shopSize).fill(null).map(() => {
                 let tier = getWeightedRandomTier(state.round);
                 let pool = getAvailableMonsters(tier);
                 // Fallback in case a tier has no monsters
@@ -1998,6 +2009,34 @@
                 state.gold--;
                 logHistory("Rerolled Shop (Cost: 1 Gold)");
                 refreshShop();
+            }
+        }
+
+        function expandSquad() {
+            const cost = state.squadSize === 5 ? 15 : (state.squadSize === 6 ? 20 : 25);
+            if (state.gold >= cost && state.squadSize < 8) {
+                state.gold -= cost;
+                state.squadSize++;
+                state.squad.push(null);
+                logHistory(`Expanded Team capacity to ${state.squadSize} (Cost: ${cost} Gold)`);
+                updateUI();
+            }
+        }
+
+        function expandShop() {
+            const cost = state.shopSize === 3 ? 10 : 15;
+            if (state.gold >= cost && state.shopSize < 5) {
+                state.gold -= cost;
+                state.shopSize++;
+                
+                // Add new slot to shop
+                let tier = getWeightedRandomTier(state.round);
+                let pool = getAvailableMonsters(tier);
+                let selectedMonster = pool[Math.floor(Math.random() * pool.length)];
+                state.shop.push({ ...selectedMonster, instId: Math.random() });
+                
+                logHistory(`Expanded Shop capacity to ${state.shopSize} (Cost: ${cost} Gold)`);
+                updateUI();
             }
         }
 
@@ -2646,6 +2685,20 @@
         function endBattle() {
             const draw = battleData.ally.length === 0 && battleData.enemy.length === 0;
             const win = battleData.ally.length > 0;
+            
+            // COMBAT REWARDS: 1 for Participation, +1 for Win
+            metaProgress.trophies += 1;
+            runStats.trophiesEarned += 1;
+            if (win) {
+                metaProgress.trophies += 1;
+                runStats.trophiesEarned += 1;
+                logHistory(`Combat End: WON! +2 Trophies (Combat + Win!)`);
+            } else if (draw) {
+                logHistory(`Combat End: DRAW. +1 Trophy (Combat Participated)`);
+            } else {
+                logHistory(`Combat End: DEFEAT. +1 Trophy (Combat Participated)`);
+            }
+
             let hpLoss = 0;
             let opponentHpLoss = 0;
 
@@ -2678,7 +2731,6 @@
             
             if (state.characters) {
                 let bystanders = state.characters.filter(c => c.id !== state.character?.id && c.id !== state.currentOpponent?.id && c.hp > 0);
-                
                 for (let i = 0; i < bystanders.length; i += 2) {
                     if (i + 1 < bystanders.length) {
                         let loser = Math.random() < 0.5 ? bystanders[i] : bystanders[i + 1];
@@ -2688,69 +2740,57 @@
                 }
             }
 
-            state.round++;
-            state.shopLevel = Math.min(state.round, 10);
-            const earnedGold = 10 + Math.floor(state.round / 2);
-            state.gold += earnedGold;
-            logHistory(`Advancing to Round ${state.round}. Gained ${earnedGold} Gold.`);
-            
-            if (state.characters) {
-                state.characters.forEach(ai => {
-                    if (ai.id !== state.character?.id && ai.hp > 0) {
-                        ai.gold += earnedGold;
-                    }
-                });
-            }
-            
+            const isPlayerDead = state.hp <= 0;
+            let aliveOthers = state.characters ? state.characters.filter(c => c.id !== state.character?.id && c.hp > 0) : [];
+            const areOthersDead = aliveOthers.length === 0;
+
             const modal = document.getElementById('battle-result-modal');
             const title = document.getElementById('battle-result-title');
             const desc = document.getElementById('battle-result-desc');
             const btn = modal.querySelector('button');
-            
             modal.style.display = 'flex';
 
-            const isPlayerDead = state.hp <= 0;
-            let aliveOthers = [];
-            if (state.characters) {
-                aliveOthers = state.characters.filter(c => c.id !== state.character?.id && c.hp > 0);
-            }
-            const areOthersDead = aliveOthers.length === 0;
+            if (isPlayerDead || areOthersDead) {
+                title.innerText = isPlayerDead ? (areOthersDead ? "PYRRHIC VICTORY" : "GAME OVER") : "CHAMPION!";
+                title.style.color = isPlayerDead ? 'var(--health-color)' : 'var(--gold-color)';
+                
+                state.characters.sort((a,b) => b.hp - a.hp);
+                let placement = state.characters.findIndex(c => c.id === state.character.id) + 1;
+                let totalPlayers = state.characters.length;
 
-            if (isPlayerDead) {
-                title.innerText = "GAME OVER";
-                title.style.color = 'var(--health-color)';
+                // PLACEMENT REWARDS
+                let placementTrophies = (totalPlayers - placement + 1);
+                if (placement === 1) placementTrophies += 5;
+                if (placement === 2) placementTrophies += 3;
+                if (placement === 3) placementTrophies += 2;
                 
-                // Placement check
-                let trophies = 0;
-                let placement = aliveOthers.length + 1;
-                if (placement === 2) trophies = 2;
-                if (placement === 3) trophies = 1;
-                
-                metaProgress.trophies += trophies;
+                metaProgress.trophies += placementTrophies;
+                runStats.trophiesEarned += placementTrophies;
                 saveProgress();
-                
-                let trophyText = trophies > 0 ? `<br><span style="color:var(--gold-color)">You earned ${trophies} 🏆!</span>` : "";
-                desc.innerHTML = `You came in ${placement}${getPlacementSuffix(placement)} place.${trophyText}`;
+
+                desc.innerHTML = `You finished in ${placement}${getPlacementSuffix(placement)} place.<br>
+                    <div style="margin-top:15px; font-size: 1.2em; color:var(--gold-color)">
+                        +${placementTrophies} 🏆 Completion Bonus<br>
+                        <b>Total Run Trophies: ${runStats.trophiesEarned} 🏆</b>
+                    </div>`;
                 
                 btn.innerText = "MAIN MENU";
                 btn.onclick = () => location.reload();
-            } else if (areOthersDead) {
-                title.innerText = "CHAMPION!";
-                title.style.color = 'var(--gold-color)';
-                
-                metaProgress.trophies += 4;
-                saveProgress();
-
-                desc.innerHTML = `You defeated all competitors!<br><span style="color:var(--gold-color)">You earned 4 🏆!</span>`;
-                btn.innerText = "MAIN MENU";
-                btn.onclick = () => location.reload();
-                createCoinShower();
+                if (!isPlayerDead) createCoinShower();
             } else {
-                // Regular Round Result
+                const earnedGold = 10 + Math.floor(state.round / 2);
+                state.gold += earnedGold;
+                state.round++;
+                state.shopLevel = Math.min(state.round, 10);
+                
+                if (state.characters) {
+                    state.characters.forEach(ai => { if (ai.hp > 0) ai.gold += earnedGold; });
+                }
+
                 if (draw) {
                     title.innerText = "DRAW";
                     title.style.color = 'var(--gold-color)';
-                    desc.innerHTML = `Stalemate! Both squads were defeated.<br>You earned ${earnedGold} Gold.`;
+                    desc.innerHTML = `Stalemate! Both squads were wiped.<br>You earned ${earnedGold} Gold.`;
                 } else if (win) {
                     title.innerText = "VICTORY!";
                     title.style.color = 'var(--gold-color)';
@@ -2770,7 +2810,8 @@
                 if (!metaProgress.achievements[ach.id]) {
                     if (ach.check(runStats, isWin)) {
                         metaProgress.achievements[ach.id] = true;
-                        metaProgress.trophies += 5; // Reward 5 trophies per achievement
+                        metaProgress.trophies += 5;
+                        runStats.trophiesEarned += 5;
                         showAchievementToast(ach.name);
                     }
                 }
@@ -2921,23 +2962,64 @@
             document.getElementById('player-hp').innerHTML = `<img src="images/hp.png" class="icon-img"> ${state.hp}`;
             document.getElementById('player-gold').innerHTML = `<img src="images/bag1.png" class="coin-bag icon-img" style="transform: scale(1.5); margin-right: 5px;"> <img src="images/win-icon.png" class="icon-img"> ${state.gold}`;
 
-            // Update Trophy Progress Bar in Header if exists (we'll add it later to title screen, but update display everywhere)
             updateTrophyDisplay();
 
-            // Calculate squad with passives for display
+            // Calculate squad with passives
             const effectiveSquad = calculateEffectiveStats(state.squad);
 
-            // Update Squad Summary Bar
             updateSquadSummary(effectiveSquad);
             updateBattlePreview();
 
-            // Render Slots
-            const squadSlots = document.querySelectorAll('#squad-view .slot');
-            effectiveSquad.forEach((m, i) => renderCard(squadSlots[i], m));
+            // Render Squad Slots Dynamically
+            const squadContainer = document.getElementById('squad-view');
+            squadContainer.innerHTML = '';
+            for (let i = 0; i < state.squadSize; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.onclick = () => inspectSlot('squad', i, slot);
+                
+                // Drag & Drop Reordering
+                slot.draggable = true;
+                slot.ondragstart = (e) => {
+                    e.dataTransfer.setData('text/plain', i);
+                    slot.style.opacity = '0.5';
+                };
+                slot.ondragend = () => {
+                    slot.style.opacity = '1';
+                };
+                slot.ondragover = (e) => {
+                    e.preventDefault();
+                    slot.classList.add('drag-over');
+                };
+                slot.ondragleave = () => {
+                    slot.classList.remove('drag-over');
+                };
+                slot.ondrop = (e) => {
+                    e.preventDefault();
+                    slot.classList.remove('drag-over');
+                    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                    if (fromIndex !== i) {
+                        // Swap monsters in squad
+                        const temp = state.squad[i];
+                        state.squad[i] = state.squad[fromIndex];
+                        state.squad[fromIndex] = temp;
+                        logHistory(`Reordered Squad: Slot ${fromIndex+1} moved to Slot ${i+1}`);
+                        updateUI();
+                    }
+                };
 
-            const shopSlots = document.querySelectorAll('#shop-view .slot');
+                renderCard(slot, effectiveSquad[i]);
+                squadContainer.appendChild(slot);
+            }
+
+            // Render Shop Slots Dynamically
+            const shopSlotsContainer = document.getElementById('shop-view-slots');
+            shopSlotsContainer.innerHTML = '';
             state.shop.forEach((m, i) => {
-                const slot = shopSlots[i];
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.onclick = () => inspectSlot('shop', i, slot);
+                slot.oncontextmenu = (e) => { buyMonster(i, e); return false; };
                 renderCard(slot, m, true);
                 
                 // Highlight discounted cards
@@ -2953,7 +3035,29 @@
                         if (costDiv) costDiv.style.color = '#2ecc71';
                     }
                 }
+                shopSlotsContainer.appendChild(slot);
             });
+
+            // Update Expansion Buttons
+            const squadBtn = document.getElementById('btn-expand-squad');
+            if (state.squadSize < 8) {
+                const cost = state.squadSize === 5 ? 15 : (state.squadSize === 6 ? 20 : 25);
+                squadBtn.style.display = 'block';
+                squadBtn.innerHTML = `Expand Team (${state.squadSize} -> ${state.squadSize+1}) <br> ${cost}<img src="images/win-icon.png" class="icon-img" style="width:1em">`;
+                squadBtn.classList.toggle('btn-disabled', state.gold < cost);
+            } else {
+                squadBtn.style.display = 'none';
+            }
+
+            const shopBtn = document.getElementById('btn-expand-shop');
+            if (state.shopSize < 5) {
+                const cost = state.shopSize === 3 ? 10 : 15;
+                shopBtn.style.display = 'block';
+                shopBtn.innerHTML = `Expand Shop (${state.shopSize} -> ${state.shopSize+1}) <br> ${cost}<img src="images/win-icon.png" class="icon-img" style="width:1em">`;
+                shopBtn.classList.toggle('btn-disabled', state.gold < cost);
+            } else {
+                shopBtn.style.display = 'none';
+            }
 
             // Render Drawer Summary
             if (state.characters && document.getElementById('drawer-leaderboard-summary')) {
