@@ -904,7 +904,7 @@
       "desc": "Humans gain +1/+1 when a Human is bought.",
       "type": "Human",
       "locked": false,
-      "unlockPrice": 0,
+      "unlockWins": 0,
       "typeWeights": {
         "Beast": 10,
         "Human": 50,
@@ -921,7 +921,7 @@
       "desc": "Beasts gain +1/+1 when a Beast is sold.",
       "type": "Beast",
       "locked": false,
-      "unlockPrice": 0,
+      "unlockWins": 0,
       "typeWeights": {
         "Beast": 50,
         "Human": 10,
@@ -938,7 +938,7 @@
       "desc": "Merging grants x1.5 the stats.",
       "type": "Genetic",
       "locked": true,
-      "unlockPrice": 20,
+      "unlockWins": 5,
       "typeWeights": {
         "Beast": 10,
         "Human": 10,
@@ -955,7 +955,7 @@
       "desc": "Nature get +0/+1 when a Nature card dies.",
       "type": "Nature",
       "locked": true,
-      "unlockPrice": 15,
+      "unlockWins": 3,
       "typeWeights": {
         "Beast": 10,
         "Human": 10,
@@ -972,7 +972,7 @@
       "desc": "Cosmics gain +2/+0 at start of combat.",
       "type": "Cosmic",
       "locked": true,
-      "unlockPrice": 25,
+      "unlockWins": 10,
       "typeWeights": {
         "Beast": 10,
         "Human": 10,
@@ -989,7 +989,7 @@
       "desc": "Mech summon a 1/1 Cosmic card on death.",
       "type": "Mech",
       "locked": true,
-      "unlockPrice": 15,
+      "unlockWins": 2,
       "typeWeights": {
         "Beast": 10,
         "Human": 10,

@@ -1557,6 +1557,7 @@
             trophies: 0,
             unlockedCards: ["m1", "h1", "g1", "n1", "c1", "k1"], // These are free
             unlockedCharacters: ["vance", "mrat"],
+            heroWins: {}, // [heroId]: count
             purchasedUpgrades: [],
             achievements: {}
         };
@@ -1594,7 +1595,10 @@
         function loadProgress() {
             const saved = localStorage.getItem('monster_crew_progress');
             if (saved) {
-                metaProgress = JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                metaProgress = { ...metaProgress, ...parsed };
+                // Ensure heroWins is an object
+                if (!metaProgress.heroWins) metaProgress.heroWins = {};
             }
             updateTrophyDisplay();
         }
@@ -1690,13 +1694,30 @@
             const list = document.getElementById('character-list');
             list.innerHTML = '';
             CHARACTERS.forEach(char => {
-                const isUnlocked = char.locked === false || metaProgress.unlockedCharacters.includes(char.id);
+                const wins = metaProgress.heroWins[char.id] || 0;
+                const target = char.unlockWins || 0;
+                const isPermanentUnlocked = metaProgress.unlockedCharacters.includes(char.id);
+                const isUnlocked = char.locked === false || isPermanentUnlocked || wins >= target;
+                
+                // Save unlock if newly achieved
+                if (!isPermanentUnlocked && wins >= target && target > 0) {
+                    metaProgress.unlockedCharacters.push(char.id);
+                    saveProgress();
+                }
+
                 const div = document.createElement('div');
                 div.className = `char-card ${isUnlocked ? '' : 'locked'}`;
+                
+                let progressText = "";
+                if (!isUnlocked && target > 0) {
+                    progressText = `<div style="font-size: 0.9em; margin-top: 10px; color: var(--gold-color);">PROGRESS: ${wins}/${target} WINS</div>`;
+                }
+
                 div.innerHTML = `
-                    <div class="char-icon" style="${isUnlocked ? '' : 'filter: brightness(0) invert(0.5);'}">${char.icon}</div>
+                    <div class="char-icon" style="${isUnlocked ? '' : 'filter: grayscale(1) opacity(0.5);'}">${char.icon}</div>
                     <div class="char-title">${char.name} ${isUnlocked ? '' : '🔒'}</div>
-                    <div class="char-desc">${isUnlocked ? char.desc : `Unlock in store for 🏆 ${char.unlockPrice}`}</div>
+                    <div class="char-desc">${isUnlocked ? char.desc : `Defeat this hero ${target} times to unlock.`}</div>
+                    ${progressText}
                 `;
                 if (isUnlocked) div.onclick = () => selectCharacter(char);
                 else div.style.cursor = 'not-allowed';
@@ -2867,6 +2888,11 @@
                         op.hp -= opponentHpLoss;
                         if (op.hp <= 0) op.hp = 0;
                     }
+
+                    // Increment Win Count for Unlocks
+                    const heroId = state.currentOpponent.id;
+                    metaProgress.heroWins[heroId] = (metaProgress.heroWins[heroId] || 0) + 1;
+                    saveProgress();
                 }
             }
             
