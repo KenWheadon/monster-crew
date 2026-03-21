@@ -11,7 +11,9 @@
       "cost": 3,
       "effect": "Team:1",
       "effectDesc": "TEAM: +1/0 to each other friendly Beast.",
-      "flavor": "Just a little guy."
+      "flavor": "Just a little guy.",
+      "locked": true,
+      "unlockPrice": 5
     },
     {
       "id": "h1",
@@ -24,7 +26,8 @@
       "cost": 3,
       "effect": "Honor:1",
       "effectDesc": "HONOR: 0/+1 to other friendly cards on death.",
-      "flavor": "Always ready."
+      "flavor": "Always ready.",
+      "locked": false
     },
     {
       "id": "g1",
@@ -37,7 +40,9 @@
       "cost": 3,
       "effect": "Team:1",
       "effectDesc": "TEAM: +1/0 to each other friendly Genetic.",
-      "flavor": "Built for efficiency."
+      "flavor": "Built for efficiency.",
+      "locked": true,
+      "unlockPrice": 5
     },
     {
       "id": "n1",
@@ -50,7 +55,9 @@
       "cost": 3,
       "effect": "Honor:1",
       "effectDesc": "HONOR: 0/+1 to other friendly cards on death.",
-      "flavor": "Thrives in sunlight."
+      "flavor": "Thrives in sunlight.",
+      "locked": true,
+      "unlockPrice": 5
     },
     {
       "id": "c1",
@@ -63,7 +70,9 @@
       "cost": 3,
       "effect": "Anger:1",
       "effectDesc": "ANGER: +1/0 to other friendly cards on death.",
-      "flavor": "Watches from the shadows."
+      "flavor": "Watches from the shadows.",
+      "locked": true,
+      "unlockPrice": 5
     },
     {
       "id": "k1",
@@ -76,7 +85,9 @@
       "cost": 3,
       "effect": "Shield",
       "effectDesc": "SHIELD: Blocks the first instance of damage.",
-      "flavor": "Obedient and tiny."
+      "flavor": "Obedient and tiny.",
+      "locked": true,
+      "unlockPrice": 5
     },
     {
       "id": "m1b",
@@ -105,7 +116,7 @@
       "effect": "Team:1",
       "effectDesc": "TEAM: +1/0 to each other friendly Human.",
       "flavor": "Happy to be here.",
-      "locked": true,
+      "locked": false,
       "unlockPrice": 5
     },
     {
@@ -179,7 +190,9 @@
       "cost": 5,
       "effect": "Anger:2",
       "effectDesc": "ANGER: +2/0 to other friendly cards on death.",
-      "flavor": "Fights when backed into a corner."
+      "flavor": "Fights when backed into a corner.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "h2",
@@ -192,7 +205,9 @@
       "cost": 5,
       "effect": "Team:2",
       "effectDesc": "TEAM: +2/0 to each other friendly Human.",
-      "flavor": "Keeps the ship running."
+      "flavor": "Keeps the ship running.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "g2",
@@ -205,7 +220,9 @@
       "cost": 5,
       "effect": "Thorn:2",
       "effectDesc": "THORN: Deal 2 damage back when hit.",
-      "flavor": "Heavy lifting specialized."
+      "flavor": "Heavy lifting specialized.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "n2",
@@ -218,7 +235,9 @@
       "cost": 5,
       "effect": "Thorn:2",
       "effectDesc": "THORN: Deal 2 damage back when hit.",
-      "flavor": "Pricky but persistent."
+      "flavor": "Pricky but persistent.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "c2",
@@ -231,7 +250,9 @@
       "cost": 6,
       "effect": "Extra:2/2",
       "effectDesc": "EXTRA: Spawn a 2/2 on death.",
-      "flavor": "Lingers with intent."
+      "flavor": "Lingers with intent.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "k2",
@@ -244,7 +265,9 @@
       "cost": 6,
       "effect": "Shield",
       "effectDesc": "SHIELD: Blocks the first instance of damage.",
-      "flavor": "Four wheels of support."
+      "flavor": "Four wheels of support.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "m2b",
@@ -347,7 +370,9 @@
       "cost": 8,
       "effect": "Twin",
       "effectDesc": "TWIN: Merge with 2 instead of 3.",
-      "flavor": "Charges headfirst."
+      "flavor": "Charges headfirst.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "h3",
@@ -360,7 +385,9 @@
       "cost": 7,
       "effect": "Honor:3",
       "effectDesc": "HONOR: 0/+3 to other friendly cards on death.",
-      "flavor": "Saves lives even in defeat."
+      "flavor": "Saves lives even in defeat.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "g3",
@@ -373,7 +400,9 @@
       "cost": 8,
       "effect": "Extra:3/3",
       "effectDesc": "EXTRA: Spawn a 3/3 on death.",
-      "flavor": "Carries more than weight."
+      "flavor": "Carries more than weight.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "n3",
@@ -386,7 +415,9 @@
       "cost": 7,
       "effect": "Team:3",
       "effectDesc": "TEAM: +3/0 to each other friendly Nature.",
-      "flavor": "Grows stronger together."
+      "flavor": "Grows stronger together.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "c3",
@@ -399,7 +430,9 @@
       "cost": 9,
       "effect": "Solo:5",
       "effectDesc": "SOLO: Gain +5/+5 if there are no other Cosmics.",
-      "flavor": "Sees all futures."
+      "flavor": "Sees all futures.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "k3",
@@ -412,7 +445,9 @@
       "cost": 8,
       "effect": "Cheap:2",
       "effectDesc": "CHEAP: -2 to cost in shop.",
-      "flavor": "Almost too human."
+      "flavor": "Almost too human.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "m3b",
@@ -515,7 +550,9 @@
       "cost": 11,
       "effect": "Anger:4",
       "effectDesc": "ANGER: +4/0 to other friendly cards on death.",
-      "flavor": "Leads the pack's fury."
+      "flavor": "Leads the pack's fury.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "h4",
@@ -528,7 +565,9 @@
       "cost": 10,
       "effect": "Honor:4",
       "effectDesc": "HONOR: 0/+4 to other friendly cards on death.",
-      "flavor": "Stands firm against any threat."
+      "flavor": "Stands firm against any threat.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "g4",
@@ -541,7 +580,9 @@
       "cost": 12,
       "effect": "Twin",
       "effectDesc": "TWIN: Merge with 2 instead of 3.",
-      "flavor": "Ancient power reborn."
+      "flavor": "Ancient power reborn.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "n4",
@@ -554,7 +595,9 @@
       "cost": 10,
       "effect": "Weak:4",
       "effectDesc": "WEAK: -4/-4 to enemy random card on death.",
-      "flavor": "Quietly undermining."
+      "flavor": "Quietly undermining.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "c4",
@@ -567,7 +610,9 @@
       "cost": 12,
       "effect": "Extra:4/4",
       "effectDesc": "EXTRA: Spawn a 4/4 on death.",
-      "flavor": "Ink clouds of mayhem."
+      "flavor": "Ink clouds of mayhem.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "k4",
@@ -580,7 +625,9 @@
       "cost": 11,
       "effect": "Honor:4",
       "effectDesc": "HONOR: 0/+4 to other friendly cards on death.",
-      "flavor": "Sings its final melody."
+      "flavor": "Sings its final melody.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "m4b",
@@ -683,7 +730,9 @@
       "cost": 16,
       "effect": "Anger:6",
       "effectDesc": "ANGER: +6/0 to other friendly cards on death.",
-      "flavor": "Awakens with rage."
+      "flavor": "Awakens with rage.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "h5",
@@ -696,7 +745,9 @@
       "cost": 15,
       "effect": "Team:6",
       "effectDesc": "TEAM: +6/0 to each other friendly Human.",
-      "flavor": "Commands the whole fleet."
+      "flavor": "Commands the whole fleet.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "g5",
@@ -709,7 +760,9 @@
       "cost": 17,
       "effect": "Extra:6/6",
       "effectDesc": "EXTRA: Spawn a 6/6 on death.",
-      "flavor": "Engineered for destruction."
+      "flavor": "Engineered for destruction.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "n5",
@@ -722,7 +775,9 @@
       "cost": 14,
       "effect": "Honor:6",
       "effectDesc": "HONOR: 0/+6 to other friendly cards on death.",
-      "flavor": "Feeds the whole team."
+      "flavor": "Feeds the whole team.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "c5",
@@ -735,7 +790,9 @@
       "cost": 18,
       "effect": "Solo:8",
       "effectDesc": "SOLO: Gain +8/+8 if there are no other Cosmics.",
-      "flavor": "Devours starlight."
+      "flavor": "Devours starlight.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "k5",
@@ -748,7 +805,9 @@
       "cost": 16,
       "effect": "Cheap:3",
       "effectDesc": "CHEAP: -3 to cost in shop.",
-      "flavor": "Armor that keeps fighting."
+      "flavor": "Armor that keeps fighting.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
       "id": "m5b",
@@ -841,34 +900,94 @@
       "unlockPrice": 25
     },
     {
-      "id": "c3c", "name": "Nova", "image": "images/nova.png", "tier": "C", "type": "Cosmic",
-      "atk": 6, "hp": 3, "cost": 9, "effect": "Crit:35", "effectDesc": "CRIT: 35% chance to deal double damage.",
-      "flavor": "Explodes with starlight."
+      "id": "c3c",
+      "name": "Nova",
+      "image": "images/nova.png",
+      "tier": "C",
+      "type": "Cosmic",
+      "atk": 6,
+      "hp": 3,
+      "cost": 9,
+      "effect": "Crit:35",
+      "effectDesc": "CRIT: 35% chance to deal double damage.",
+      "flavor": "Explodes with starlight.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
-      "id": "m4c", "name": "Hyena", "image": "images/hyena.png", "tier": "B", "type": "Beast",
-      "atk": 7, "hp": 5, "cost": 10, "effect": "Echo:45", "effectDesc": "ECHO: 45% chance to attack again immediately.",
-      "flavor": "Laughs as it strikes twice."
+      "id": "m4c",
+      "name": "Hyena",
+      "image": "images/hyena.png",
+      "tier": "B",
+      "type": "Beast",
+      "atk": 7,
+      "hp": 5,
+      "cost": 10,
+      "effect": "Echo:45",
+      "effectDesc": "ECHO: 45% chance to attack again immediately.",
+      "flavor": "Laughs as it strikes twice.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
-      "id": "h2c", "name": "Mercenary", "image": "images/mercenary.png", "tier": "D", "type": "Human",
-      "atk": 2, "hp": 4, "cost": 4, "effect": "Recruit:2", "effectDesc": "RECRUIT: +2/+2 when bought.",
-      "flavor": "Loyal for the right price."
+      "id": "h2c",
+      "name": "Mercenary",
+      "image": "images/mercenary.png",
+      "tier": "D",
+      "type": "Human",
+      "atk": 2,
+      "hp": 4,
+      "cost": 4,
+      "effect": "Recruit:2",
+      "effectDesc": "RECRUIT: +2/+2 when bought.",
+      "flavor": "Loyal for the right price.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
-      "id": "k4c", "name": "Relay", "image": "images/relay.png", "tier": "B", "type": "Mech",
-      "atk": 5, "hp": 8, "cost": 11, "effect": "Aura:2", "effectDesc": "AURA: Adjacent allies gain +2 Attack.",
-      "flavor": "Commands the line."
+      "id": "k4c",
+      "name": "Relay",
+      "image": "images/relay.png",
+      "tier": "B",
+      "type": "Mech",
+      "atk": 5,
+      "hp": 8,
+      "cost": 11,
+      "effect": "Aura:2",
+      "effectDesc": "AURA: Adjacent allies gain +2 Attack.",
+      "flavor": "Commands the line.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
-      "id": "n3c", "name": "Berry", "image": "images/berry.png", "tier": "C", "type": "Nature",
-      "atk": 2, "hp": 7, "cost": 6, "effect": "Bounty:4", "effectDesc": "BOUNTY: +4 gold when this dies.",
-      "flavor": "Sweet even in sacrifice."
+      "id": "n3c",
+      "name": "Berry",
+      "image": "images/berry.png",
+      "tier": "C",
+      "type": "Nature",
+      "atk": 2,
+      "hp": 7,
+      "cost": 6,
+      "effect": "Bounty:4",
+      "effectDesc": "BOUNTY: +4 gold when this dies.",
+      "flavor": "Sweet even in sacrifice.",
+      "locked": true,
+      "unlockPrice": 10
     },
     {
-      "id": "h5c", "name": "Paladin", "image": "images/paladin.png", "tier": "A", "type": "Human",
-      "atk": 7, "hp": 15, "cost": 15, "effect": "LastStand", "effectDesc": "LASTSTAND: Survives with 1 HP once per combat.",
-      "flavor": "For the crew!"
+      "id": "h5c",
+      "name": "Paladin",
+      "image": "images/paladin.png",
+      "tier": "A",
+      "type": "Human",
+      "atk": 7,
+      "hp": 15,
+      "cost": 15,
+      "effect": "LastStand",
+      "effectDesc": "LASTSTAND: Survives with 1 HP once per combat.",
+      "flavor": "For the crew!",
+      "locked": true,
+      "unlockPrice": 10
     }
   ],
   "upgrades": [
@@ -916,16 +1035,76 @@
     "A": "#ffa000"
   },
   "shopLevelWeights": [
-    [100, 0, 0, 0, 0],
-    [70, 30, 0, 0, 0],
-    [50, 40, 10, 0, 0],
-    [40, 35, 25, 0, 0],
-    [30, 35, 25, 10, 0],
-    [20, 30, 30, 15, 5],
-    [10, 25, 35, 20, 10],
-    [5, 15, 35, 30, 15],
-    [0, 10, 30, 40, 20],
-    [0, 0, 20, 50, 30]
+    [
+      100,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      70,
+      30,
+      0,
+      0,
+      0
+    ],
+    [
+      50,
+      40,
+      10,
+      0,
+      0
+    ],
+    [
+      40,
+      35,
+      25,
+      0,
+      0
+    ],
+    [
+      30,
+      35,
+      25,
+      10,
+      0
+    ],
+    [
+      20,
+      30,
+      30,
+      15,
+      5
+    ],
+    [
+      10,
+      25,
+      35,
+      20,
+      10
+    ],
+    [
+      5,
+      15,
+      35,
+      30,
+      15
+    ],
+    [
+      0,
+      10,
+      30,
+      40,
+      20
+    ],
+    [
+      0,
+      0,
+      20,
+      50,
+      30
+    ]
   ],
   "characters": [
     {
@@ -934,7 +1113,6 @@
       "desc": "Humans gain +1/+1 when a Human is bought.",
       "type": "Human",
       "locked": false,
-      "unlockWins": 0,
       "typeWeights": {
         "Beast": 10,
         "Human": 50,
@@ -950,8 +1128,7 @@
       "name": "Massive Rat",
       "desc": "Beasts gain +1/+1 when a Beast is sold.",
       "type": "Beast",
-      "locked": false,
-      "unlockWins": 0,
+      "locked": true,
       "typeWeights": {
         "Beast": 50,
         "Human": 10,
@@ -968,7 +1145,6 @@
       "desc": "Merging grants x1.5 the stats.",
       "type": "Genetic",
       "locked": true,
-      "unlockWins": 5,
       "typeWeights": {
         "Beast": 10,
         "Human": 10,
@@ -985,7 +1161,6 @@
       "desc": "Nature get +0/+1 when a Nature card dies.",
       "type": "Nature",
       "locked": true,
-      "unlockWins": 3,
       "typeWeights": {
         "Beast": 10,
         "Human": 10,
@@ -1002,7 +1177,6 @@
       "desc": "Cosmics gain +2/+0 at start of combat.",
       "type": "Cosmic",
       "locked": true,
-      "unlockWins": 10,
       "typeWeights": {
         "Beast": 10,
         "Human": 10,
@@ -1019,7 +1193,6 @@
       "desc": "Mech summon a 1/1 Cosmic card on death.",
       "type": "Mech",
       "locked": true,
-      "unlockWins": 2,
       "typeWeights": {
         "Beast": 10,
         "Human": 10,
@@ -1032,82 +1205,851 @@
     }
   ],
   "crews": [
-    { "id": "vance_r1_a", "name": "Vance's Recruits A", "type": "Human", "minRound": 1, "monsters": ["h1", "h1", "h1b"] },
-    { "id": "vance_r1_b", "name": "Vance's Recruits B", "type": "Human", "minRound": 1, "monsters": ["h1b", "h1b", "h1"] },
-    { "id": "vance_r3_a", "name": "Human Shield", "type": "Human", "minRound": 3, "monsters": ["h1", "h2", "h1b", "h2b"] },
-    { "id": "vance_r3_b", "name": "Quick Response", "type": "Human", "minRound": 3, "monsters": ["h2", "h1b", "h1b", "h1"] },
-    { "id": "vance_r5_a", "name": "Security Detail", "type": "Human", "minRound": 5, "monsters": ["h3", "h3b", "h2", "h2b", "h1"] },
-    { "id": "vance_r5_b", "name": "Medical Support", "type": "Human", "minRound": 5, "monsters": ["h3", "h3", "h3b", "h1", "h2"] },
-    { "id": "vance_r8_a", "name": "Elite Guard", "type": "Human", "minRound": 8, "monsters": ["h4", "h4b", "h3", "h3b", "h5"] },
-    { "id": "vance_r8_b", "name": "Heavy Patrol", "type": "Human", "minRound": 8, "monsters": ["h4", "h4", "h4b", "h2b", "h3"] },
-    { "id": "vance_final_a", "name": "Admiral's Fleet", "type": "Human", "minRound": 11, "monsters": ["h5", "h5b", "h4", "h4b", "h3"] },
-    { "id": "vance_final_b", "name": "Victory Formation", "type": "Human", "minRound": 11, "monsters": ["h5", "h5", "h5b", "h4b", "h4"] },
-
-    { "id": "mrat_r1_a", "name": "Rodent Swarm A", "type": "Beast", "minRound": 1, "monsters": ["m1", "m1", "m1b"] },
-    { "id": "mrat_r1_b", "name": "Rodent Swarm B", "type": "Beast", "minRound": 1, "monsters": ["m1b", "m1b", "m1"] },
-    { "id": "mrat_r3_a", "name": "Chicken Coop", "type": "Beast", "minRound": 3, "monsters": ["m2", "m2b", "m1", "m1b"] },
-    { "id": "mrat_r3_b", "name": "Small Pack", "type": "Beast", "minRound": 3, "monsters": ["m2", "m1", "m1", "m1b"] },
-    { "id": "mrat_r5_a", "name": "The Great Boar", "type": "Beast", "minRound": 5, "monsters": ["m3", "m3b", "m2", "m2b", "m1"] },
-    { "id": "mrat_r5_b", "name": "Angry Herd", "type": "Beast", "minRound": 5, "monsters": ["m3", "m2", "m2", "m1", "m1b"] },
-    { "id": "mrat_r8_a", "name": "Alpha Pack", "type": "Beast", "minRound": 8, "monsters": ["m4", "m4b", "m3", "m3b", "m5"] },
-    { "id": "mrat_r8_b", "name": "Wolf Den", "type": "Beast", "minRound": 8, "monsters": ["m4", "m4", "m4b", "m2", "m1"] },
-    { "id": "mrat_final_a", "name": "Primal Apex", "type": "Beast", "minRound": 11, "monsters": ["m5", "m5b", "m4", "m4b", "m4"] },
-    { "id": "mrat_final_b", "name": "Bear Den", "type": "Beast", "minRound": 11, "monsters": ["m5", "m5", "m5b", "m3", "m4"] },
-
-    { "id": "brain_r1_a", "name": "Lab Rats A", "type": "Genetic", "minRound": 1, "monsters": ["g1", "g1b", "g1"] },
-    { "id": "brain_r1_b", "name": "Lab Rats B", "type": "Genetic", "minRound": 1, "monsters": ["g1b", "g1b", "g1"] },
-    { "id": "brain_r3_a", "name": "Evolved Specimen", "type": "Genetic", "minRound": 3, "monsters": ["g2", "g2b", "g1", "g1b"] },
-    { "id": "brain_r3_b", "name": "Genetic Drift", "type": "Genetic", "minRound": 3, "monsters": ["g2", "g1", "g1b", "g2b"] },
-    { "id": "brain_r5_a", "name": "Viral Loading", "type": "Genetic", "minRound": 5, "monsters": ["g3", "g3b", "g2", "g2b", "g1"] },
-    { "id": "brain_r5_b", "name": "Heavy Haulers", "type": "Genetic", "minRound": 5, "monsters": ["g3", "g3", "g2", "g2b", "g1"] },
-    { "id": "brain_r8_a", "name": "Modified Ancients", "type": "Genetic", "minRound": 8, "monsters": ["g4", "g4b", "g3", "g3b", "g5"] },
-    { "id": "brain_r8_b", "name": "Dino Rampage", "type": "Genetic", "minRound": 8, "monsters": ["g4", "g4b", "g4", "g2", "g1"] },
-    { "id": "brain_final_a", "name": "Perfect Evolution", "type": "Genetic", "minRound": 11, "monsters": ["g5", "g5b", "g4", "g4b", "g4"] },
-    { "id": "brain_final_b", "name": "Dragon Roar", "type": "Genetic", "minRound": 11, "monsters": ["g5", "g5", "g5b", "g4", "g3"] },
-
-    { "id": "pete_r1_a", "name": "Sproutlings A", "type": "Nature", "minRound": 1, "monsters": ["n1", "n1b", "n1"] },
-    { "id": "pete_r1_b", "name": "Sproutlings B", "type": "Nature", "minRound": 1, "monsters": ["n1b", "n1b", "n1"] },
-    { "id": "pete_r3_a", "name": "Thorn Bush", "type": "Nature", "minRound": 3, "monsters": ["n2", "n2b", "n1", "n1b"] },
-    { "id": "pete_r3_b", "name": "Prickly Patch", "type": "Nature", "minRound": 3, "monsters": ["n2", "n2", "n1", "n1b"] },
-    { "id": "pete_r5_a", "name": "Golden Harvest", "type": "Nature", "minRound": 5, "monsters": ["n3", "n3b", "n2", "n2b", "n1"] },
-    { "id": "pete_r5_b", "name": "Wheat Field", "type": "Nature", "minRound": 5, "monsters": ["n3", "n3", "n2", "n1", "n1b"] },
-    { "id": "pete_r8_a", "name": "Verdant Reach", "type": "Nature", "minRound": 8, "monsters": ["n4", "n4b", "n3", "n3b", "n5"] },
-    { "id": "pete_r8_b", "name": "Root Bound", "type": "Nature", "minRound": 8, "monsters": ["n4", "n4", "n4b", "n2", "n1"] },
-    { "id": "pete_final_a", "name": "Gaia's Revenge", "type": "Nature", "minRound": 11, "monsters": ["n5", "n5b", "n4", "n4b", "n4"] },
-    { "id": "pete_final_b", "name": "Ancient Grove", "type": "Nature", "minRound": 11, "monsters": ["n5", "n5", "n5b", "n4b", "n3"] },
-
-    { "id": "dread_r1_a", "name": "Dark Sparks A", "type": "Cosmic", "minRound": 1, "monsters": ["c1", "c1b", "c1"] },
-    { "id": "dread_r1_b", "name": "Dark Sparks B", "type": "Cosmic", "minRound": 1, "monsters": ["c1b", "c1b", "c1"] },
-    { "id": "dread_r3_a", "name": "Phantom Void", "type": "Cosmic", "minRound": 3, "monsters": ["c2", "c2b", "c1", "c1b"] },
-    { "id": "dread_r3_b", "name": "Ghostly Presence", "type": "Cosmic", "minRound": 3, "monsters": ["c2", "c2", "c1", "c1b"] },
-    { "id": "dread_r5_a", "name": "All-Seeing", "type": "Cosmic", "minRound": 5, "monsters": ["c3", "c3b", "c2", "c2b", "c1"] },
-    { "id": "dread_r5_b", "name": "Gazer Gaze", "type": "Cosmic", "minRound": 5, "monsters": ["c3", "c3", "c2", "c1", "c1b"] },
-    { "id": "dread_r8_a", "name": "Void Reavers", "type": "Cosmic", "minRound": 8, "monsters": ["c4", "c4b", "c3", "c3b", "c5"] },
-    { "id": "dread_r8_b", "name": "Ink Cloud", "type": "Cosmic", "minRound": 8, "monsters": ["c4", "c4", "c4b", "c2", "c1"] },
-    { "id": "dread_final_a", "name": "Reality Tear", "type": "Cosmic", "minRound": 11, "monsters": ["c5", "c5b", "c4", "c4b", "c4"] },
-    { "id": "dread_final_b", "name": "The Maw", "type": "Cosmic", "minRound": 11, "monsters": ["c5", "c5", "c5b", "c4b", "c3"] },
-
-    { "id": "pancake_r1_a", "name": "Worker Drones A", "type": "Mech", "minRound": 1, "monsters": ["k1", "k1b", "k1"] },
-    { "id": "pancake_r1_b", "name": "Worker Drones B", "type": "Mech", "minRound": 1, "monsters": ["k1b", "k1b", "k1"] },
-    { "id": "pancake_r3_a", "name": "Rolling Support", "type": "Mech", "minRound": 3, "monsters": ["k2", "k2b", "k1", "k1b"] },
-    { "id": "pancake_r3_b", "name": "Squad Rover", "type": "Mech", "minRound": 3, "monsters": ["k2", "k2", "k1", "k1b"] },
-    { "id": "pancake_r5_a", "name": "Protocol Beta", "type": "Mech", "minRound": 5, "monsters": ["k3", "k3b", "k2", "k2b", "k1"] },
-    { "id": "pancake_r5_b", "name": "Android Army", "type": "Mech", "minRound": 5, "monsters": ["k3", "k3", "k2", "k1", "k1b"] },
-    { "id": "pancake_r8_a", "name": "Automated Assault", "type": "Mech", "minRound": 8, "monsters": ["k4", "k4b", "k3", "k3b", "k5"] },
-    { "id": "pancake_r8_b", "name": "Synth Squad", "type": "Mech", "minRound": 8, "monsters": ["k4", "k4", "k4b", "k2", "k1"] },
-    { "id": "pancake_final_a", "name": "Titanium Storm", "type": "Mech", "minRound": 11, "monsters": ["k5", "k5b", "k4", "k4b", "k4"] },
-    { "id": "pancake_final_b", "name": "Iron Titan", "type": "Mech", "minRound": 11, "monsters": ["k5", "k5", "k5b", "k4b", "k3"] },
-
-    { "id": "mixed_r2_a", "name": "The Mercenaries A", "type": "Any", "minRound": 2, "monsters": ["m1", "h1", "g1", "k1"] },
-    { "id": "mixed_r2_b", "name": "The Drifters", "type": "Any", "minRound": 2, "monsters": ["n1", "c1", "k1", "h1"] },
-    { "id": "mixed_r4_a", "name": "Balanced Squad A", "type": "Any", "minRound": 4, "monsters": ["m2", "h2", "n2", "c2", "g1"] },
-    { "id": "mixed_r4_b", "name": "Hybrid Team", "type": "Any", "minRound": 4, "monsters": ["g2", "k2", "m2", "h1", "n1"] },
-    { "id": "mixed_r7_a", "name": "Synergy Test A", "type": "Any", "minRound": 7, "monsters": ["m3", "h3", "g3", "k3", "n3"] },
-    { "id": "mixed_r7_b", "name": "Mixed Elite", "type": "Any", "minRound": 7, "monsters": ["c3", "n3", "k3", "h2", "m2"] },
-    { "id": "mixed_r10_a", "name": "Final Challenge A", "type": "Any", "minRound": 10, "monsters": ["m5", "h5", "g5", "k5", "c5"] },
-    { "id": "mixed_r10_b", "name": "World Breakers", "type": "Any", "minRound": 10, "monsters": ["n5", "c5", "k5", "g4", "h4"] }
+    {
+      "id": "vance_r1_a",
+      "name": "Vance's Recruits A",
+      "type": "Human",
+      "minRound": 1,
+      "monsters": [
+        "h1",
+        "h1",
+        "h1b"
+      ]
+    },
+    {
+      "id": "vance_r1_b",
+      "name": "Vance's Recruits B",
+      "type": "Human",
+      "minRound": 1,
+      "monsters": [
+        "h1b",
+        "h1b",
+        "h1"
+      ]
+    },
+    {
+      "id": "vance_r3_a",
+      "name": "Human Shield",
+      "type": "Human",
+      "minRound": 3,
+      "monsters": [
+        "h1",
+        "h2",
+        "h1b",
+        "h2b"
+      ]
+    },
+    {
+      "id": "vance_r3_b",
+      "name": "Quick Response",
+      "type": "Human",
+      "minRound": 3,
+      "monsters": [
+        "h2",
+        "h1b",
+        "h1b",
+        "h1"
+      ]
+    },
+    {
+      "id": "vance_r5_a",
+      "name": "Security Detail",
+      "type": "Human",
+      "minRound": 5,
+      "monsters": [
+        "h3",
+        "h3b",
+        "h2",
+        "h2b",
+        "h1"
+      ]
+    },
+    {
+      "id": "vance_r5_b",
+      "name": "Medical Support",
+      "type": "Human",
+      "minRound": 5,
+      "monsters": [
+        "h3",
+        "h3",
+        "h3b",
+        "h1",
+        "h2"
+      ]
+    },
+    {
+      "id": "vance_r8_a",
+      "name": "Elite Guard",
+      "type": "Human",
+      "minRound": 8,
+      "monsters": [
+        "h4",
+        "h4b",
+        "h3",
+        "h3b",
+        "h5"
+      ]
+    },
+    {
+      "id": "vance_r8_b",
+      "name": "Heavy Patrol",
+      "type": "Human",
+      "minRound": 8,
+      "monsters": [
+        "h4",
+        "h4",
+        "h4b",
+        "h2b",
+        "h3"
+      ]
+    },
+    {
+      "id": "vance_final_a",
+      "name": "Admiral's Fleet",
+      "type": "Human",
+      "minRound": 11,
+      "monsters": [
+        "h5",
+        "h5b",
+        "h4",
+        "h4b",
+        "h3"
+      ]
+    },
+    {
+      "id": "vance_final_b",
+      "name": "Victory Formation",
+      "type": "Human",
+      "minRound": 11,
+      "monsters": [
+        "h5",
+        "h5",
+        "h5b",
+        "h4b",
+        "h4"
+      ]
+    },
+    {
+      "id": "mrat_r1_a",
+      "name": "Rodent Swarm A",
+      "type": "Beast",
+      "minRound": 1,
+      "monsters": [
+        "m1",
+        "m1",
+        "m1b"
+      ]
+    },
+    {
+      "id": "mrat_r1_b",
+      "name": "Rodent Swarm B",
+      "type": "Beast",
+      "minRound": 1,
+      "monsters": [
+        "m1b",
+        "m1b",
+        "m1"
+      ]
+    },
+    {
+      "id": "mrat_r3_a",
+      "name": "Chicken Coop",
+      "type": "Beast",
+      "minRound": 3,
+      "monsters": [
+        "m2",
+        "m2b",
+        "m1",
+        "m1b"
+      ]
+    },
+    {
+      "id": "mrat_r3_b",
+      "name": "Small Pack",
+      "type": "Beast",
+      "minRound": 3,
+      "monsters": [
+        "m2",
+        "m1",
+        "m1",
+        "m1b"
+      ]
+    },
+    {
+      "id": "mrat_r5_a",
+      "name": "The Great Boar",
+      "type": "Beast",
+      "minRound": 5,
+      "monsters": [
+        "m3",
+        "m3b",
+        "m2",
+        "m2b",
+        "m1"
+      ]
+    },
+    {
+      "id": "mrat_r5_b",
+      "name": "Angry Herd",
+      "type": "Beast",
+      "minRound": 5,
+      "monsters": [
+        "m3",
+        "m2",
+        "m2",
+        "m1",
+        "m1b"
+      ]
+    },
+    {
+      "id": "mrat_r8_a",
+      "name": "Alpha Pack",
+      "type": "Beast",
+      "minRound": 8,
+      "monsters": [
+        "m4",
+        "m4b",
+        "m3",
+        "m3b",
+        "m5"
+      ]
+    },
+    {
+      "id": "mrat_r8_b",
+      "name": "Wolf Den",
+      "type": "Beast",
+      "minRound": 8,
+      "monsters": [
+        "m4",
+        "m4",
+        "m4b",
+        "m2",
+        "m1"
+      ]
+    },
+    {
+      "id": "mrat_final_a",
+      "name": "Primal Apex",
+      "type": "Beast",
+      "minRound": 11,
+      "monsters": [
+        "m5",
+        "m5b",
+        "m4",
+        "m4b",
+        "m4"
+      ]
+    },
+    {
+      "id": "mrat_final_b",
+      "name": "Bear Den",
+      "type": "Beast",
+      "minRound": 11,
+      "monsters": [
+        "m5",
+        "m5",
+        "m5b",
+        "m3",
+        "m4"
+      ]
+    },
+    {
+      "id": "brain_r1_a",
+      "name": "Lab Rats A",
+      "type": "Genetic",
+      "minRound": 1,
+      "monsters": [
+        "g1",
+        "g1b",
+        "g1"
+      ]
+    },
+    {
+      "id": "brain_r1_b",
+      "name": "Lab Rats B",
+      "type": "Genetic",
+      "minRound": 1,
+      "monsters": [
+        "g1b",
+        "g1b",
+        "g1"
+      ]
+    },
+    {
+      "id": "brain_r3_a",
+      "name": "Evolved Specimen",
+      "type": "Genetic",
+      "minRound": 3,
+      "monsters": [
+        "g2",
+        "g2b",
+        "g1",
+        "g1b"
+      ]
+    },
+    {
+      "id": "brain_r3_b",
+      "name": "Genetic Drift",
+      "type": "Genetic",
+      "minRound": 3,
+      "monsters": [
+        "g2",
+        "g1",
+        "g1b",
+        "g2b"
+      ]
+    },
+    {
+      "id": "brain_r5_a",
+      "name": "Viral Loading",
+      "type": "Genetic",
+      "minRound": 5,
+      "monsters": [
+        "g3",
+        "g3b",
+        "g2",
+        "g2b",
+        "g1"
+      ]
+    },
+    {
+      "id": "brain_r5_b",
+      "name": "Heavy Haulers",
+      "type": "Genetic",
+      "minRound": 5,
+      "monsters": [
+        "g3",
+        "g3",
+        "g2",
+        "g2b",
+        "g1"
+      ]
+    },
+    {
+      "id": "brain_r8_a",
+      "name": "Modified Ancients",
+      "type": "Genetic",
+      "minRound": 8,
+      "monsters": [
+        "g4",
+        "g4b",
+        "g3",
+        "g3b",
+        "g5"
+      ]
+    },
+    {
+      "id": "brain_r8_b",
+      "name": "Dino Rampage",
+      "type": "Genetic",
+      "minRound": 8,
+      "monsters": [
+        "g4",
+        "g4b",
+        "g4",
+        "g2",
+        "g1"
+      ]
+    },
+    {
+      "id": "brain_final_a",
+      "name": "Perfect Evolution",
+      "type": "Genetic",
+      "minRound": 11,
+      "monsters": [
+        "g5",
+        "g5b",
+        "g4",
+        "g4b",
+        "g4"
+      ]
+    },
+    {
+      "id": "brain_final_b",
+      "name": "Dragon Roar",
+      "type": "Genetic",
+      "minRound": 11,
+      "monsters": [
+        "g5",
+        "g5",
+        "g5b",
+        "g4",
+        "g3"
+      ]
+    },
+    {
+      "id": "pete_r1_a",
+      "name": "Sproutlings A",
+      "type": "Nature",
+      "minRound": 1,
+      "monsters": [
+        "n1",
+        "n1b",
+        "n1"
+      ]
+    },
+    {
+      "id": "pete_r1_b",
+      "name": "Sproutlings B",
+      "type": "Nature",
+      "minRound": 1,
+      "monsters": [
+        "n1b",
+        "n1b",
+        "n1"
+      ]
+    },
+    {
+      "id": "pete_r3_a",
+      "name": "Thorn Bush",
+      "type": "Nature",
+      "minRound": 3,
+      "monsters": [
+        "n2",
+        "n2b",
+        "n1",
+        "n1b"
+      ]
+    },
+    {
+      "id": "pete_r3_b",
+      "name": "Prickly Patch",
+      "type": "Nature",
+      "minRound": 3,
+      "monsters": [
+        "n2",
+        "n2",
+        "n1",
+        "n1b"
+      ]
+    },
+    {
+      "id": "pete_r5_a",
+      "name": "Golden Harvest",
+      "type": "Nature",
+      "minRound": 5,
+      "monsters": [
+        "n3",
+        "n3b",
+        "n2",
+        "n2b",
+        "n1"
+      ]
+    },
+    {
+      "id": "pete_r5_b",
+      "name": "Wheat Field",
+      "type": "Nature",
+      "minRound": 5,
+      "monsters": [
+        "n3",
+        "n3",
+        "n2",
+        "n1",
+        "n1b"
+      ]
+    },
+    {
+      "id": "pete_r8_a",
+      "name": "Verdant Reach",
+      "type": "Nature",
+      "minRound": 8,
+      "monsters": [
+        "n4",
+        "n4b",
+        "n3",
+        "n3b",
+        "n5"
+      ]
+    },
+    {
+      "id": "pete_r8_b",
+      "name": "Root Bound",
+      "type": "Nature",
+      "minRound": 8,
+      "monsters": [
+        "n4",
+        "n4",
+        "n4b",
+        "n2",
+        "n1"
+      ]
+    },
+    {
+      "id": "pete_final_a",
+      "name": "Gaia's Revenge",
+      "type": "Nature",
+      "minRound": 11,
+      "monsters": [
+        "n5",
+        "n5b",
+        "n4",
+        "n4b",
+        "n4"
+      ]
+    },
+    {
+      "id": "pete_final_b",
+      "name": "Ancient Grove",
+      "type": "Nature",
+      "minRound": 11,
+      "monsters": [
+        "n5",
+        "n5",
+        "n5b",
+        "n4b",
+        "n3"
+      ]
+    },
+    {
+      "id": "dread_r1_a",
+      "name": "Dark Sparks A",
+      "type": "Cosmic",
+      "minRound": 1,
+      "monsters": [
+        "c1",
+        "c1b",
+        "c1"
+      ]
+    },
+    {
+      "id": "dread_r1_b",
+      "name": "Dark Sparks B",
+      "type": "Cosmic",
+      "minRound": 1,
+      "monsters": [
+        "c1b",
+        "c1b",
+        "c1"
+      ]
+    },
+    {
+      "id": "dread_r3_a",
+      "name": "Phantom Void",
+      "type": "Cosmic",
+      "minRound": 3,
+      "monsters": [
+        "c2",
+        "c2b",
+        "c1",
+        "c1b"
+      ]
+    },
+    {
+      "id": "dread_r3_b",
+      "name": "Ghostly Presence",
+      "type": "Cosmic",
+      "minRound": 3,
+      "monsters": [
+        "c2",
+        "c2",
+        "c1",
+        "c1b"
+      ]
+    },
+    {
+      "id": "dread_r5_a",
+      "name": "All-Seeing",
+      "type": "Cosmic",
+      "minRound": 5,
+      "monsters": [
+        "c3",
+        "c3b",
+        "c2",
+        "c2b",
+        "c1"
+      ]
+    },
+    {
+      "id": "dread_r5_b",
+      "name": "Gazer Gaze",
+      "type": "Cosmic",
+      "minRound": 5,
+      "monsters": [
+        "c3",
+        "c3",
+        "c2",
+        "c1",
+        "c1b"
+      ]
+    },
+    {
+      "id": "dread_r8_a",
+      "name": "Void Reavers",
+      "type": "Cosmic",
+      "minRound": 8,
+      "monsters": [
+        "c4",
+        "c4b",
+        "c3",
+        "c3b",
+        "c5"
+      ]
+    },
+    {
+      "id": "dread_r8_b",
+      "name": "Ink Cloud",
+      "type": "Cosmic",
+      "minRound": 8,
+      "monsters": [
+        "c4",
+        "c4",
+        "c4b",
+        "c2",
+        "c1"
+      ]
+    },
+    {
+      "id": "dread_final_a",
+      "name": "Reality Tear",
+      "type": "Cosmic",
+      "minRound": 11,
+      "monsters": [
+        "c5",
+        "c5b",
+        "c4",
+        "c4b",
+        "c4"
+      ]
+    },
+    {
+      "id": "dread_final_b",
+      "name": "The Maw",
+      "type": "Cosmic",
+      "minRound": 11,
+      "monsters": [
+        "c5",
+        "c5",
+        "c5b",
+        "c4b",
+        "c3"
+      ]
+    },
+    {
+      "id": "pancake_r1_a",
+      "name": "Worker Drones A",
+      "type": "Mech",
+      "minRound": 1,
+      "monsters": [
+        "k1",
+        "k1b",
+        "k1"
+      ]
+    },
+    {
+      "id": "pancake_r1_b",
+      "name": "Worker Drones B",
+      "type": "Mech",
+      "minRound": 1,
+      "monsters": [
+        "k1b",
+        "k1b",
+        "k1"
+      ]
+    },
+    {
+      "id": "pancake_r3_a",
+      "name": "Rolling Support",
+      "type": "Mech",
+      "minRound": 3,
+      "monsters": [
+        "k2",
+        "k2b",
+        "k1",
+        "k1b"
+      ]
+    },
+    {
+      "id": "pancake_r3_b",
+      "name": "Squad Rover",
+      "type": "Mech",
+      "minRound": 3,
+      "monsters": [
+        "k2",
+        "k2",
+        "k1",
+        "k1b"
+      ]
+    },
+    {
+      "id": "pancake_r5_a",
+      "name": "Protocol Beta",
+      "type": "Mech",
+      "minRound": 5,
+      "monsters": [
+        "k3",
+        "k3b",
+        "k2",
+        "k2b",
+        "k1"
+      ]
+    },
+    {
+      "id": "pancake_r5_b",
+      "name": "Android Army",
+      "type": "Mech",
+      "minRound": 5,
+      "monsters": [
+        "k3",
+        "k3",
+        "k2",
+        "k1",
+        "k1b"
+      ]
+    },
+    {
+      "id": "pancake_r8_a",
+      "name": "Automated Assault",
+      "type": "Mech",
+      "minRound": 8,
+      "monsters": [
+        "k4",
+        "k4b",
+        "k3",
+        "k3b",
+        "k5"
+      ]
+    },
+    {
+      "id": "pancake_r8_b",
+      "name": "Synth Squad",
+      "type": "Mech",
+      "minRound": 8,
+      "monsters": [
+        "k4",
+        "k4",
+        "k4b",
+        "k2",
+        "k1"
+      ]
+    },
+    {
+      "id": "pancake_final_a",
+      "name": "Titanium Storm",
+      "type": "Mech",
+      "minRound": 11,
+      "monsters": [
+        "k5",
+        "k5b",
+        "k4",
+        "k4b",
+        "k4"
+      ]
+    },
+    {
+      "id": "pancake_final_b",
+      "name": "Iron Titan",
+      "type": "Mech",
+      "minRound": 11,
+      "monsters": [
+        "k5",
+        "k5",
+        "k5b",
+        "k4b",
+        "k3"
+      ]
+    },
+    {
+      "id": "mixed_r2_a",
+      "name": "The Mercenaries A",
+      "type": "Any",
+      "minRound": 2,
+      "monsters": [
+        "m1",
+        "h1",
+        "g1",
+        "k1"
+      ]
+    },
+    {
+      "id": "mixed_r2_b",
+      "name": "The Drifters",
+      "type": "Any",
+      "minRound": 2,
+      "monsters": [
+        "n1",
+        "c1",
+        "k1",
+        "h1"
+      ]
+    },
+    {
+      "id": "mixed_r4_a",
+      "name": "Balanced Squad A",
+      "type": "Any",
+      "minRound": 4,
+      "monsters": [
+        "m2",
+        "h2",
+        "n2",
+        "c2",
+        "g1"
+      ]
+    },
+    {
+      "id": "mixed_r4_b",
+      "name": "Hybrid Team",
+      "type": "Any",
+      "minRound": 4,
+      "monsters": [
+        "g2",
+        "k2",
+        "m2",
+        "h1",
+        "n1"
+      ]
+    },
+    {
+      "id": "mixed_r7_a",
+      "name": "Synergy Test A",
+      "type": "Any",
+      "minRound": 7,
+      "monsters": [
+        "m3",
+        "h3",
+        "g3",
+        "k3",
+        "n3"
+      ]
+    },
+    {
+      "id": "mixed_r7_b",
+      "name": "Mixed Elite",
+      "type": "Any",
+      "minRound": 7,
+      "monsters": [
+        "c3",
+        "n3",
+        "k3",
+        "h2",
+        "m2"
+      ]
+    },
+    {
+      "id": "mixed_r10_a",
+      "name": "Final Challenge A",
+      "type": "Any",
+      "minRound": 10,
+      "monsters": [
+        "m5",
+        "h5",
+        "g5",
+        "k5",
+        "c5"
+      ]
+    },
+    {
+      "id": "mixed_r10_b",
+      "name": "World Breakers",
+      "type": "Any",
+      "minRound": 10,
+      "monsters": [
+        "n5",
+        "c5",
+        "k5",
+        "g4",
+        "h4"
+      ]
+    }
   ]
 }
-
-
-

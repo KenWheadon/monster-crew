@@ -1566,9 +1566,10 @@
 
         let metaProgress = {
             trophies: 0,
-            unlockedCards: ["m1", "h1", "g1", "n1", "c1", "k1"], // These are free
-            unlockedCharacters: ["vance", "mrat"],
-            heroWins: {}, // [heroId]: count
+            unlockedCards: ["h1", "h1b"],
+            unlockedCharacters: ["vance"],
+            heroWins: {},   // [heroId]: total wins against them
+            heroFights: {}, // [heroId]: total fights against them
             purchasedUpgrades: [],
             achievements: {}
         };
@@ -1608,8 +1609,11 @@
             if (saved) {
                 const parsed = JSON.parse(saved);
                 metaProgress = { ...metaProgress, ...parsed };
-                // Ensure heroWins is an object
+                // Ensure legacy support
                 if (!metaProgress.heroWins) metaProgress.heroWins = {};
+                if (!metaProgress.heroFights) metaProgress.heroFights = {};
+                if (!metaProgress.unlockedCards) metaProgress.unlockedCards = ["h1", "h1b"];
+                if (!metaProgress.unlockedCharacters) metaProgress.unlockedCharacters = ["vance"];
             }
             updateTrophyDisplay();
         }
@@ -1705,35 +1709,52 @@
             const list = document.getElementById('character-list');
             list.innerHTML = '';
             CHARACTERS.forEach(char => {
+                const isUnlocked = metaProgress.unlockedCharacters.includes(char.id);
+                const fights = metaProgress.heroFights[char.id] || 0;
                 const wins = metaProgress.heroWins[char.id] || 0;
-                const target = char.unlockWins || 0;
-                const isPermanentUnlocked = metaProgress.unlockedCharacters.includes(char.id);
-                const isUnlocked = char.locked === false || isPermanentUnlocked || wins >= target;
                 
-                // Save unlock if newly achieved
-                if (!isPermanentUnlocked && wins >= target && target > 0) {
-                    metaProgress.unlockedCharacters.push(char.id);
-                    saveProgress();
-                }
+                // Formula: 1000 - (fights * 50) - (wins * 50)
+                const cost = Math.max(0, 1000 - (fights * 50) - (wins * 50));
+                const canAfford = metaProgress.trophies >= cost;
 
                 const div = document.createElement('div');
                 div.className = `char-card ${isUnlocked ? '' : 'locked'}`;
                 
                 let progressText = "";
-                if (!isUnlocked && target > 0) {
-                    progressText = `<div style="font-size: 0.9em; margin-top: 10px; color: var(--gold-color);">PROGRESS: ${wins}/${target} WINS</div>`;
+                if (!isUnlocked) {
+                    progressText = `
+                        <div style="font-size: 0.85em; margin-top: 10px; color: var(--gold-color);">
+                            STATS: ${fights} FIGHTS / ${wins} WINS
+                        </div>
+                        <div class="item-price ${canAfford ? '' : 'disabled'}" onclick="unlockCharacterFromSelection(event, '${char.id}', ${cost})" style="margin-top: 10px; padding: 10px; font-size: 1em;">
+                            UNLOCK: 🏆 ${cost}
+                        </div>
+                    `;
                 }
 
                 div.innerHTML = `
                     <div class="char-icon" style="${isUnlocked ? '' : 'filter: grayscale(1) opacity(0.5);'}">${char.icon}</div>
                     <div class="char-title">${char.name} ${isUnlocked ? '' : '🔒'}</div>
-                    <div class="char-desc">${isUnlocked ? char.desc : `Defeat this hero ${target} times to unlock.`}</div>
+                    <div class="char-desc">${isUnlocked ? char.desc : "Unlock this character to lead your crew!"}</div>
                     ${progressText}
                 `;
                 if (isUnlocked) div.onclick = () => selectCharacter(char);
-                else div.style.cursor = 'not-allowed';
+                else div.style.cursor = 'default';
                 list.appendChild(div);
             });
+        }
+
+        function unlockCharacterFromSelection(event, id, cost) {
+            event.stopPropagation();
+            if (metaProgress.trophies >= cost && !metaProgress.unlockedCharacters.includes(id)) {
+                metaProgress.trophies -= cost;
+                metaProgress.unlockedCharacters.push(id);
+                saveProgress();
+                renderCharacterSelection();
+                showToast("Character Unlocked!");
+            } else if (metaProgress.trophies < cost) {
+                showToast("Not enough trophies!");
+            }
         }
 
         function startGame() {
@@ -3005,6 +3026,16 @@
             const draw = battleData.ally.length === 0 && battleData.enemy.length === 0;
             const win = battleData.ally.length > 0;
             
+            // TRACKING FOR UNLOCKS
+            if (state.currentOpponent) {
+                const opId = state.currentOpponent.id;
+                metaProgress.heroFights[opId] = (metaProgress.heroFights[opId] || 0) + 1;
+                if (win) {
+                    metaProgress.heroWins[opId] = (metaProgress.heroWins[opId] || 0) + 1;
+                }
+                saveProgress();
+            }
+
             // COMBAT REWARDS: 1 for Participation, +1 for Win
             metaProgress.trophies += 1;
             runStats.trophiesEarned += 1;
@@ -3045,11 +3076,6 @@
                         op.hp -= opponentHpLoss;
                         if (op.hp <= 0) op.hp = 0;
                     }
-
-                    // Increment Win Count for Unlocks
-                    const heroId = state.currentOpponent.id;
-                    metaProgress.heroWins[heroId] = (metaProgress.heroWins[heroId] || 0) + 1;
-                    saveProgress();
                 }
             }
             
@@ -3783,18 +3809,22 @@
             charUnlocksGrid.innerHTML = '';
             
             // Render Character Unlocks
-            CHARACTERS.filter(c => c.locked).forEach(char => {
+            CHARACTERS.forEach(char => {
                 const isUnlocked = metaProgress.unlockedCharacters.includes(char.id);
-                const canAfford = metaProgress.trophies >= char.unlockPrice;
+                if (char.id === 'vance' || isUnlocked) return; // Don't show in store if unlocked
+
+                const fights = metaProgress.heroFights[char.id] || 0;
+                const wins = metaProgress.heroWins[char.id] || 0;
+                const cost = Math.max(0, 1000 - (fights * 50) - (wins * 50));
+                const canAfford = metaProgress.trophies >= cost;
                 
                 const div = document.createElement('div');
-                div.className = `shop-item ${isUnlocked ? 'purchased' : ''}`;
+                div.className = `shop-item`;
                 div.innerHTML = `
                     <div class="item-icon">${char.icon}</div>
                     <div class="item-name">${char.name}</div>
-                    <div class="item-desc">${char.desc}</div>
-                    ${isUnlocked ? '<div class="item-purchased">UNLOCKED</div>' : 
-                    `<div class="item-price ${canAfford ? '' : 'disabled'}" onclick="unlockCharacter('${char.id}', ${char.unlockPrice})">🏆 ${char.unlockPrice}</div>`}
+                    <div class="item-desc">${char.desc}<br><small>(${fights} Fights, ${wins} Wins)</small></div>
+                    <div class="item-price ${canAfford ? '' : 'disabled'}" onclick="unlockCharacter('${char.id}', ${cost})">🏆 ${cost}</div>
                 `;
                 charUnlocksGrid.appendChild(div);
             });
@@ -3816,19 +3846,27 @@
                 charUpgradesGrid.appendChild(div);
             });
             
-            // Render Card Unlocks
+            // Render Card Unlocks (Filter by character ownership)
             MONSTER_REGISTRY.filter(m => m.locked).forEach(card => {
                 const isUnlocked = metaProgress.unlockedCards.includes(card.id);
+                if (isUnlocked) return;
+
+                const parentChar = CHARACTERS.find(c => c.type === card.type);
+                const isParentUnlocked = parentChar ? metaProgress.unlockedCharacters.includes(parentChar.id) : true;
                 const canAfford = metaProgress.trophies >= card.unlockPrice;
                 
                 const div = document.createElement('div');
-                div.className = `shop-item ${isUnlocked ? 'purchased' : ''}`;
+                div.className = `shop-item ${isParentUnlocked ? '' : 'disabled'}`;
+                let unlockText = `<div class="item-price ${canAfford && isParentUnlocked ? '' : 'disabled'}" onclick="unlockCard('${card.id}', ${card.unlockPrice})">🏆 ${card.unlockPrice}</div>`;
+                if (!isParentUnlocked) {
+                    unlockText = `<div style="font-size: 0.8em; color: #e74c3c; margin-top: 10px;">LOCKED: Unlock ${parentChar ? parentChar.name : card.type + ' Hero'} First</div>`;
+                }
+
                 div.innerHTML = `
-                    <img src="${card.image}" class="item-image">
+                    <img src="${card.image}" class="item-image" style="${isParentUnlocked ? '' : 'filter: grayscale(1); opacity: 0.5;'}">
                     <div class="item-name">${card.name}</div>
                     <div class="item-desc">${card.effectDesc}</div>
-                    ${isUnlocked ? '<div class="item-purchased">UNLOCKED</div>' : 
-                    `<div class="item-price ${canAfford ? '' : 'disabled'}" onclick="unlockCard('${card.id}', ${card.unlockPrice})">🏆 ${card.unlockPrice}</div>`}
+                    ${unlockText}
                 `;
                 cardUnlocksGrid.appendChild(div);
             });
@@ -3846,11 +3884,23 @@
         }
 
         function unlockCard(id, price) {
+            const card = MONSTER_REGISTRY.find(m => m.id === id);
+            const parentChar = CHARACTERS.find(c => c.type === (card ? card.type : ''));
+            const isParentUnlocked = parentChar ? metaProgress.unlockedCharacters.includes(parentChar.id) : true;
+
+            if (!isParentUnlocked) {
+                showToast(`Unlock ${parentChar ? parentChar.name : card.type + ' Hero'} first!`);
+                return;
+            }
+
             if (metaProgress.trophies >= price && !metaProgress.unlockedCards.includes(id)) {
                 metaProgress.trophies -= price;
                 metaProgress.unlockedCards.push(id);
                 saveProgress();
                 renderStore();
+                showToast("Card Unlocked!");
+            } else if (metaProgress.trophies < price) {
+                showToast("Not enough trophies!");
             }
         }
 
