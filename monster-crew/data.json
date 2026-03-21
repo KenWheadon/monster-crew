@@ -839,6 +839,36 @@
       "flavor": "Colossus of steel.",
       "locked": true,
       "unlockPrice": 25
+    },
+    {
+      "id": "c3c", "name": "Nova", "image": "images/nova.png", "tier": "C", "type": "Cosmic",
+      "atk": 6, "hp": 3, "cost": 9, "effect": "Crit:35", "effectDesc": "CRIT: 35% chance to deal double damage.",
+      "flavor": "Explodes with starlight."
+    },
+    {
+      "id": "m4c", "name": "Hyena", "image": "images/hyena.png", "tier": "B", "type": "Beast",
+      "atk": 7, "hp": 5, "cost": 10, "effect": "Echo:45", "effectDesc": "ECHO: 45% chance to attack again immediately.",
+      "flavor": "Laughs as it strikes twice."
+    },
+    {
+      "id": "h2c", "name": "Mercenary", "image": "images/mercenary.png", "tier": "D", "type": "Human",
+      "atk": 2, "hp": 4, "cost": 4, "effect": "Recruit:2", "effectDesc": "RECRUIT: +2/+2 when bought.",
+      "flavor": "Loyal for the right price."
+    },
+    {
+      "id": "k4c", "name": "Relay", "image": "images/relay.png", "tier": "B", "type": "Mech",
+      "atk": 5, "hp": 8, "cost": 11, "effect": "Aura:2", "effectDesc": "AURA: Adjacent allies gain +2 Attack.",
+      "flavor": "Commands the line."
+    },
+    {
+      "id": "n3c", "name": "Berry", "image": "images/berry.png", "tier": "C", "type": "Nature",
+      "atk": 2, "hp": 7, "cost": 6, "effect": "Bounty:4", "effectDesc": "BOUNTY: +4 gold when this dies.",
+      "flavor": "Sweet even in sacrifice."
+    },
+    {
+      "id": "h5c", "name": "Paladin", "image": "images/paladin.png", "tier": "A", "type": "Human",
+      "atk": 7, "hp": 15, "cost": 15, "effect": "LastStand", "effectDesc": "LASTSTAND: Survives with 1 HP once per combat.",
+      "flavor": "For the crew!"
     }
   ],
   "upgrades": [

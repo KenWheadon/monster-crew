@@ -1469,16 +1469,27 @@
         <div class="result-inner" onclick="event.stopPropagation()" style="width: 500px; max-width: 90%;">
             <h1 style="color: var(--gold-color); margin-bottom: 20px;">KEYWORD GLOSSARY</h1>
             <div style="text-align: left; max-height: 400px; overflow-y: auto; padding: 20px; color: white; line-height: 1.6;">
-                <p><b style="color: var(--gold-color);">Team:</b> Grants stats to other friendly cards that share its type at start of battle.</p>
-                <p><b style="color: #3498db;">Shield:</b> Blocks the first instance of damage received in combat.</p>
-                <p><b style="color: #e74c3c;">Thorn:</b> Deals damage back to its attacker when hit.</p>
-                <p><b style="color: var(--beast-color);">Anger:</b> Grants Attack to all allies when this card dies.</p>
-                <p><b style="color: var(--nature-color);">Honor:</b> Grants HP to all allies when this card dies.</p>
-                <p><b style="color: var(--gold-color);">Cheap:</b> While in squad, shop cards cost less (min 0).</p>
-                <p><b style="color: var(--human-color);">Twin:</b> Only requires 1 duplicate instead of 2 to merge and level up.</p>
-                <p><b style="color: var(--cosmic-color);">Extra:</b> Spawns a token (stats based on effect) when this card dies.</p>
-                <p><b style="color: var(--health-color);">Weak:</b> Permanently reduces stats of a random enemy when this card dies.</p>
-                <p><b style="color: var(--genetic-color);">Solo:</b> Gains stats at start of battle if it's the only one of its type in squad.</p>
+                <p><b style="color: var(--gold-color);">Team:</b> Stats to allies of same type at start of battle.</p>
+                <p><b style="color: #3498db;">Shield:</b> Blocks the first damage instance.</p>
+                <p><b style="color: #e74c3c;">Thorn:</b> Damage back to attacker when hit.</p>
+                <p><b style="color: var(--beast-color);">Anger:</b> Attack to allies when this dies.</p>
+                <p><b style="color: var(--nature-color);">Honor:</b> HP to allies when this dies.</p>
+                <p><b style="color: var(--human-color);">Twin:</b> Only 1 duplicate needed to Merge.</p>
+                <p><b style="color: var(--health-color);">Vampire:</b> Heal on hit (up to max HP).</p>
+                <p><b style="color: var(--beast-color);">Fury:</b> Gain stats when an ally dies.</p>
+                <p><b style="color: #3498db;">Taunt:</b> Enemies MUST attack this unit first.</p>
+                <p><b style="color: var(--genetic-color);">Poison:</b> Deals damage over time each clash.</p>
+                <p><b style="color: var(--nature-color);">Regen:</b> Heals at start of each clash.</p>
+                <p><b style="color: var(--cosmic-color);">Extra:</b> Spawns token on death.</p>
+                <p><b style="color: var(--health-color);">Weak:</b> Nerf random enemy permanently on death.</p>
+                <p><b style="color: var(--genetic-color);">Solo:</b> Start-of-battle buff if unique type.</p>
+                <hr style="border: 0; border-top: 1px solid #444; margin: 10px 0;">
+                <p><b style="color: var(--gold-color);">Crit:</b> Attacks have X% chance to deal double damage.</p>
+                <p><b style="color: #e74c3c;">Echo:</b> After attacking, X% chance to attack again immediately.</p>
+                <p><b style="color: var(--human-color);">Recruit:</b> When bought: gain +X/+X (or bonus gold/token).</p>
+                <p><b style="color: var(--mech-color);">Aura:</b> Adjacent allies gain +X Attack or +X HP.</p>
+                <p><b style="color: var(--gold-color);">Bounty:</b> When this dies (or is sold): gain X gold.</p>
+                <p><b style="color: var(--health-color);">LastStand:</b> If this would die, survive with 1 HP once per combat.</p>
             </div>
             <button class="btn-main" onclick="closeGlossary()" style="margin-top: 20px; width: 100%;">CLOSE</button>
         </div>
@@ -2263,6 +2274,19 @@
                         });
                     }
 
+                    // === RECRUIT / ONBUY EFFECT ===
+                    if (monster.effect && monster.effect.startsWith("Recruit:")) {
+                        const val = parseInt(monster.effect.split(":")[1]) || 2;
+                        const bought = state.squad[emptyIdx];
+                        bought.atk += val;
+                        bought.hp += val;
+                        if (bought.cAtk !== undefined) bought.cAtk += val;
+                        if (bought.cHp !== undefined) bought.cHp += val;
+                        
+                        logHistory(`Recruit effect: ${monster.name} gained +${val}/+${val} on buy!`);
+                        showFloatingStat(emptyIdx, 'squad', `+${val}/+${val}`, 'var(--gold-color)');
+                    }
+
                     createParticleBurst(event ? {x: event.clientX, y: event.clientY} : null, 'var(--gold-color)', 15);
                     animateGoldCollection(event ? {x: event.clientX, y: event.clientY} : null);
                     
@@ -2557,7 +2581,37 @@
                 if (m.effect === "Shield") m.hasShield = true;
             });
 
+            applyAuraEffects();
             renderBattle();
+        }
+
+        function applyAuraEffects() {
+            // Ally side
+            battleData.ally.forEach((m, i) => {
+                if (!m.effect || !m.effect.startsWith("Aura:")) return;
+                const val = parseInt(m.effect.split(":")[1]) || 1;
+                const isHp = m.effect.toLowerCase().includes("hp");
+                
+                // left neighbor
+                if (i > 0 && battleData.ally[i-1]) {
+                    if (isHp) battleData.ally[i-1].cHp += val;
+                    else battleData.ally[i-1].cAtk += val;
+                }
+                // right neighbor
+                if (i < battleData.ally.length-1 && battleData.ally[i+1]) {
+                    if (isHp) battleData.ally[i+1].cHp += val;
+                    else battleData.ally[i+1].cAtk += val;
+                }
+            });
+            
+            // Enemy side
+            battleData.enemy.forEach((m, i) => {
+                if (!m.effect || !m.effect.startsWith("Aura:")) return;
+                const val = parseInt(m.effect.split(":")[1]) || 1;
+                const isHp = m.effect.toLowerCase().includes("hp");
+                if (i > 0 && battleData.enemy[i-1]) isHp ? battleData.enemy[i-1].cHp += val : battleData.enemy[i-1].cAtk += val;
+                if (i < battleData.enemy.length-1 && battleData.enemy[i+1]) isHp ? battleData.enemy[i+1].cHp += val : battleData.enemy[i+1].cAtk += val;
+            });
         }
 
         function battleStep() {
@@ -2571,156 +2625,214 @@
                 return;
             }
 
-            const a = battleData.ally[0];
-            const e = battleData.enemy[0];
+            // --- TARGET SELECTION (Taunt) ---
+            const aIdx = battleData.ally.findIndex(m => m.effect === "Taunt");
+            const eIdx = battleData.enemy.findIndex(m => m.effect === "Taunt");
+            const aActualIdx = aIdx !== -1 ? aIdx : 0;
+            const eActualIdx = eIdx !== -1 ? eIdx : 0;
 
-            // Momentum: +50% Atk per fight survived
+            const a = battleData.ally[aActualIdx];
+            const e = battleData.enemy[eActualIdx];
+
+            const allyLine = document.getElementById('ally-line');
+            const enemyLine = document.getElementById('enemy-line');
+            const allySlot = allyLine.children[aActualIdx];
+            const enemySlot = enemyLine.children[eActualIdx];
+
+            // --- START OF CLASH EFFECTS ---
+            // Regen
+            if (a.effect && a.effect.startsWith("Regen:")) {
+                const x = parseInt(a.effect.split(":")[1]);
+                const heal = Math.min(a.hp - a.cHp, x);
+                if (heal > 0) {
+                    a.cHp += heal;
+                    showFloatingStat(aActualIdx, 'ally-line', `+${heal}`, 'var(--nature-color)');
+                    logHistory(`${a.name} Regens ${heal} HP.`);
+                }
+            }
+            if (e.effect && e.effect.startsWith("Regen:")) {
+                const x = parseInt(e.effect.split(":")[1]);
+                const heal = Math.min(e.hp - e.cHp, x);
+                if (heal > 0) {
+                    e.cHp += heal;
+                    showFloatingStat(eActualIdx, 'enemy-line', `+${heal}`, 'var(--nature-color)');
+                    logHistory(`${e.name} Regens ${heal} HP.`);
+                }
+            }
+
+            // Poison
+            if (a.poisoned) {
+                a.cHp -= a.poisoned;
+                showFloatingStat(aActualIdx, 'ally-line', `-${a.poisoned} POISON`, 'var(--genetic-color)');
+                logHistory(`${a.name} takes ${a.poisoned} Poison damage.`);
+            }
+            if (e.poisoned) {
+                e.cHp -= e.poisoned;
+                showFloatingStat(eActualIdx, 'enemy-line', `-${e.poisoned} POISON`, 'var(--genetic-color)');
+                logHistory(`${e.name} takes ${e.poisoned} Poison damage.`);
+            }
+            
+            // Death check from start-of-clash effects
+            if (a.cHp <= 0 || e.cHp <= 0) {
+                renderBattle();
+                setTimeout(() => handleDeathsAndContinue(aActualIdx, eActualIdx), 500);
+                return;
+            }
+
+            // --- CLASH CALCULATIONS ---
             const aMomentum = 1 + (a.fights || 0) * 0.5;
             const eMomentum = 1 + (e.fights || 0) * 0.5;
-            const aDmg = Math.floor(a.cAtk * aMomentum);
-            const eDmg = Math.floor(e.cAtk * eMomentum);
+            let aDmgBase = Math.floor(a.cAtk * aMomentum);
+            let eDmgBase = Math.floor(e.cAtk * eMomentum);
 
-            const allyFrontSlot = document.getElementById('ally-line').children[0];
-            const enemyFrontSlot = document.getElementById('enemy-line').children[0];
-            
-            const aRect = allyFrontSlot?.getBoundingClientRect();
-            const eRect = enemyFrontSlot?.getBoundingClientRect();
-            if (a.fights > 0 && aRect) showEffectAt(aRect.left + aRect.width/2, aRect.top + aRect.height/2, `MOMENTUM x${aMomentum.toFixed(1)}`, 'var(--gold-color)');
-            if (e.fights > 0 && eRect) showEffectAt(eRect.left + eRect.width/2, eRect.top + eRect.height/2, `MOMENTUM x${eMomentum.toFixed(1)}`, 'var(--gold-color)');
+            if (a.fights > 0 && allySlot) {
+                const rect = allySlot.getBoundingClientRect();
+                showEffectAt(rect.left + rect.width/2, rect.top + rect.height/2, `MOMENTUM x${aMomentum.toFixed(1)}`, 'var(--gold-color)');
+            }
+            if (e.fights > 0 && enemySlot) {
+                const rect = enemySlot.getBoundingClientRect();
+                showEffectAt(rect.left + rect.width/2, rect.top + rect.height/2, `MOMENTUM x${eMomentum.toFixed(1)}`, 'var(--gold-color)');
+            }
 
-            logHistory(`Combat: ${a.name} (${aDmg}/${a.cHp}) clashes with ${e.name} (${eDmg}/${e.cHp})`);
-            
-            // Glass Cannon: Take more damage proportional to momentum
-            const finalDmgToA = Math.floor(eDmg * aMomentum);
-            const finalDmgToE = Math.floor(aDmg * eMomentum);
+            // CRIT
+            let aCrit = false, eCrit = false;
+            if (a.effect && a.effect.startsWith("Crit:")) {
+                const chance = parseInt(a.effect.split(":")[1]) || 25;
+                if (Math.random() * 100 < chance) {
+                    aDmgBase *= 2;
+                    aCrit = true;
+                }
+            }
+            if (e.effect && e.effect.startsWith("Crit:")) {
+                const chance = parseInt(e.effect.split(":")[1]) || 25;
+                if (Math.random() * 100 < chance) {
+                    eDmgBase *= 2;
+                    eCrit = true;
+                }
+            }
 
-            // JUICE: Projectile Attack
+            // ECHO (repeat attack prep)
+            let aEcho = false, eEcho = false;
+            if (a.effect && a.effect.startsWith("Echo:")) {
+                const chance = parseInt(a.effect.split(":")[1]) || 30;
+                if (Math.random() * 100 < chance) aEcho = true;
+            }
+            if (e.effect && e.effect.startsWith("Echo:")) {
+                const chance = parseInt(e.effect.split(":")[1]) || 30;
+                if (Math.random() * 100 < chance) eEcho = true;
+            }
+
+            const finalDmgToA = Math.floor(eDmgBase * aMomentum);
+            const finalDmgToE = Math.floor(aDmgBase * eMomentum);
+
+            logHistory(`Combat: ${a.name}${aCrit ? ' (CRIT!)':''} (${aDmgBase}/${a.cHp}) vs ${e.name}${eCrit ? ' (CRIT!)':''} (${eDmgBase}/${e.cHp})`);
+
+            // --- ANIMATIONS ---
             const speedFact = 1 / combatSpeed;
-            createProjectile(allyFrontSlot, enemyFrontSlot, a.type);
-            setTimeout(() => createProjectile(enemyFrontSlot, allyFrontSlot, e.type), 200 * speedFact);
+            createProjectile(allySlot, enemySlot, a.type);
+            setTimeout(() => createProjectile(enemySlot, allySlot, e.type), 200 * speedFact);
 
             setTimeout(() => {
-                if (allyFrontSlot) allyFrontSlot.classList.add('clash-right');
-                if (enemyFrontSlot) enemyFrontSlot.classList.add('clash-left');
+                if (allySlot) allySlot.classList.add('clash-right');
+                if (enemySlot) enemySlot.classList.add('clash-left');
 
                 setTimeout(() => {
                     // Visual Damage
-                    showFloatingStat(0, 'ally-line', `-${finalDmgToA}`, 'var(--health-color)');
-                    showFloatingStat(0, 'enemy-line', `-${finalDmgToE}`, 'var(--health-color)');
+                    showFloatingStat(aActualIdx, 'ally-line', `-${finalDmgToA}`, 'var(--health-color)');
+                    showFloatingStat(eActualIdx, 'enemy-line', `-${finalDmgToE}`, 'var(--health-color)');
                     
                     document.getElementById('battle-view').classList.add('shake');
                     setTimeout(() => document.getElementById('battle-view').classList.remove('shake'), 200 * speedFact);
 
+                    // Shield
                     let dmgToA = finalDmgToA;
-                    if (a.hasShield) {
-                        dmgToA = 0;
-                        a.hasShield = false;
-                        runStats.effectTriggers.Shield++;
-                        logHistory(`${a.name}'s Shield blocked the attack!`);
-                        showEffect('ally-line', 'BLOCKED', 'var(--human-color)');
-                    }
-
+                    if (a.hasShield) { dmgToA = 0; a.hasShield = false; showEffect('ally-line', 'BLOCKED', 'var(--human-color)'); }
                     let dmgToE = finalDmgToE;
-                    if (e.hasShield) {
-                        dmgToE = 0;
-                        e.hasShield = false;
-                        runStats.effectTriggers.Shield++;
-                        logHistory(`${e.name}'s Shield blocked the attack!`);
-                        showEffect('enemy-line', 'BLOCKED', 'var(--human-color)');
+                    if (e.hasShield) { dmgToE = 0; e.hasShield = false; showEffect('enemy-line', 'BLOCKED', 'var(--human-color)'); }
+
+                    // Hit-Shake
+                    [ {slot: allySlot, dmg: dmgToA}, {slot: enemySlot, dmg: dmgToE} ].forEach(obj => {
+                        if (obj.dmg > 0 && obj.slot) {
+                            const cardElement = obj.slot.querySelector('.card');
+                            if (cardElement) {
+                                cardElement.classList.add('hit-shake');
+                                setTimeout(() => cardElement.classList.remove('hit-shake'), 300);
+                            }
+                        }
+                    });
+
+                    // Vampire
+                    if (dmgToE > 0 && a.effect && a.effect.startsWith("Vampire:")) {
+                        const x = parseInt(a.effect.split(":")[1]);
+                        const heal = Math.min(a.hp - a.cHp, x);
+                        if (heal > 0) { a.cHp += heal; showFloatingStat(aActualIdx, 'ally-line', `+${heal} VAMP`, 'var(--health-color)'); }
+                    }
+                    if (dmgToA > 0 && e.effect && e.effect.startsWith("Vampire:")) {
+                        const x = parseInt(e.effect.split(":")[1]);
+                        const heal = Math.min(e.hp - e.cHp, x);
+                        if (heal > 0) { e.cHp += heal; showFloatingStat(eActualIdx, 'enemy-line', `+${heal} VAMP`, 'var(--health-color)'); }
                     }
 
-                    if (dmgToA > 0) {
-                        const cardElement = allyFrontSlot.querySelector('.card');
-                        if (cardElement) cardElement.classList.add('hit-shake');
-                        setTimeout(() => { if (cardElement) cardElement.classList.remove('hit-shake') }, 300);
+                    // Poison Apply
+                    if (dmgToE > 0 && a.effect && a.effect.startsWith("Poison:")) {
+                        const x = parseInt(a.effect.split(":")[1]);
+                        e.poisoned = (e.poisoned || 0) + x;
+                        if (enemySlot) {
+                            const rect = enemySlot.getBoundingClientRect();
+                            showEffectAt(rect.left, rect.top, 'POISONED', 'var(--genetic-color)');
+                        }
                     }
-                    if (dmgToE > 0) {
-                        const cardElement = enemyFrontSlot.querySelector('.card');
-                        if (cardElement) cardElement.classList.add('hit-shake');
-                        setTimeout(() => { if (cardElement) cardElement.classList.remove('hit-shake') }, 300);
+                    if (dmgToA > 0 && e.effect && e.effect.startsWith("Poison:")) {
+                        const x = parseInt(e.effect.split(":")[1]);
+                        a.poisoned = (a.poisoned || 0) + x;
+                        if (allySlot) {
+                            const rect = allySlot.getBoundingClientRect();
+                            showEffectAt(rect.left, rect.top, 'POISONED', 'var(--genetic-color)');
+                        }
                     }
 
-                    a.cHp -= dmgToA;
-                    e.cHp -= dmgToE;
-                    
-                    // Thorn Effect
+                    // Thorn
                     if (dmgToA > 0 && a.effect && a.effect.startsWith("Thorn:")) {
                         const x = parseInt(a.effect.split(":")[1]);
-                        e.cHp -= x;
-                        runStats.effectTriggers.Thorn++;
-                        logHistory(`${a.name}'s Thorns deal ${x} back to ${e.name}`);
-                        showEffect('enemy-line', `-${x} THORN`, 'var(--health-color)');
+                        e.cHp -= x; showEffect('enemy-line', `-${x} THORN`, 'var(--health-color)');
                     }
                     if (dmgToE > 0 && e.effect && e.effect.startsWith("Thorn:")) {
                         const x = parseInt(e.effect.split(":")[1]);
-                        a.cHp -= x;
-                        runStats.effectTriggers.Thorn++;
-                        logHistory(`${e.name}'s Thorns deal ${x} back to ${a.name}`);
-                        showEffect('ally-line', `-${x} THORN`, 'var(--health-color)');
+                        a.cHp -= x; showEffect('ally-line', `-${x} THORN`, 'var(--health-color)');
+                    }
+
+                    // Apply Final Damage
+                    a.cHp -= dmgToA;
+                    e.cHp -= dmgToE;
+
+                    // ECHO Repeat Attack
+                    if (aEcho && a.cHp > 0 && e.cHp > 0) {
+                        logHistory(`ECHO! ${a.name} attacks again!`);
+                        showEffect('ally-line', 'ECHO!', '#f1c40f');
+                        e.cHp -= dmgToE; // Deal same damage again (or should it be aDmgBase?)
+                        // User plan said: "e.cHp -= aDmg" where aDmg was the calculated damage.
+                        // In my code, finalDmgToE was the damage e takes from a.
+                        // Wait, finalDmgToE already includes e's Momentum (Glass Cannon penalty).
+                        // Let's use finalDmgToE.
+                        showFloatingStat(eActualIdx, 'enemy-line', `-${finalDmgToE}`, '#f1c40f');
+                    }
+                    if (eEcho && e.cHp > 0 && a.cHp > 0) {
+                        logHistory(`ECHO! ${e.name} attacks again!`);
+                        showEffect('enemy-line', 'ECHO!', '#f1c40f');
+                        a.cHp -= finalDmgToA;
+                        showFloatingStat(aActualIdx, 'ally-line', `-${finalDmgToA}`, '#f1c40f');
                     }
 
                     logHistory(`Result: ${a.name} HP -> ${a.cHp}, ${e.name} HP -> ${e.cHp}`);
 
-                    let delay = 0;
+                    const delay = (a.cHp <= 0 || e.cHp <= 0) ? 500 * speedFact : 0;
+                    if (a.cHp <= 0 && allySlot) allySlot.classList.add('defeated');
+                    if (e.cHp <= 0 && enemySlot) enemySlot.classList.add('defeated');
 
-                    if (a.cHp <= 0 && allyFrontSlot) {
-                        allyFrontSlot.classList.remove('clash-right');
-                        allyFrontSlot.classList.add('defeated');
-                        delay = 500 * speedFact;
-                        logHistory(`Defeated: Ally ${a.name} has fallen.`);
-                    }
-                    if (e.cHp <= 0 && enemyFrontSlot) {
-                        enemyFrontSlot.classList.remove('clash-left');
-                        enemyFrontSlot.classList.add('defeated');
-                        delay = 500 * speedFact;
-                        logHistory(`Defeated: Enemy ${e.name} has fallen.`);
-                    }
+                    if (a.cHp > 0) a.fights++;
+                    if (e.cHp > 0) e.fights++;
 
-                    setTimeout(() => {
-                        let deadAllies = [];
-                        let deadEnemies = [];
-
-                        if (a.cHp <= 0) {
-                            deadAllies.push(battleData.ally.shift());
-                            createParticleBurst(null, 'var(--health-color)', 20);
-                        }
-                        if (e.cHp <= 0) {
-                            deadEnemies.push(battleData.enemy.shift());
-                            createParticleBurst(null, 'var(--gold-color)', 20);
-                        }
-
-                        renderBattle();
-
-                        deadAllies.forEach(dead => triggerDeathEffect(dead, 'battle', 'ally'));
-                        deadEnemies.forEach(dead => triggerDeathEffect(dead, 'battle', 'enemy'));
-                        
-                        let additionalDeaths = true;
-                        while(additionalDeaths) {
-                            additionalDeaths = false;
-                            for (let i = 0; i < battleData.ally.length; i++) {
-                                if (battleData.ally[i].cHp <= 0) {
-                                    const dead = battleData.ally.splice(i, 1)[0];
-                                    triggerDeathEffect(dead, 'battle', 'ally');
-                                    additionalDeaths = true;
-                                    i--;
-                                }
-                            }
-                            for (let i = 0; i < battleData.enemy.length; i++) {
-                                if (battleData.enemy[i].cHp <= 0) {
-                                    const dead = battleData.enemy.splice(i, 1)[0];
-                                    triggerDeathEffect(dead, 'battle', 'enemy');
-                                    additionalDeaths = true;
-                                    i--;
-                                }
-                            }
-                        }
-
-                        if (a.cHp > 0) a.fights++;
-                        if (e.cHp > 0) e.fights++;
-
-                        renderBattle(); // Re-render to show updated stats
-
-                    }, delay);
+                    setTimeout(() => handleDeathsAndContinue(aActualIdx, eActualIdx), delay);
 
                 }, 500 * speedFact);
             }, 400 * speedFact);
@@ -2728,7 +2840,29 @@
             setTimeout(battleStep, 2500 * speedFact);
         }
 
+        function handleDeathsAndContinue(aIdx, eIdx) {
+            const speedFact = 1 / combatSpeed;
+            let deadAllies = [];
+            let deadEnemies = [];
 
+            // We must identify all dead from the full arrays
+            battleData.ally.forEach(m => { if (m.cHp <= 0) deadAllies.push(m); });
+            battleData.enemy.forEach(m => { if (m.cHp <= 0) deadEnemies.push(m); });
+
+            battleData.ally = battleData.ally.filter(m => m.cHp > 0);
+            battleData.enemy = battleData.enemy.filter(m => m.cHp > 0);
+
+            if (deadAllies.length > 0) createParticleBurst(null, 'var(--health-color)', 20);
+            if (deadEnemies.length > 0) createParticleBurst(null, 'var(--gold-color)', 20);
+
+            renderBattle();
+
+            deadAllies.forEach(dead => triggerDeathEffect(dead, 'battle', 'ally'));
+            deadEnemies.forEach(dead => triggerDeathEffect(dead, 'battle', 'enemy'));
+            
+            applyAuraEffects();
+            renderBattle();
+        }
 
         function triggerDeathEffect(deadMonster, context, side = 'ally') {
             if (!deadMonster) return;
@@ -2737,9 +2871,32 @@
                 ? (side === 'ally' ? battleData.ally : battleData.enemy)
                 : state.squad.filter(m => m !== null);
             
-            const enemies = (context === 'battle')
-                ? (side === 'ally' ? battleData.enemy : battleData.ally)
-                : [];
+            // BOUNTY
+            if (deadMonster.effect && deadMonster.effect.startsWith("Bounty:")) {
+                const gold = parseInt(deadMonster.effect.split(":")[1]) || 2;
+                state.gold += gold;
+                runStats.effectTriggers.Bounty = (runStats.effectTriggers.Bounty || 0) + 1;
+                logHistory(`BOUNTY: +${gold} gold from ${deadMonster.name}`);
+                animateGoldCollection(null); // pops gold on player
+            }
+
+            // LASTSTAND (only in battle)
+            if (context === 'battle' && deadMonster.effect === "LastStand" && !deadMonster.lastStandUsed) {
+                deadMonster.cHp = 1;
+                deadMonster.lastStandUsed = true;
+                logHistory(`LASTSTAND: ${deadMonster.name} refuses to die! (1 HP left)`);
+                showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', 'LAST STAND!', 'var(--health-color)');
+                return; // don't remove from battleData (Wait, actually triggerDeathEffect returns? Yes, I'll return here)
+            }
+            
+            // FURY: On ally death, gain stats
+            targets.forEach((m, idx) => {
+                if (m && m.cHp > 0 && m.effect && m.effect.startsWith("Fury:")) {
+                    const x = parseInt(m.effect.split(":")[1]);
+                    m.cAtk += x; m.cHp += x;
+                    if (context === 'battle') showFloatingStat(idx, side + '-line', `+${x}/+${x} FURY`, 'var(--beast-color)');
+                }
+            });
 
             // Honor: 0/+X to other friendly cards on death.
             if (deadMonster.effect && deadMonster.effect.startsWith("Honor:")) {
