@@ -1814,14 +1814,14 @@
         function selectCharacter(char) {
             state.character = char;
             
-            // Apply Meta Upgrades
-            let startHP = 10;
+            // HP Overhaul: Everyone starts with 2 HP
+            let startHP = 2;
             let startGold = 5;
 
             if (metaProgress.purchasedUpgrades.includes("gold_1")) startGold += 5;
             if (metaProgress.purchasedUpgrades.includes("gold_2")) startGold += 10;
-            if (metaProgress.purchasedUpgrades.includes("hp_1")) startHP += 10;
-            if (metaProgress.purchasedUpgrades.includes("hp_2")) startHP += 20;
+            // HP meta-upgrades disabled or scaled for faster play?
+            // User said "everyone starts with 2 hp", so we ignore hp upgrades for now.
 
             state.hp = startHP;
             state.gold = startGold;
@@ -1847,7 +1847,7 @@
                 name: c.name,
                 icon: c.icon,
                 typeWeights: c.typeWeights,
-                hp: 10, // AI gets standard HP
+                hp: 2, // AI starts with 2 HP
                 gold: startGold,
                 squad: [null, null, null, null, null]
             }));
@@ -3121,43 +3121,57 @@
                 logHistory(`Combat End: DEFEAT. +1 Trophy (Combat Participated)`);
             }
 
-            let hpLoss = 0;
-            let opponentHpLoss = 0;
+            // HP Overhaul: Damage is fixed at round * 1.5 floor. Winners GAIN, Losers LOSE.
+            const wager = Math.floor(state.round * 1.5) || 1;
+            let hpChange = wager;
 
             if (draw) {
-                logHistory(`--- Battle End: DRAW ---`);
+                logHistory(`--- Battle End: DRAW (No HP change) ---`);
             } else if (!win) {
-                const aliveMonsters = battleData.enemy.length;
-                hpLoss = state.round + aliveMonsters;
-                state.hp -= hpLoss;
+                state.hp -= hpChange;
                 if (state.hp <= 0) state.hp = 0;
-                logHistory(`--- Battle End: DEFEAT (-${hpLoss} Player HP) ---`);
+                logHistory(`--- Battle End: DEFEAT (-${hpChange} Player HP) ---`);
                 
                 if (state.characters) {
                     let pChar = state.characters.find(c => c.id === state.character.id);
                     if (pChar) pChar.hp = state.hp;
                 }
             } else {
+                state.hp += hpChange;
+                logHistory(`--- Battle End: RECOVERY (+${hpChange} Player HP) ---`);
+                
+                if (state.characters) {
+                    let pChar = state.characters.find(c => c.id === state.character.id);
+                    if (pChar) pChar.hp = state.hp;
+                }
+
                 if (state.currentOpponent) {
-                    const aliveMonsters = battleData.ally.length;
-                    opponentHpLoss = state.round + aliveMonsters;
-                    logHistory(`--- Battle End: VICTORY (-${opponentHpLoss} ${state.currentOpponent.name} HP) ---`);
+                    logHistory(`--- Battle End: VICTORY (-${hpChange} ${state.currentOpponent.name} HP) ---`);
                     
                     let op = state.characters.find(c => c.id === state.currentOpponent.id);
                     if (op) {
-                        op.hp -= opponentHpLoss;
+                        op.hp -= hpChange;
                         if (op.hp <= 0) op.hp = 0;
                     }
                 }
             }
             
             if (state.characters) {
-                let bystanders = state.characters.filter(c => c.id !== state.character?.id && c.id !== state.currentOpponent?.id && c.hp > 0);
+                let bystanders = state.characters.filter(c => c.id !== state.character?.id && c.id !== (state.currentOpponent ? state.currentOpponent.id : '') && c.hp > 0);
                 for (let i = 0; i < bystanders.length; i += 2) {
                     if (i + 1 < bystanders.length) {
-                        let loser = Math.random() < 0.5 ? bystanders[i] : bystanders[i + 1];
-                        loser.hp -= (state.round + Math.floor(Math.random() * 3));
-                        if (loser.hp <= 0) loser.hp = 0;
+                        let c1 = bystanders[i];
+                        let c2 = bystanders[i+1];
+                        let wagerAmount = Math.floor(state.round * 0.75) || 1;
+                        if (Math.random() < 0.5) {
+                            c1.hp += wagerAmount;
+                            c2.hp -= wagerAmount;
+                        } else {
+                            c2.hp += wagerAmount;
+                            c1.hp -= wagerAmount;
+                        }
+                        if (c1.hp < 0) c1.hp = 0;
+                        if (c2.hp < 0) c2.hp = 0;
                     }
                 }
             }
@@ -3549,7 +3563,8 @@
 
             // Update Expansion Buttons
             const squadBtn = document.getElementById('btn-expand-squad');
-            if (state.squadSize < 8) {
+            const hasSquadUpgrade = metaProgress.purchasedUpgrades.includes("squad_expansion");
+            if (state.squadSize < 8 && hasSquadUpgrade) {
                 const cost = state.squadSize === 5 ? 15 : (state.squadSize === 6 ? 20 : 25);
                 squadBtn.style.display = 'block';
                 squadBtn.innerHTML = `Expand Team (${state.squadSize} -> ${state.squadSize+1}) <br> ${cost}<img src="images/win-icon.png" class="icon-img" style="width:1em">`;
@@ -3559,7 +3574,8 @@
             }
 
             const shopBtn = document.getElementById('btn-expand-shop');
-            if (state.shopSize < 5) {
+            const hasShopUpgrade = metaProgress.purchasedUpgrades.includes("shop_expansion");
+            if (state.shopSize < 5 && hasShopUpgrade) {
                 const cost = state.shopSize === 3 ? 10 : 15;
                 shopBtn.style.display = 'block';
                 shopBtn.innerHTML = `Expand Shop (${state.shopSize} -> ${state.shopSize+1}) <br> ${cost}<img src="images/win-icon.png" class="icon-img" style="width:1em">`;

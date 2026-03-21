@@ -1018,6 +1018,20 @@
       "desc": "Start with +20 max HP.",
       "price": 15,
       "icon": "❤️"
+    },
+    {
+      "id": "squad_expansion",
+      "name": "Commander License",
+      "desc": "Required to buy Squad size increases in-game.",
+      "price": 20,
+      "icon": "🎖️"
+    },
+    {
+      "id": "shop_expansion",
+      "name": "Broker License",
+      "desc": "Required to buy Shop slot increases in-game.",
+      "price": 20,
+      "icon": "💹"
     }
   ],
   "tierNames": [
