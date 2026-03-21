@@ -429,6 +429,52 @@
             text-transform: uppercase;
         }
 
+        /* NEW INTERACTIVE EFFECTS */
+        .slot:hover .card {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+            cursor: pointer;
+        }
+        
+        .slot:active .card {
+            transform: translateY(-5px) scale(0.98);
+            transition: 0.1s;
+        }
+
+        .card-glow-gold { box-shadow: 0 0 15px var(--gold-color) !important; }
+        .card-glow-green { box-shadow: 0 0 15px #2ecc71 !important; }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px rgba(255,215,0,0.3); }
+            50% { box-shadow: 0 0 15px rgba(255,215,0,0.6); }
+            100% { box-shadow: 0 0 5px rgba(255,215,0,0.3); }
+        }
+        
+        .can-afford {
+            animation: pulse-glow 2s infinite;
+        }
+
+        .attacking-left { animation: attackLeft 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); }
+        .attacking-right { animation: attackRight 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); }
+        
+        @keyframes attackLeft {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-50px) scale(1.1); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes attackRight {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(50px) scale(1.1); }
+            100% { transform: translateX(0); }
+        }
+
+        .hit-shake { animation: hitShake 0.3s; }
+        @keyframes hitShake {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-5deg) scale(0.9); }
+            75% { transform: rotate(5deg) scale(0.9); }
+        }
+
         .floating-text {
             position: absolute;
             font-weight: bold;
@@ -616,9 +662,22 @@
         }
 
         .char-card:hover {
-            transform: scale(1.05);
-            border-color: var(--text-color);
-            box-shadow: 0 0 20px rgba(255,0,85,0.4);
+            transform: scale(1.1) translateY(-10px);
+            border-color: var(--gold-color);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6), 0 0 20px rgba(255,215,0,0.3);
+            background: rgba(255,255,255,0.1);
+        }
+
+        .low-hp {
+            animation: hpPulse 1s infinite alternate;
+            color: #ff4d4d !important;
+            border-color: #ff4d4d !important;
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.5);
+        }
+
+        @keyframes hpPulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.1); opacity: 0.8; }
         }
 
         .char-icon {
@@ -1920,6 +1979,14 @@
 
 
         function refreshShop() {
+            // JUICE: Reroll animation
+            const slots = document.querySelectorAll('#shop-view-slots .slot');
+            slots.forEach((s, i) => {
+                s.style.animation = 'none';
+                void s.offsetWidth;
+                s.style.animation = `popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${i * 0.05}s forwards`;
+            });
+
             state.shop = Array(state.shopSize).fill(null).map(() => {
                 let tier = getWeightedRandomTier(state.round);
                 let selectedMonster = getMonsterForShop(tier);
@@ -2175,8 +2242,8 @@
                         });
                     }
 
-                    // JUICE: Particle burst and sound placeholder
                     createParticleBurst(event ? {x: event.clientX, y: event.clientY} : null, 'var(--gold-color)', 15);
+                    animateGoldCollection(event ? {x: event.clientX, y: event.clientY} : null);
                     
                     closeInspector();
                     updateUI();
@@ -2202,6 +2269,7 @@
 
             state.squad[index] = null;
             state.gold += 1; 
+            animateGoldCollection({x: rect.left + rect.width/2, y: rect.top + rect.height/2});
             logHistory(`Sacrificed ${sacrificed.name} (Slot ${index+1}) for 1 Gold.`);
             
             if (state.character && state.character.id === 'mrat' && sacrificed.type === 'Beast') {
@@ -2297,6 +2365,7 @@
                 mainMonster.effect = scaleEffectValue(mainMonster.effect, mainMonster.level);
                 mainMonster.effectDesc = scaleEffectDesc(mainMonster.effectDesc, mainMonster.level);
 
+                showEffectAt(mainRect.left + mainRect.width/2, mainRect.top + mainRect.height/2, 'LEVEL UP!', 'var(--gold-color)');
                 logHistory(`Merged into Level ${mainMonster.level} ${mainMonster.name}. Gained +${bonusAtk}/+${bonusHp}. Effect scaled!`);
                 
                 runStats.merges++;
@@ -2504,27 +2573,36 @@
                     document.getElementById('battle-view').classList.add('shake');
                     setTimeout(() => document.getElementById('battle-view').classList.remove('shake'), 200 * speedFact);
 
-                    const a = battleData.ally[0];
-                    const e = battleData.enemy[0];
-
                     let dmgToA = e.cAtk;
-                    if (a.effect === "Shield" || a.hasShield) {
+                    if (a.hasShield) {
                         dmgToA = 0;
                         a.hasShield = false;
                         runStats.effectTriggers.Shield++;
                         logHistory(`${a.name}'s Shield blocked the attack!`);
                         showEffect('ally-line', 'BLOCKED', 'var(--human-color)');
                     }
-                    a.cHp -= dmgToA;
 
                     let dmgToE = a.cAtk;
-                    if (e.effect === "Shield" || e.hasShield) {
+                    if (e.hasShield) {
                         dmgToE = 0;
                         e.hasShield = false;
                         runStats.effectTriggers.Shield++;
                         logHistory(`${e.name}'s Shield blocked the attack!`);
                         showEffect('enemy-line', 'BLOCKED', 'var(--human-color)');
                     }
+
+                    if (dmgToA > 0) {
+                        const cardElement = allyFrontSlot.querySelector('.card');
+                        if (cardElement) cardElement.classList.add('hit-shake');
+                        setTimeout(() => { if (cardElement) cardElement.classList.remove('hit-shake') }, 300);
+                    }
+                    if (dmgToE > 0) {
+                        const cardElement = enemyFrontSlot.querySelector('.card');
+                        if (cardElement) cardElement.classList.add('hit-shake');
+                        setTimeout(() => { if (cardElement) cardElement.classList.remove('hit-shake') }, 300);
+                    }
+
+                    a.cHp -= dmgToA;
                     e.cHp -= dmgToE;
                     
                     // Thorn Effect
@@ -2564,8 +2642,14 @@
                         let deadAllies = [];
                         let deadEnemies = [];
 
-                        if (a.cHp <= 0) deadAllies.push(battleData.ally.shift());
-                        if (e.cHp <= 0) deadEnemies.push(battleData.enemy.shift());
+                        if (a.cHp <= 0) {
+                            deadAllies.push(battleData.ally.shift());
+                            createParticleBurst(null, 'var(--health-color)', 20);
+                        }
+                        if (e.cHp <= 0) {
+                            deadEnemies.push(battleData.enemy.shift());
+                            createParticleBurst(null, 'var(--gold-color)', 20);
+                        }
 
                         renderBattle();
 
@@ -2824,18 +2908,23 @@
                     state.characters.forEach(ai => { if (ai.hp > 0) ai.gold += earnedGold; });
                 }
 
-                if (draw) {
-                    title.innerText = "DRAW";
-                    title.style.color = 'var(--gold-color)';
-                    desc.innerHTML = `Stalemate! Both squads were wiped.<br>You earned ${earnedGold} Gold.`;
-                } else if (win) {
+                if (areOthersDead && !isPlayerDead) {
                     title.innerText = "VICTORY!";
                     title.style.color = 'var(--gold-color)';
-                    desc.innerHTML = `You won the round!<br>You earned ${earnedGold} Gold.`;
-                } else {
+                    desc.innerHTML = `You earned ${earnedGold} Gold and 10 Trophies!`;
+                    createVictoryConfetti();
+                } else if (!areOthersDead && isPlayerDead) {
                     title.innerText = "DEFEAT";
                     title.style.color = 'var(--health-color)';
                     desc.innerHTML = `You lost ${hpLoss} HP.<br>You earned ${earnedGold} Gold.`;
+                } else if (draw) {
+                    title.innerText = "DRAW";
+                    title.style.color = 'var(--gold-color)';
+                    desc.innerHTML = `Stalemate! Both squads were wiped.<br>You earned ${earnedGold} Gold.`;
+                } else { // This covers the case where player is not dead, others are not dead, and it's not a draw (i.e., player won the round but not the game)
+                    title.innerText = "VICTORY!";
+                    title.style.color = 'var(--gold-color)';
+                    desc.innerHTML = `You won the round!<br>You earned ${earnedGold} Gold.`;
                 }
                 btn.innerText = "CONTINUE";
                 btn.onclick = closeBattleResult;
@@ -2954,14 +3043,79 @@
 
         function showEffect(containerId, text, color) {
             const container = document.getElementById(containerId);
-            const target = container.children.length > 0 ? container.children[0] : container;
+            if (!container) return;
+            const rect = container.children[0]?.getBoundingClientRect() || container.getBoundingClientRect();
+            showEffectAt(rect.left + rect.width / 2, rect.top + rect.height / 2, text, color);
+        }
+
+        function showEffectAt(x, y, text, color) {
             const el = document.createElement('div');
             el.className = 'floating-text';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            el.style.color = color || 'white';
+            el.style.fontSize = '2.5em';
+            el.style.textShadow = '0 0 10px rgba(0,0,0,0.8), 0 0 5px ' + color;
             el.innerText = text;
-            el.style.color = color;
-            el.style.left = "50%";
-            target.appendChild(el);
+            document.body.appendChild(el);
             setTimeout(() => el.remove(), 1000);
+        }
+
+        function animateGoldCollection(sourcePos) {
+            if (!sourcePos) return;
+            const goldEl = document.getElementById('player-gold');
+            if (!goldEl) return;
+            const target = goldEl.getBoundingClientRect();
+            
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const coin = document.createElement('div');
+                    coin.style.position = 'fixed';
+                    coin.style.left = sourcePos.x + 'px';
+                    coin.style.top = sourcePos.y + 'px';
+                    coin.style.width = '15px';
+                    coin.style.height = '15px';
+                    coin.style.background = 'var(--gold-color)';
+                    coin.style.borderRadius = '50%';
+                    coin.style.boxShadow = '0 0 10px gold';
+                    coin.style.zIndex = '9999';
+                    coin.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    document.body.appendChild(coin);
+                    
+                    // Force reflow
+                    void coin.offsetWidth;
+                    
+                    coin.style.left = (target.left + target.width / 2) + 'px';
+                    coin.style.top = (target.top + target.height / 2) + 'px';
+                    coin.style.transform = 'scale(0.5)';
+                    coin.style.opacity = '0';
+                    
+                    setTimeout(() => coin.remove(), 700);
+                }, i * 100);
+            }
+        }
+
+        function createVictoryConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const conf = document.createElement('div');
+                conf.style.position = 'fixed';
+                conf.style.width = '10px';
+                conf.style.height = '10px';
+                conf.style.background = ['#f1c40f', '#e67e22', '#e74c3c', '#3498db', '#2ecc71'][Math.floor(Math.random()*5)];
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.top = '-10px';
+                conf.style.zIndex = '9999';
+                conf.style.borderRadius = '2px';
+                conf.style.transition = `transform ${Math.random()*3+2}s linear, top ${Math.random()*3+2}s linear`;
+                document.body.appendChild(conf);
+                
+                setTimeout(() => {
+                    conf.style.top = '110vh';
+                    conf.style.transform = `rotate(${Math.random()*1000}deg) translateX(${Math.random()*100-50}px)`;
+                }, 10);
+                
+                setTimeout(() => conf.remove(), 5000);
+            }
         }
 
         function calculateEffectiveStats(squad) {
@@ -2998,7 +3152,12 @@
             document.getElementById('id-round-display') ? document.getElementById('id-round-display').innerText = `ROUND ${state.round}` : null;
             if (document.getElementById('round-display')) document.getElementById('round-display').innerText = `ROUND ${state.round}`;
             document.getElementById('shop-level-num').innerText = state.shopLevel;
-            document.getElementById('player-hp').innerHTML = `<img src="images/hp.png" class="icon-img"> ${state.hp}`;
+            if (document.getElementById('player-hp')) {
+                const hpEl = document.getElementById('player-hp');
+                hpEl.innerHTML = `<img src="images/hp.png" class="icon-img"> ${Math.max(0, state.hp)}`;
+                if (state.hp <= 3 && state.hp > 0) hpEl.classList.add('low-hp');
+                else hpEl.classList.remove('low-hp');
+            }
             document.getElementById('player-gold').innerHTML = `<img src="images/bag1.png" class="coin-bag icon-img" style="transform: scale(1.5); margin-right: 5px;"> <img src="images/win-icon.png" class="icon-img"> ${state.gold}`;
 
             updateTrophyDisplay();
@@ -3287,8 +3446,16 @@
                 return sum;
             }, 0);
             let currentCost = isShop ? Math.max(0, m.cost - totalDiscount) : m.cost;
+            
+            // Add indicator if player can afford it
+            if (isShop && state.gold >= currentCost) {
+                slot.classList.add('can-afford');
+            } else {
+                slot.classList.remove('can-afford');
+            }
+
             slot.innerHTML = `
-                ${isShop ? `<div class="card-cost">${currentCost}<img src="images/win-icon.png" class="icon-img" style="width:1em;height:1em;"></div>` : ''}
+                ${isShop ? `<div class="card-cost" style="${state.gold < currentCost ? 'color: #e74c3c; border-color: #e74c3c;' : ''}">${currentCost}<img src="images/win-icon.png" class="icon-img" style="width:1em;height:1em;"></div>` : ''}
                 <div class="card-tier" style="background: ${tierColor};">${tierStr}</div>
                 <div class="card-level">${lvl}</div>
                 <div class="card">
