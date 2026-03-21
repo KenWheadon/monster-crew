@@ -2435,7 +2435,8 @@
                 cHp: Number(s.hp) || 1, 
                 cAtk: Number(s.atk) || 1,
                 hp: Number(s.hp) || 1,
-                atk: Number(s.atk) || 1
+                atk: Number(s.atk) || 1,
+                fights: 0
             }));
             
             if (state.currentOpponent) {
@@ -2447,7 +2448,8 @@
                         cHp: Number(s.hp) || 1, 
                         cAtk: Number(s.atk) || 1,
                         hp: Number(s.hp) || 1,
-                        atk: Number(s.atk) || 1
+                        atk: Number(s.atk) || 1,
+                        fights: 0
                     }));
                 } else {
                     battleData.enemy = [];
@@ -2551,10 +2553,25 @@
             const a = battleData.ally[0];
             const e = battleData.enemy[0];
 
-            logHistory(`Combat: ${a.name} (${a.cAtk}/${a.cHp}) clashes with ${e.name} (${e.cAtk}/${e.cHp})`);
+            // Momentum: +50% Atk per fight survived
+            const aMomentum = 1 + (a.fights || 0) * 0.5;
+            const eMomentum = 1 + (e.fights || 0) * 0.5;
+            const aDmg = Math.floor(a.cAtk * aMomentum);
+            const eDmg = Math.floor(e.cAtk * eMomentum);
 
             const allyFrontSlot = document.getElementById('ally-line').children[0];
             const enemyFrontSlot = document.getElementById('enemy-line').children[0];
+            
+            const aRect = allyFrontSlot?.getBoundingClientRect();
+            const eRect = enemyFrontSlot?.getBoundingClientRect();
+            if (a.fights > 0 && aRect) showEffectAt(aRect.left + aRect.width/2, aRect.top + aRect.height/2, `MOMENTUM x${aMomentum.toFixed(1)}`, 'var(--gold-color)');
+            if (e.fights > 0 && eRect) showEffectAt(eRect.left + eRect.width/2, eRect.top + eRect.height/2, `MOMENTUM x${eMomentum.toFixed(1)}`, 'var(--gold-color)');
+
+            logHistory(`Combat: ${a.name} (${aDmg}/${a.cHp}) clashes with ${e.name} (${eDmg}/${e.cHp})`);
+            
+            // Glass Cannon: Take more damage proportional to momentum
+            const finalDmgToA = Math.floor(eDmg * aMomentum);
+            const finalDmgToE = Math.floor(aDmg * eMomentum);
 
             // JUICE: Projectile Attack
             const speedFact = 1 / combatSpeed;
@@ -2567,13 +2584,13 @@
 
                 setTimeout(() => {
                     // Visual Damage
-                    showFloatingStat(0, 'ally-line', `-${e.cAtk}`, 'var(--health-color)');
-                    showFloatingStat(0, 'enemy-line', `-${a.cAtk}`, 'var(--health-color)');
+                    showFloatingStat(0, 'ally-line', `-${finalDmgToA}`, 'var(--health-color)');
+                    showFloatingStat(0, 'enemy-line', `-${finalDmgToE}`, 'var(--health-color)');
                     
                     document.getElementById('battle-view').classList.add('shake');
                     setTimeout(() => document.getElementById('battle-view').classList.remove('shake'), 200 * speedFact);
 
-                    let dmgToA = e.cAtk;
+                    let dmgToA = finalDmgToA;
                     if (a.hasShield) {
                         dmgToA = 0;
                         a.hasShield = false;
@@ -2582,7 +2599,7 @@
                         showEffect('ally-line', 'BLOCKED', 'var(--human-color)');
                     }
 
-                    let dmgToE = a.cAtk;
+                    let dmgToE = finalDmgToE;
                     if (e.hasShield) {
                         dmgToE = 0;
                         e.hasShield = false;
@@ -2676,6 +2693,9 @@
                                 }
                             }
                         }
+
+                        if (a.cHp > 0) a.fights++;
+                        if (e.cHp > 0) e.fights++;
 
                         renderBattle(); // Re-render to show updated stats
 
