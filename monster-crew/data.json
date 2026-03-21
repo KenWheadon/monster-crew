@@ -116,7 +116,7 @@
       "effect": "Team:1",
       "effectDesc": "TEAM: +1/0 to each other friendly Human.",
       "flavor": "Happy to be here.",
-      "locked": false,
+      "locked": true,
       "unlockPrice": 5
     },
     {

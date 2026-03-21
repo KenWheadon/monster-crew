@@ -1257,18 +1257,31 @@
 <body>
 
     <div id="title-screen">
-        <div class="trophy-counter">
-             🏆 <span id="main-trophy-count">0</span>
+        <div id="title-default-view">
+            <div class="trophy-counter">
+                 🏆 <span id="main-trophy-count">0</span>
+            </div>
+            <div id="trophy-progress-container" style="position: absolute; bottom: 15%; width: 40%; background: rgba(0,0,0,0.7); height: 12px; border-radius: 6px; border: 1px solid var(--gold-color); overflow: visible; display: flex; align-items: center;">
+                <div id="trophy-progress-fill" style="height: 100%; background: var(--gold-color); width: 0%; transition: width 1s; box-shadow: 0 0 10px var(--gold-color);"></div>
+                <div id="trophy-next-milestone-label" style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.8em; font-weight: bold; color: var(--gold-color); white-space: nowrap;">NEXT REWARD: ???</div>
+            </div>
+            <img src="images/logo.png" alt="Monster Crew Logo" id="title-logo">
+            <div class="title-buttons">
+                <button class="btn-title" onclick="startGame()">PLAY</button>
+                <button class="btn-title" onclick="openStore()">UPGRADES</button>
+                <button class="btn-title" onclick="openCredits()">CREDITS</button>
+            </div>
         </div>
-        <div id="trophy-progress-container" style="position: absolute; bottom: 15%; width: 40%; background: rgba(0,0,0,0.7); height: 12px; border-radius: 6px; border: 1px solid var(--gold-color); overflow: visible; display: flex; align-items: center;">
-            <div id="trophy-progress-fill" style="height: 100%; background: var(--gold-color); width: 0%; transition: width 1s; box-shadow: 0 0 10px var(--gold-color);"></div>
-            <div id="trophy-next-milestone-label" style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.8em; font-weight: bold; color: var(--gold-color); white-space: nowrap;">NEXT REWARD: ???</div>
-        </div>
-        <img src="images/logo.png" alt="Monster Crew Logo" id="title-logo">
-        <div class="title-buttons">
-            <button class="btn-title" onclick="startGame()">PLAY</button>
-            <button class="btn-title" onclick="openStore()">UPGRADES</button>
-            <button class="btn-title" onclick="openCredits()">CREDITS</button>
+        
+        <div id="title-onboarding-view" style="display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+            <img src="images/logo.png" alt="Monster Crew Logo" style="height: 120px; margin-bottom: 20px;">
+            <div style="background: rgba(0,0,0,0.8); padding: 30px; border-radius: 20px; border: 2px solid var(--gold-color); text-align: center; max-width: 400px; box-shadow: 0 0 30px rgba(0,0,0,1);">
+                <div style="font-size: 1.5em; color: var(--gold-color); margin-bottom: 15px; font-weight: bold;">WELCOME, CAPTAIN</div>
+                <div id="onboarding-char-preview" style="margin-bottom: 20px;">
+                    <!-- Vance Preview -->
+                </div>
+                <button class="btn-main" onclick="startGame()" style="width: 100%; font-size: 1.5em; padding: 20px;">START VOYAGE</button>
+            </div>
         </div>
     </div>
 
@@ -1566,10 +1579,11 @@
 
         let metaProgress = {
             trophies: 0,
-            unlockedCards: ["h1", "h1b"],
+            unlockedCards: ["h1"],
             unlockedCharacters: ["vance"],
             heroWins: {},   // [heroId]: total wins against them
             heroFights: {}, // [heroId]: total fights against them
+            runsFinished: 0,
             purchasedUpgrades: [],
             achievements: {}
         };
@@ -1612,10 +1626,35 @@
                 // Ensure legacy support
                 if (!metaProgress.heroWins) metaProgress.heroWins = {};
                 if (!metaProgress.heroFights) metaProgress.heroFights = {};
-                if (!metaProgress.unlockedCards) metaProgress.unlockedCards = ["h1", "h1b"];
+                if (metaProgress.runsFinished === undefined) metaProgress.runsFinished = 0;
+                if (!metaProgress.unlockedCards) metaProgress.unlockedCards = ["h1"];
                 if (!metaProgress.unlockedCharacters) metaProgress.unlockedCharacters = ["vance"];
             }
             updateTrophyDisplay();
+            checkOnboarding();
+        }
+
+        function checkOnboarding() {
+            const isFirstRun = metaProgress.runsFinished === 0;
+            const defaultView = document.getElementById('title-default-view');
+            const onboardingView = document.getElementById('title-onboarding-view');
+            
+            if (isFirstRun && CHARACTERS) {
+                defaultView.style.display = 'none';
+                onboardingView.style.display = 'flex';
+                
+                const vance = CHARACTERS.find(c => c.id === 'vance');
+                if (vance) {
+                    document.getElementById('onboarding-char-preview').innerHTML = `
+                        <div class="char-icon" style="margin: 0 auto 10px;">${vance.icon}</div>
+                        <div style="font-weight: bold; font-size: 1.2em;">${vance.name}</div>
+                        <div style="font-size: 0.9em; color: #ccc; margin-top: 5px;">${vance.desc}</div>
+                    `;
+                }
+            } else {
+                defaultView.style.display = 'block';
+                onboardingView.style.display = 'none';
+            }
         }
 
         function saveProgress() {
@@ -1758,10 +1797,18 @@
         }
 
         function startGame() {
-            document.getElementById('title-screen').style.display = 'none';
-            document.getElementById('character-select-modal').style.display = 'flex';
-            updateTrophyDisplay();
-            renderCharacterSelection();
+            const isFirstTime = metaProgress.runsFinished === 0;
+            
+            if (isFirstTime) {
+                document.getElementById('title-screen').style.display = 'none';
+                const vance = CHARACTERS.find(c => c.id === 'vance');
+                selectCharacter(vance);
+            } else {
+                document.getElementById('title-screen').style.display = 'none';
+                document.getElementById('character-select-modal').style.display = 'flex';
+                updateTrophyDisplay();
+                renderCharacterSelection();
+            }
         }
 
         function selectCharacter(char) {
@@ -2607,32 +2654,51 @@
         }
 
         function applyAuraEffects() {
+            // 1. Remove Previous Aura from all surviving participants
+            [...battleData.ally, ...battleData.enemy].forEach(m => {
+                if (m.auraAtk) { m.cAtk -= m.auraAtk; m.auraAtk = 0; }
+                if (m.auraHp) { m.cHp -= m.auraHp; m.auraHp = 0; }
+            });
+
+            // 2. Re-calculate NEW Aura
             // Ally side
             battleData.ally.forEach((m, i) => {
                 if (!m.effect || !m.effect.startsWith("Aura:")) return;
-                const val = parseInt(m.effect.split(":")[1]) || 1;
-                const isHp = m.effect.toLowerCase().includes("hp");
+                const parts = m.effect.split(":");
+                const val = parseInt(parts[1]) || 1;
+                const isHp = parts[0].toLowerCase().includes("hp") || m.effect.toLowerCase().includes("aura (hp)");
                 
-                // left neighbor
-                if (i > 0 && battleData.ally[i-1]) {
-                    if (isHp) battleData.ally[i-1].cHp += val;
-                    else battleData.ally[i-1].cAtk += val;
-                }
-                // right neighbor
-                if (i < battleData.ally.length-1 && battleData.ally[i+1]) {
-                    if (isHp) battleData.ally[i+1].cHp += val;
-                    else battleData.ally[i+1].cAtk += val;
-                }
+                const applyToIdx = (idx) => {
+                    const target = battleData.ally[idx];
+                    if (!target) return;
+                    if (isHp) { target.cHp += val; target.auraHp = (target.auraHp || 0) + val; }
+                    else { target.cAtk += val; target.auraAtk = (target.auraAtk || 0) + val; }
+                };
+
+                if (i > 0) applyToIdx(i - 1);
+                if (i < battleData.ally.length - 1) applyToIdx(i + 1);
             });
             
             // Enemy side
             battleData.enemy.forEach((m, i) => {
                 if (!m.effect || !m.effect.startsWith("Aura:")) return;
-                const val = parseInt(m.effect.split(":")[1]) || 1;
-                const isHp = m.effect.toLowerCase().includes("hp");
-                if (i > 0 && battleData.enemy[i-1]) isHp ? battleData.enemy[i-1].cHp += val : battleData.enemy[i-1].cAtk += val;
-                if (i < battleData.enemy.length-1 && battleData.enemy[i+1]) isHp ? battleData.enemy[i+1].cHp += val : battleData.enemy[i+1].cAtk += val;
+                const parts = m.effect.split(":");
+                const val = parseInt(parts[1]) || 1;
+                const isHp = parts[0].toLowerCase().includes("hp") || m.effect.toLowerCase().includes("aura (hp)");
+
+                const applyToIdx = (idx) => {
+                    const target = battleData.enemy[idx];
+                    if (!target) return;
+                    if (isHp) { target.cHp += val; target.auraHp = (target.auraHp || 0) + val; }
+                    else { target.cAtk += val; target.auraAtk = (target.auraAtk || 0) + val; }
+                };
+
+                if (i > 0) applyToIdx(i - 1);
+                if (i < battleData.enemy.length - 1) applyToIdx(i + 1);
             });
+
+            // Check if anyone died from losing an aura? (Unlikely to happen often, but safe to check)
+            // But handleDeathsAndContinue will catch it in the next loop.
         }
 
         function battleStep() {
@@ -2858,7 +2924,6 @@
                 }, 500 * speedFact);
             }, 400 * speedFact);
 
-            setTimeout(battleStep, 2500 * speedFact);
         }
 
         function handleDeathsAndContinue(aIdx, eIdx) {
@@ -2883,6 +2948,13 @@
             
             applyAuraEffects();
             renderBattle();
+
+            // Next step check
+            if (battleData.ally.length > 0 && battleData.enemy.length > 0) {
+                setTimeout(battleStep, 800 * speedFact);
+            } else {
+                endBattle();
+            }
         }
 
         function triggerDeathEffect(deadMonster, context, side = 'ally') {
@@ -3116,6 +3188,9 @@
                 
                 metaProgress.trophies += placementTrophies;
                 runStats.trophiesEarned += placementTrophies;
+                
+                // Onboarding check: Mark first run as finished
+                metaProgress.runsFinished = (metaProgress.runsFinished || 0) + 1;
                 saveProgress();
 
                 desc.innerHTML = `You finished in ${placement}${getPlacementSuffix(placement)} place.<br>
@@ -3150,7 +3225,11 @@
                     title.innerText = "DRAW";
                     title.style.color = 'var(--gold-color)';
                     desc.innerHTML = `Stalemate! Both squads were wiped.<br>You earned ${earnedGold} Gold.`;
-                } else { // This covers the case where player is not dead, others are not dead, and it's not a draw (i.e., player won the round but not the game)
+                } else if (!win) {
+                    title.innerText = "DEFEAT";
+                    title.style.color = 'var(--health-color)';
+                    desc.innerHTML = `You lost the round!<br>You lost ${hpLoss} HP.`;
+                } else {
                     title.innerText = "VICTORY!";
                     title.style.color = 'var(--gold-color)';
                     desc.innerHTML = `You won the round!<br>You earned ${earnedGold} Gold.`;
