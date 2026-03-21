@@ -579,6 +579,30 @@
             background: rgba(255,255,255,0.1);
         }
 
+        /* GLOBAL MODAL STYLES */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001; /* Above title screen (5000) and other modals */
+            backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            background: #1a1a2e;
+            border: 4px solid var(--text-color);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            position: relative;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .text-center { text-align: center; }
+
         /* BATTLE RESULT MODAL */
         #battle-result-modal {
             position: fixed;
@@ -587,7 +611,7 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 2000;
+            z-index: 8000;
             backdrop-filter: blur(5px);
         }
 
@@ -1043,6 +1067,13 @@
             to { border-color: var(--gold-color); box-shadow: 0 0 10px var(--gold-color); }
         }
 
+        @keyframes pulse-btn {
+            0% { transform: scale(1); box-shadow: 0 0 0px transparent; }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px var(--gold-color); }
+            100% { transform: scale(1); box-shadow: 0 0 0px transparent; }
+        }
+        .pulse { animation: pulse-btn 1.5s infinite ease-in-out; }
+
         .type-icon { width: 1.1em; height: 1.1em; vertical-align: middle; }
         
         .item-image {
@@ -1282,6 +1313,21 @@
                 </div>
                 <button class="btn-main" onclick="startGame()" style="width: 100%; font-size: 1.5em; padding: 20px;">START VOYAGE</button>
             </div>
+        </div>
+    </div>
+
+    <!-- TUTORIAL REWARD MODAL (Pre-placed in HTML for reliability) -->
+    <div id="tutorial-reward-modal" class="modal">
+        <div class="modal-content text-center" style="max-width: 450px; border: 2px solid var(--gold-color); box-shadow: 0 0 20px rgba(241, 196, 15, 0.4);">
+            <h2 style="color:var(--gold-color); margin-top:0;">CONGRATULATIONS CAPTAIN!</h2>
+            <div style="font-size: 4em; margin: 10px 0; filter: drop-shadow(0 0 5px #f1c40f);">⚔️</div>
+            <p>You survived your first voyage through the stars. Every legend starts with a single duel!</p>
+            <div style="background: rgba(46, 204, 113, 0.1); padding: 20px; border-radius: 12px; margin: 20px 0; border: 2px dashed #2ecc71;">
+                <div style="color:#2ecc71; font-weight:bold; margin-bottom:5px;">MISSION REWARD:</div>
+                The <b>Recruit</b> card has been added to your collection for <b>FREE</b>!
+            </div>
+            <p style="font-size: 0.9em; opacity: 0.9;">Visit the <b>UPGRADES</b> screen from the main menu to unlock more crew, increase your squad size, and become unstoppable.</p>
+            <button class="btn-main" onclick="dismissTutorialReward();" style="width: 100%; margin-top: 10px;">START CAREER</button>
         </div>
     </div>
 
@@ -1584,6 +1630,7 @@
             heroWins: {},   // [heroId]: total wins against them
             heroFights: {}, // [heroId]: total fights against them
             runsFinished: 0,
+            tutorialRewardSeen: false,
             purchasedUpgrades: [],
             achievements: {}
         };
@@ -1627,11 +1674,39 @@
                 if (!metaProgress.heroWins) metaProgress.heroWins = {};
                 if (!metaProgress.heroFights) metaProgress.heroFights = {};
                 if (metaProgress.runsFinished === undefined) metaProgress.runsFinished = 0;
+                if (metaProgress.tutorialRewardSeen === undefined) metaProgress.tutorialRewardSeen = false;
                 if (!metaProgress.unlockedCards) metaProgress.unlockedCards = ["h1"];
                 if (!metaProgress.unlockedCharacters) metaProgress.unlockedCharacters = ["vance"];
             }
             updateTrophyDisplay();
             checkOnboarding();
+            checkTutorial();
+        }
+
+        function checkTutorial() {
+            // If they finished run 1 and haven't seen the reward modal yet
+            if (metaProgress.runsFinished >= 1 && !metaProgress.tutorialRewardSeen) {
+                // Free gift: Recruit!
+                const cards = new Set(metaProgress.unlockedCards || ["h1"]);
+                cards.add("h1b");
+                metaProgress.unlockedCards = Array.from(cards);
+                
+                // Show the modal (already in HTML)
+                const modal = document.getElementById('tutorial-reward-modal');
+                if (modal) modal.style.display = 'flex';
+                
+                // Add pulse effect to Store button to guide the user
+                const storeBtns = document.querySelectorAll('button[onclick="openStore()"]');
+                storeBtns.forEach(btn => btn.classList.add('pulse'));
+            }
+        }
+
+        function dismissTutorialReward() {
+            metaProgress.tutorialRewardSeen = true;
+            saveProgress();
+            const modal = document.getElementById('tutorial-reward-modal');
+            if (modal) modal.style.display = 'none';
+            openStore();
         }
 
         function checkOnboarding() {
@@ -1842,7 +1917,12 @@
                 trophiesEarned: 0
             };
 
-            state.characters = CHARACTERS.map(c => ({
+            const isFirstRun = metaProgress.runsFinished === 0;
+            const startingRoster = isFirstRun ? 
+                CHARACTERS.filter(c => c.id === 'vance' || c.id === 'mrat') : 
+                CHARACTERS;
+
+            state.characters = startingRoster.map(c => ({
                 id: c.id,
                 name: c.name,
                 icon: c.icon,
@@ -3234,7 +3314,7 @@
                 } else if (!areOthersDead && isPlayerDead) {
                     title.innerText = "DEFEAT";
                     title.style.color = 'var(--health-color)';
-                    desc.innerHTML = `You lost ${hpLoss} HP.<br>You earned ${earnedGold} Gold.`;
+                    desc.innerHTML = `You were eliminated!<br>You lost ${hpChange} HP.`;
                 } else if (draw) {
                     title.innerText = "DRAW";
                     title.style.color = 'var(--gold-color)';
@@ -3242,7 +3322,7 @@
                 } else if (!win) {
                     title.innerText = "DEFEAT";
                     title.style.color = 'var(--health-color)';
-                    desc.innerHTML = `You lost the round!<br>You lost ${hpLoss} HP.`;
+                    desc.innerHTML = `You lost the round!<br>You lost ${hpChange} HP.`;
                 } else {
                     title.innerText = "VICTORY!";
                     title.style.color = 'var(--gold-color)';
