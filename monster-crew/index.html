@@ -1283,6 +1283,93 @@
                 margin: 0 5px;
             }
         }
+
+        /* GALLERY CARDS */
+        .gallery-item {
+            width: 220px;
+            height: 310px;
+            perspective: 1500px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .gallery-item-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .gallery-item.flipped .gallery-item-inner {
+            transform: rotateY(180deg);
+        }
+
+        .gallery-card-front, .gallery-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            border: 4px solid var(--gold-color);
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        .gallery-card-front {
+            justify-content: center;
+        }
+
+        .gallery-card-back {
+            transform: rotateY(180deg);
+            padding: 20px 15px;
+            justify-content: space-between;
+        }
+
+        .gallery-card-front img {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 25px;
+        }
+        
+        .gallery-card-front .name {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .gallery-card-front .tier {
+            position: absolute;
+            top: -12px; left: -12px;
+            color: black; font-weight: bold; font-size: 1.2em; padding: 6px 12px;
+            border-radius: 8px; border: 2px solid white; box-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+
+        .gallery-card-back .type {
+            color: #aaa; text-transform: uppercase; font-size: 0.9em; letter-spacing: 2px; margin-bottom: 5px;
+        }
+
+        .gallery-card-back .stats {
+            font-size: 1.6em; font-weight: bold; margin: 10px 0;
+            display: flex; justify-content: center; gap: 15px; width: 100%;
+        }
+
+        .gallery-card-back .effect {
+            color: var(--gold-color); font-size: 1em; font-style: italic; margin: 15px 0; line-height: 1.4;
+        }
+
+        .gallery-card-back .flavor {
+            color: #888; font-size: 0.85em; border-top: 1px solid #444; padding-top: 10px; margin-top: auto;
+        }
     </style>
 </head>
 <body>
@@ -1300,6 +1387,7 @@
             <div class="title-buttons">
                 <button class="btn-title" onclick="startGame()">PLAY</button>
                 <button class="btn-title" onclick="openStore()">UPGRADES</button>
+                <button class="btn-title" onclick="openGallery()">GALLERY</button>
                 <button class="btn-title" onclick="openCredits()">CREDITS</button>
             </div>
         </div>
@@ -1375,6 +1463,20 @@
                 <span style="color: var(--text-color); font-weight: bold;">Game by Ken Wheadon</span>
             </p>
             <button class="btn-main" onclick="closeCredits()" style="margin-top: 20px; width: 100%; max-width: 300px;">BACK</button>
+        </div>
+    </div>
+
+    <div id="gallery-modal" class="modal">
+        <div class="store-inner" style="width: 90%; max-width: 1200px; height: 90%; display: flex; flex-direction: column;">
+            <div class="store-header">
+                <h2>MONSTER GALLERY</h2>
+            </div>
+            <div id="gallery-grid" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; overflow-y: auto; flex: 1; padding: 20px; align-items: flex-start;">
+                <!-- Cards filled by JS -->
+            </div>
+            <div style="text-align: center; margin-top: 20px; flex-shrink: 0;">
+                <button class="btn-sec" onclick="closeGallery()" style="width: 200px;">CLOSE</button>
+            </div>
         </div>
     </div>
 
@@ -1527,28 +1629,8 @@
     <div id="glossary-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(10px);">
         <div class="result-inner" onclick="event.stopPropagation()" style="width: 500px; max-width: 90%;">
             <h1 style="color: var(--gold-color); margin-bottom: 20px;">KEYWORD GLOSSARY</h1>
-            <div style="text-align: left; max-height: 400px; overflow-y: auto; padding: 20px; color: white; line-height: 1.6;">
-                <p><b style="color: var(--gold-color);">Team:</b> Stats to allies of same type at start of battle.</p>
-                <p><b style="color: #3498db;">Shield:</b> Blocks the first damage instance.</p>
-                <p><b style="color: #e74c3c;">Thorn:</b> Damage back to attacker when hit.</p>
-                <p><b style="color: var(--beast-color);">Anger:</b> Attack to allies when this dies.</p>
-                <p><b style="color: var(--nature-color);">Honor:</b> HP to allies when this dies.</p>
-                <p><b style="color: var(--human-color);">Twin:</b> Only 1 duplicate needed to Merge.</p>
-                <p><b style="color: var(--health-color);">Vampire:</b> Heal on hit (up to max HP).</p>
-                <p><b style="color: var(--beast-color);">Fury:</b> Gain stats when an ally dies.</p>
-                <p><b style="color: #3498db;">Taunt:</b> Enemies MUST attack this unit first.</p>
-                <p><b style="color: var(--genetic-color);">Poison:</b> Deals damage over time each clash.</p>
-                <p><b style="color: var(--nature-color);">Regen:</b> Heals at start of each clash.</p>
-                <p><b style="color: var(--cosmic-color);">Extra:</b> Spawns token on death.</p>
-                <p><b style="color: var(--health-color);">Weak:</b> Nerf random enemy permanently on death.</p>
-                <p><b style="color: var(--genetic-color);">Solo:</b> Start-of-battle buff if unique type.</p>
-                <hr style="border: 0; border-top: 1px solid #444; margin: 10px 0;">
-                <p><b style="color: var(--gold-color);">Crit:</b> Attacks have X% chance to deal double damage.</p>
-                <p><b style="color: #e74c3c;">Echo:</b> After attacking, X% chance to attack again immediately.</p>
-                <p><b style="color: var(--human-color);">Recruit:</b> When bought: gain +X/+X (or bonus gold/token).</p>
-                <p><b style="color: var(--mech-color);">Aura:</b> Adjacent allies gain +X Attack or +X HP.</p>
-                <p><b style="color: var(--gold-color);">Bounty:</b> When this dies (or is sold): gain X gold.</p>
-                <p><b style="color: var(--health-color);">LastStand:</b> If this would die, survive with 1 HP once per combat.</p>
+            <div id="glossary-content" style="text-align: left; max-height: 400px; overflow-y: auto; padding: 20px; color: white; line-height: 1.6;">
+                <!-- Filled dynamically by JavaScript -->
             </div>
             <button class="btn-main" onclick="closeGlossary()" style="margin-top: 20px; width: 100%;">CLOSE</button>
         </div>
@@ -1603,6 +1685,37 @@
         let SHOP_LEVEL_WEIGHTS = [];
         let CHARACTERS = [];
         let CREWS_REGISTRY = [];
+        let KEYWORDS_REGISTRY = {};
+
+        function getKeywordDefaultValue(effectBase) {
+            return (KEYWORDS_REGISTRY[effectBase] || {}).default || 0;
+        }
+
+        function getEffectDescription(monster) {
+            if (!monster.effect) return "";
+            let base = monster.effect.split(":")[0];
+            if (base.startsWith("Aura")) base = "Aura";
+            
+            let kw = KEYWORDS_REGISTRY[base];
+            if (!kw || !kw.template) return monster.effect;
+            
+            let valStr = monster.effect.split(":")[1] || "";
+            let vals = valStr.split("/");
+            let text = kw.template;
+            
+            text = text.replace(/\{X\}/g, vals[0] || kw.default || 0);
+            text = text.replace(/\{Y\}/g, vals[1] || vals[0] || kw.default || 0);
+            text = text.replace(/\{Type\}/g, monster.type);
+            
+            if (base === "Aura") {
+                if (monster.effect.toLowerCase().includes("hp")) {
+                    text = text.replace(/\{Y\}/g, "HP");
+                } else {
+                    text = text.replace(/\{Y\}/g, "Attack");
+                }
+            }
+            return text;
+        }
 
         async function loadData() {
             try {
@@ -1615,6 +1728,11 @@
                 SHOP_LEVEL_WEIGHTS = data.shopLevelWeights;
                 CHARACTERS = data.characters;
                 CREWS_REGISTRY = data.crews || [];
+                KEYWORDS_REGISTRY = data.keywords || {};
+                
+                MONSTER_REGISTRY.forEach(m => {
+                    m.effectDesc = getEffectDescription(m);
+                });
             } catch (error) {
                 console.error("Error loading data.json:", error);
             }
@@ -1951,7 +2069,18 @@
         /**
          * TUTORIAL & GLOSSARY
          */
-        function openGlossary() { document.getElementById('glossary-modal').style.display = 'flex'; }
+        function openGlossary() { 
+            const glossaryContent = document.getElementById('glossary-content');
+            if (glossaryContent.innerHTML.trim() === '') {
+                for (const key in KEYWORDS_REGISTRY) {
+                    const kw = KEYWORDS_REGISTRY[key];
+                    const p = document.createElement('p');
+                    p.innerHTML = `<b style="color: ${kw.color || 'white'};">${key}:</b> ${kw.desc}`;
+                    glossaryContent.appendChild(p);
+                }
+            }
+            document.getElementById('glossary-modal').style.display = 'flex'; 
+        }
         function closeGlossary() { document.getElementById('glossary-modal').style.display = 'none'; }
 
         let tutorialStep = 0;
@@ -2424,7 +2553,7 @@
 
                     // === RECRUIT / ONBUY EFFECT ===
                     if (monster.effect && monster.effect.startsWith("Recruit:")) {
-                        const val = parseInt(monster.effect.split(":")[1]) || 2;
+                        const val = parseInt(monster.effect.split(":")[1]) || getKeywordDefaultValue("Recruit") || 2;
                         const bought = state.squad[emptyIdx];
                         bought.atk += val;
                         bought.hp += val;
@@ -2745,7 +2874,7 @@
             battleData.ally.forEach((m, i) => {
                 if (!m.effect || !m.effect.startsWith("Aura:")) return;
                 const parts = m.effect.split(":");
-                const val = parseInt(parts[1]) || 1;
+                const val = parseInt(parts[1]) || getKeywordDefaultValue("Aura") || 1;
                 const isHp = parts[0].toLowerCase().includes("hp") || m.effect.toLowerCase().includes("aura (hp)");
                 
                 const applyToIdx = (idx) => {
@@ -2763,7 +2892,7 @@
             battleData.enemy.forEach((m, i) => {
                 if (!m.effect || !m.effect.startsWith("Aura:")) return;
                 const parts = m.effect.split(":");
-                const val = parseInt(parts[1]) || 1;
+                const val = parseInt(parts[1]) || getKeywordDefaultValue("Aura") || 1;
                 const isHp = parts[0].toLowerCase().includes("hp") || m.effect.toLowerCase().includes("aura (hp)");
 
                 const applyToIdx = (idx) => {
@@ -2864,14 +2993,14 @@
             // CRIT
             let aCrit = false, eCrit = false;
             if (a.effect && a.effect.startsWith("Crit:")) {
-                const chance = parseInt(a.effect.split(":")[1]) || 25;
+                const chance = parseInt(a.effect.split(":")[1]) || getKeywordDefaultValue("Crit") || 25;
                 if (Math.random() * 100 < chance) {
                     aDmgBase *= 2;
                     aCrit = true;
                 }
             }
             if (e.effect && e.effect.startsWith("Crit:")) {
-                const chance = parseInt(e.effect.split(":")[1]) || 25;
+                const chance = parseInt(e.effect.split(":")[1]) || getKeywordDefaultValue("Crit") || 25;
                 if (Math.random() * 100 < chance) {
                     eDmgBase *= 2;
                     eCrit = true;
@@ -2881,11 +3010,11 @@
             // ECHO (repeat attack prep)
             let aEcho = false, eEcho = false;
             if (a.effect && a.effect.startsWith("Echo:")) {
-                const chance = parseInt(a.effect.split(":")[1]) || 30;
+                const chance = parseInt(a.effect.split(":")[1]) || getKeywordDefaultValue("Echo") || 30;
                 if (Math.random() * 100 < chance) aEcho = true;
             }
             if (e.effect && e.effect.startsWith("Echo:")) {
-                const chance = parseInt(e.effect.split(":")[1]) || 30;
+                const chance = parseInt(e.effect.split(":")[1]) || getKeywordDefaultValue("Echo") || 30;
                 if (Math.random() * 100 < chance) eEcho = true;
             }
 
@@ -3011,9 +3140,31 @@
             let deadAllies = [];
             let deadEnemies = [];
 
-            // We must identify all dead from the full arrays
-            battleData.ally.forEach(m => { if (m.cHp <= 0) deadAllies.push(m); });
-            battleData.enemy.forEach(m => { if (m.cHp <= 0) deadEnemies.push(m); });
+            // FIX: Check LastStand BEFORE filtering out dead units
+            battleData.ally.forEach(m => {
+                if (m.cHp <= 0) {
+                    if (m.effect === 'LastStand' && !m.lastStandUsed) {
+                        m.cHp = 1;
+                        m.lastStandUsed = true;
+                        logHistory(`LASTSTAND: ${m.name} refuses to die! (1 HP left)`);
+                        showEffect('ally-line', 'LAST STAND!', 'var(--health-color)');
+                    } else {
+                        deadAllies.push(m);
+                    }
+                }
+            });
+            battleData.enemy.forEach(m => {
+                if (m.cHp <= 0) {
+                    if (m.effect === 'LastStand' && !m.lastStandUsed) {
+                        m.cHp = 1;
+                        m.lastStandUsed = true;
+                        logHistory(`LASTSTAND: ${m.name} refuses to die! (1 HP left)`);
+                        showEffect('enemy-line', 'LAST STAND!', 'var(--health-color)');
+                    } else {
+                        deadEnemies.push(m);
+                    }
+                }
+            });
 
             battleData.ally = battleData.ally.filter(m => m.cHp > 0);
             battleData.enemy = battleData.enemy.filter(m => m.cHp > 0);
@@ -3044,30 +3195,31 @@
                 ? (side === 'ally' ? battleData.ally : battleData.enemy)
                 : state.squad.filter(m => m !== null);
             
-            // BOUNTY
-            if (deadMonster.effect && deadMonster.effect.startsWith("Bounty:")) {
+            // BOUNTY - only award gold if the monster was on the player's side (or sold)
+            if (deadMonster.effect && deadMonster.effect.startsWith("Bounty:") && side === 'ally') {
                 const gold = parseInt(deadMonster.effect.split(":")[1]) || 2;
                 state.gold += gold;
                 runStats.effectTriggers.Bounty = (runStats.effectTriggers.Bounty || 0) + 1;
                 logHistory(`BOUNTY: +${gold} gold from ${deadMonster.name}`);
-                animateGoldCollection(null); // pops gold on player
+                animateGoldCollection(null);
             }
 
-            // LASTSTAND (only in battle)
+            // LASTSTAND is now handled in handleDeathsAndContinue before filtering
+            // This block is kept as a no-op safety check.
             if (context === 'battle' && deadMonster.effect === "LastStand" && !deadMonster.lastStandUsed) {
-                deadMonster.cHp = 1;
-                deadMonster.lastStandUsed = true;
-                logHistory(`LASTSTAND: ${deadMonster.name} refuses to die! (1 HP left)`);
-                showEffect(side === 'ally' ? 'ally-line' : 'enemy-line', 'LAST STAND!', 'var(--health-color)');
-                return; // don't remove from battleData (Wait, actually triggerDeathEffect returns? Yes, I'll return here)
+                return; // Shouldn't reach here; handled upstream
             }
             
-            // FURY: On ally death, gain stats
+            // FURY: On ally death, gain stats (also sync to base stats for persistence)
             targets.forEach((m, idx) => {
                 if (m && m.cHp > 0 && m.effect && m.effect.startsWith("Fury:")) {
                     const x = parseInt(m.effect.split(":")[1]);
                     m.cAtk += x; m.cHp += x;
-                    if (context === 'battle') showFloatingStat(idx, side + '-line', `+${x}/+${x} FURY`, 'var(--beast-color)');
+                    if (context === 'battle') {
+                        showFloatingStat(idx, side + '-line', `+${x}/+${x} FURY`, 'var(--beast-color)');
+                        syncToSquad(m, 'atk', x, side, `Fury (${deadMonster.name})`);
+                        syncToSquad(m, 'hp', x, side, `Fury (${deadMonster.name})`);
+                    }
                 }
             });
 
@@ -3188,6 +3340,10 @@
                 saveProgress();
             }
 
+            // FIX: Pre-calculate hpChange here so it's always defined for display logic below
+            const wager = Math.floor(state.round * 1.5) || 1;
+            const hpChange = wager;
+
             // COMBAT REWARDS: 1 for Participation, +1 for Win
             metaProgress.trophies += 1;
             runStats.trophiesEarned += 1;
@@ -3201,9 +3357,7 @@
                 logHistory(`Combat End: DEFEAT. +1 Trophy (Combat Participated)`);
             }
 
-            // HP Overhaul: Damage is fixed at round * 1.5 floor. Winners GAIN, Losers LOSE.
-            const wager = Math.floor(state.round * 1.5) || 1;
-            let hpChange = wager;
+            // HP change already calculated above (hpChange = wager)
 
             if (draw) {
                 logHistory(`--- Battle End: DRAW (No HP change) ---`);
@@ -3260,13 +3414,17 @@
             let aliveOthers = state.characters ? state.characters.filter(c => c.id !== state.character?.id && c.hp > 0) : [];
             const areOthersDead = aliveOthers.length === 0;
 
+            // FIX: The run ends if EITHER the player is dead OR all opponents are dead.
+            // Previously, winning the final round would fall into the wrong branch.
+            const isRunOver = isPlayerDead || areOthersDead;
+
             const modal = document.getElementById('battle-result-modal');
             const title = document.getElementById('battle-result-title');
             const desc = document.getElementById('battle-result-desc');
             const btn = modal.querySelector('button');
             modal.style.display = 'flex';
 
-            if (isPlayerDead || areOthersDead) {
+            if (isRunOver) {
                 title.innerText = isPlayerDead ? (areOthersDead ? "PYRRHIC VICTORY" : "GAME OVER") : "CHAMPION!";
                 title.style.color = isPlayerDead ? 'var(--health-color)' : 'var(--gold-color)';
                 
@@ -3297,6 +3455,7 @@
                 btn.onclick = () => location.reload();
                 if (!isPlayerDead) createCoinShower();
             } else {
+                // Round continues — give gold and advance round
                 const earnedGold = 10 + Math.floor(state.round / 2);
                 state.gold += earnedGold;
                 state.round++;
@@ -3306,16 +3465,7 @@
                     state.characters.forEach(ai => { if (ai.hp > 0) ai.gold += earnedGold; });
                 }
 
-                if (areOthersDead && !isPlayerDead) {
-                    title.innerText = "VICTORY!";
-                    title.style.color = 'var(--gold-color)';
-                    desc.innerHTML = `You earned ${earnedGold} Gold and 10 Trophies!`;
-                    createVictoryConfetti();
-                } else if (!areOthersDead && isPlayerDead) {
-                    title.innerText = "DEFEAT";
-                    title.style.color = 'var(--health-color)';
-                    desc.innerHTML = `You were eliminated!<br>You lost ${hpChange} HP.`;
-                } else if (draw) {
+                if (draw) {
                     title.innerText = "DRAW";
                     title.style.color = 'var(--gold-color)';
                     desc.innerHTML = `Stalemate! Both squads were wiped.<br>You earned ${earnedGold} Gold.`;
@@ -3972,6 +4122,81 @@
 
         function closeStore() {
             document.getElementById('store-modal').style.display = 'none';
+        }
+
+        function openGallery() {
+            renderGallery();
+            document.getElementById('gallery-modal').style.display = 'flex';
+        }
+
+        function closeGallery() {
+            document.getElementById('gallery-modal').style.display = 'none';
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = '';
+            
+            // Sort by tier (S=0, A=1, B=2...) then Name
+            const sortedMonsters = [...MONSTER_REGISTRY].sort((a, b) => {
+                const tiers = "SABCD E";
+                let tA = tiers.indexOf(a.tier) !== -1 ? tiers.indexOf(a.tier) : 99;
+                let tB = tiers.indexOf(b.tier) !== -1 ? tiers.indexOf(b.tier) : 99;
+                if(tA !== tB) return tA - tB;
+                return a.name.localeCompare(b.name);
+            });
+
+            sortedMonsters.forEach(m => {
+                const isUnlocked = !m.locked || metaProgress.unlockedCards.includes(m.id);
+                const tierColor = TIER_COLORS[m.tier || "E"] || "#b0bec5";
+                
+                const div = document.createElement('div');
+                div.className = 'gallery-item';
+                div.onclick = function() {
+                    this.classList.toggle('flipped');
+                };
+
+                if (isUnlocked) {
+                    div.innerHTML = `
+                        <div class="gallery-item-inner">
+                            <div class="gallery-card-front">
+                                <div class="tier" style="background: ${tierColor}">${m.tier || "E"}</div>
+                                <img src="${m.image}" alt="${m.name}">
+                                <div class="name">${m.name}</div>
+                            </div>
+                            <div class="gallery-card-back">
+                                <div>
+                                    <div class="type">${m.type}</div>
+                                    <div class="name" style="font-weight: bold; font-size: 1.4em; color: white;">${m.name}</div>
+                                </div>
+                                <div class="stats">
+                                    <span class="c-atk">⚔️ ${m.atk}</span>
+                                    <span class="c-hp"><img src="images/hp.png" class="icon-img" style="width: 1em;"> ${m.hp}</span>
+                                </div>
+                                <div class="effect">${m.effectDesc || ''}</div>
+                                <div class="flavor">"${m.flavor || ''}"</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="gallery-item-inner">
+                            <div class="gallery-card-front" style="filter: grayscale(1); opacity: 0.5; border-color: #555;">
+                                <div class="tier" style="background: #555">?</div>
+                                <img src="images/demon.png" alt="Locked" style="opacity: 0.3;">
+                                <div class="name">LOCKED</div>
+                            </div>
+                            <div class="gallery-card-back" style="border-color: #555;">
+                                <div style="display:flex; justify-content:center; align-items:center; height:100%; color: #888; font-size: 1.2em;">
+                                    Unlock in Upgrades Store
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    div.onclick = null; // Do not flip locked cards
+                }
+                grid.appendChild(div);
+            });
         }
 
         function renderStore() {

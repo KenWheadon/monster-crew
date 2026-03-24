@@ -10,7 +10,6 @@
       "hp": 2,
       "cost": 3,
       "effect": "Team:1",
-      "effectDesc": "TEAM: +1/0 to each other friendly Beast.",
       "flavor": "Just a little guy.",
       "locked": true,
       "unlockPrice": 5
@@ -25,7 +24,6 @@
       "hp": 2,
       "cost": 3,
       "effect": "Honor:1",
-      "effectDesc": "HONOR: 0/+1 to other friendly cards on death.",
       "flavor": "Always ready.",
       "locked": false
     },
@@ -39,7 +37,6 @@
       "hp": 2,
       "cost": 3,
       "effect": "Team:1",
-      "effectDesc": "TEAM: +1/0 to each other friendly Genetic.",
       "flavor": "Built for efficiency.",
       "locked": true,
       "unlockPrice": 5
@@ -54,7 +51,6 @@
       "hp": 3,
       "cost": 3,
       "effect": "Honor:1",
-      "effectDesc": "HONOR: 0/+1 to other friendly cards on death.",
       "flavor": "Thrives in sunlight.",
       "locked": true,
       "unlockPrice": 5
@@ -69,7 +65,6 @@
       "hp": 2,
       "cost": 3,
       "effect": "Anger:1",
-      "effectDesc": "ANGER: +1/0 to other friendly cards on death.",
       "flavor": "Watches from the shadows.",
       "locked": true,
       "unlockPrice": 5
@@ -84,7 +79,6 @@
       "hp": 3,
       "cost": 3,
       "effect": "Shield",
-      "effectDesc": "SHIELD: Blocks the first instance of damage.",
       "flavor": "Obedient and tiny.",
       "locked": true,
       "unlockPrice": 5
@@ -99,7 +93,6 @@
       "hp": 1,
       "cost": 3,
       "effect": "Anger:1",
-      "effectDesc": "ANGER: +1/0 to other friendly cards on death.",
       "flavor": "Hide your nuts.",
       "locked": true,
       "unlockPrice": 5
@@ -114,7 +107,6 @@
       "hp": 1,
       "cost": 2,
       "effect": "Team:1",
-      "effectDesc": "TEAM: +1/0 to each other friendly Human.",
       "flavor": "Happy to be here.",
       "locked": true,
       "unlockPrice": 5
@@ -129,7 +121,6 @@
       "hp": 1,
       "cost": 3,
       "effect": "Team:1",
-      "effectDesc": "TEAM: +1/0 to each other friendly Genetic.",
       "flavor": "Splits easily.",
       "locked": true,
       "unlockPrice": 5
@@ -144,7 +135,6 @@
       "hp": 2,
       "cost": 3,
       "effect": "Honor:1",
-      "effectDesc": "HONOR: 0/+1 to other friendly cards on death.",
       "flavor": "Small but hopeful.",
       "locked": true,
       "unlockPrice": 5
@@ -159,7 +149,6 @@
       "hp": 2,
       "cost": 4,
       "effect": "Anger:1",
-      "effectDesc": "ANGER: +1/0 to other friendly cards on death.",
       "flavor": "A flick of light.",
       "locked": true,
       "unlockPrice": 5
@@ -174,7 +163,6 @@
       "hp": 2,
       "cost": 3,
       "effect": "Shield",
-      "effectDesc": "SHIELD: Blocks the first instance of damage.",
       "flavor": "Calculated sacrifice.",
       "locked": true,
       "unlockPrice": 5
@@ -189,7 +177,6 @@
       "hp": 3,
       "cost": 5,
       "effect": "Anger:2",
-      "effectDesc": "ANGER: +2/0 to other friendly cards on death.",
       "flavor": "Fights when backed into a corner.",
       "locked": true,
       "unlockPrice": 10
@@ -204,7 +191,6 @@
       "hp": 5,
       "cost": 5,
       "effect": "Team:2",
-      "effectDesc": "TEAM: +2/0 to each other friendly Human.",
       "flavor": "Keeps the ship running.",
       "locked": true,
       "unlockPrice": 10
@@ -219,7 +205,6 @@
       "hp": 5,
       "cost": 5,
       "effect": "Thorn:2",
-      "effectDesc": "THORN: Deal 2 damage back when hit.",
       "flavor": "Heavy lifting specialized.",
       "locked": true,
       "unlockPrice": 10
@@ -234,7 +219,6 @@
       "hp": 6,
       "cost": 5,
       "effect": "Thorn:2",
-      "effectDesc": "THORN: Deal 2 damage back when hit.",
       "flavor": "Pricky but persistent.",
       "locked": true,
       "unlockPrice": 10
@@ -249,7 +233,6 @@
       "hp": 3,
       "cost": 6,
       "effect": "Extra:2/2",
-      "effectDesc": "EXTRA: Spawn a 2/2 on death.",
       "flavor": "Lingers with intent.",
       "locked": true,
       "unlockPrice": 10
@@ -264,7 +247,6 @@
       "hp": 2,
       "cost": 6,
       "effect": "Shield",
-      "effectDesc": "SHIELD: Blocks the first instance of damage.",
       "flavor": "Four wheels of support.",
       "locked": true,
       "unlockPrice": 10
@@ -279,7 +261,6 @@
       "hp": 4,
       "cost": 5,
       "effect": "Solo:2",
-      "effectDesc": "SOLO: +2/+2 if there are no other Beasts.",
       "flavor": "Clever and alone.",
       "locked": true,
       "unlockPrice": 10
@@ -294,7 +275,6 @@
       "hp": 5,
       "cost": 4,
       "effect": "Cheap:2",
-      "effectDesc": "CHEAP: -2 to cost in shop.",
       "flavor": "Stands his ground.",
       "locked": true,
       "unlockPrice": 10
@@ -309,7 +289,6 @@
       "hp": 3,
       "cost": 6,
       "effect": "Twin",
-      "effectDesc": "TWIN: Merge with 2 instead of 3.",
       "flavor": "Best of both worlds.",
       "locked": true,
       "unlockPrice": 10
@@ -324,7 +303,6 @@
       "hp": 7,
       "cost": 5,
       "effect": "Thorn:2",
-      "effectDesc": "THORN: Deal 2 damage back when hit.",
       "flavor": "Hurts to touch.",
       "locked": true,
       "unlockPrice": 10
@@ -339,7 +317,6 @@
       "hp": 2,
       "cost": 6,
       "effect": "Anger:2",
-      "effectDesc": "ANGER: +2/0 to other friendly cards on death.",
       "flavor": "Flickers in the void.",
       "locked": true,
       "unlockPrice": 10
@@ -354,7 +331,6 @@
       "hp": 6,
       "cost": 5,
       "effect": "Team:2",
-      "effectDesc": "TEAM: +2/0 to each other friendly Mech.",
       "flavor": "Relays commands.",
       "locked": true,
       "unlockPrice": 10
@@ -369,7 +345,6 @@
       "hp": 4,
       "cost": 8,
       "effect": "Twin",
-      "effectDesc": "TWIN: Merge with 2 instead of 3.",
       "flavor": "Charges headfirst.",
       "locked": true,
       "unlockPrice": 10
@@ -384,7 +359,6 @@
       "hp": 7,
       "cost": 7,
       "effect": "Honor:3",
-      "effectDesc": "HONOR: 0/+3 to other friendly cards on death.",
       "flavor": "Saves lives even in defeat.",
       "locked": true,
       "unlockPrice": 10
@@ -399,7 +373,6 @@
       "hp": 6,
       "cost": 8,
       "effect": "Extra:3/3",
-      "effectDesc": "EXTRA: Spawn a 3/3 on death.",
       "flavor": "Carries more than weight.",
       "locked": true,
       "unlockPrice": 10
@@ -414,7 +387,6 @@
       "hp": 6,
       "cost": 7,
       "effect": "Team:3",
-      "effectDesc": "TEAM: +3/0 to each other friendly Nature.",
       "flavor": "Grows stronger together.",
       "locked": true,
       "unlockPrice": 10
@@ -429,7 +401,6 @@
       "hp": 3,
       "cost": 9,
       "effect": "Solo:5",
-      "effectDesc": "SOLO: Gain +5/+5 if there are no other Cosmics.",
       "flavor": "Sees all futures.",
       "locked": true,
       "unlockPrice": 10
@@ -444,7 +415,6 @@
       "hp": 5,
       "cost": 8,
       "effect": "Cheap:2",
-      "effectDesc": "CHEAP: -2 to cost in shop.",
       "flavor": "Almost too human.",
       "locked": true,
       "unlockPrice": 10
@@ -459,7 +429,6 @@
       "hp": 5,
       "cost": 8,
       "effect": "Team:3",
-      "effectDesc": "TEAM: +3/0 to each other friendly Beast.",
       "flavor": "Sees only red.",
       "locked": true,
       "unlockPrice": 15
@@ -474,7 +443,6 @@
       "hp": 8,
       "cost": 7,
       "effect": "Honor:3",
-      "effectDesc": "HONOR: 0/+3 to other friendly cards on death.",
       "flavor": "Last line of defense.",
       "locked": true,
       "unlockPrice": 15
@@ -489,7 +457,6 @@
       "hp": 4,
       "cost": 9,
       "effect": "Weak:3",
-      "effectDesc": "WEAK: -3/-3 to enemy random card on death.",
       "flavor": "Perfect copy.",
       "locked": true,
       "unlockPrice": 15
@@ -504,7 +471,6 @@
       "hp": 9,
       "cost": 7,
       "effect": "Weak:3",
-      "effectDesc": "WEAK: -3/-3 to enemy random card on death.",
       "flavor": "Bends but never breaks.",
       "locked": true,
       "unlockPrice": 15
@@ -519,7 +485,6 @@
       "hp": 4,
       "cost": 10,
       "effect": "Solo:5",
-      "effectDesc": "SOLO: Gain +5/+5 if there are no other Cosmics.",
       "flavor": "Watches every move.",
       "locked": true,
       "unlockPrice": 15
@@ -534,7 +499,6 @@
       "hp": 7,
       "cost": 8,
       "effect": "Cheap:3",
-      "effectDesc": "CHEAP: -3 to cost in shop.",
       "flavor": "Efficient and ruthless.",
       "locked": true,
       "unlockPrice": 15
@@ -549,7 +513,6 @@
       "hp": 6,
       "cost": 11,
       "effect": "Anger:4",
-      "effectDesc": "ANGER: +4/0 to other friendly cards on death.",
       "flavor": "Leads the pack's fury.",
       "locked": true,
       "unlockPrice": 10
@@ -564,7 +527,6 @@
       "hp": 9,
       "cost": 10,
       "effect": "Honor:4",
-      "effectDesc": "HONOR: 0/+4 to other friendly cards on death.",
       "flavor": "Stands firm against any threat.",
       "locked": true,
       "unlockPrice": 10
@@ -579,7 +541,6 @@
       "hp": 7,
       "cost": 12,
       "effect": "Twin",
-      "effectDesc": "TWIN: Merge with 2 instead of 3.",
       "flavor": "Ancient power reborn.",
       "locked": true,
       "unlockPrice": 10
@@ -594,7 +555,6 @@
       "hp": 12,
       "cost": 10,
       "effect": "Weak:4",
-      "effectDesc": "WEAK: -4/-4 to enemy random card on death.",
       "flavor": "Quietly undermining.",
       "locked": true,
       "unlockPrice": 10
@@ -609,7 +569,6 @@
       "hp": 8,
       "cost": 12,
       "effect": "Extra:4/4",
-      "effectDesc": "EXTRA: Spawn a 4/4 on death.",
       "flavor": "Ink clouds of mayhem.",
       "locked": true,
       "unlockPrice": 10
@@ -624,7 +583,6 @@
       "hp": 7,
       "cost": 11,
       "effect": "Honor:4",
-      "effectDesc": "HONOR: 0/+4 to other friendly cards on death.",
       "flavor": "Sings its final melody.",
       "locked": true,
       "unlockPrice": 10
@@ -639,7 +597,6 @@
       "hp": 7,
       "cost": 11,
       "effect": "Team:4",
-      "effectDesc": "TEAM: +4/0 to each other friendly Beast.",
       "flavor": "Stalks in silence.",
       "locked": true,
       "unlockPrice": 20
@@ -654,7 +611,6 @@
       "hp": 10,
       "cost": 10,
       "effect": "Honor:4",
-      "effectDesc": "HONOR: 0/+4 to other friendly cards on death.",
       "flavor": "Oath of the blade.",
       "locked": true,
       "unlockPrice": 20
@@ -669,7 +625,6 @@
       "hp": 9,
       "cost": 12,
       "effect": "Anger:5",
-      "effectDesc": "ANGER: +5/0 to other friendly cards on death.",
       "flavor": "Evolving rapidly.",
       "locked": true,
       "unlockPrice": 20
@@ -684,7 +639,6 @@
       "hp": 14,
       "cost": 10,
       "effect": "Extra:5/5",
-      "effectDesc": "EXTRA: Spawn a 5/5 on death.",
       "flavor": "Roots of power.",
       "locked": true,
       "unlockPrice": 20
@@ -699,7 +653,6 @@
       "hp": 10,
       "cost": 13,
       "effect": "Weak:5",
-      "effectDesc": "WEAK: -5/-5 to enemy random card on death.",
       "flavor": "Nothingness awaits.",
       "locked": true,
       "unlockPrice": 20
@@ -714,7 +667,6 @@
       "hp": 8,
       "cost": 11,
       "effect": "Twin",
-      "effectDesc": "TWIN: Merge with 2 instead of 3.",
       "flavor": "Clay and wire.",
       "locked": true,
       "unlockPrice": 20
@@ -729,7 +681,6 @@
       "hp": 10,
       "cost": 16,
       "effect": "Anger:6",
-      "effectDesc": "ANGER: +6/0 to other friendly cards on death.",
       "flavor": "Awakens with rage.",
       "locked": true,
       "unlockPrice": 10
@@ -744,7 +695,6 @@
       "hp": 14,
       "cost": 15,
       "effect": "Team:6",
-      "effectDesc": "TEAM: +6/0 to each other friendly Human.",
       "flavor": "Commands the whole fleet.",
       "locked": true,
       "unlockPrice": 10
@@ -759,7 +709,6 @@
       "hp": 12,
       "cost": 17,
       "effect": "Extra:6/6",
-      "effectDesc": "EXTRA: Spawn a 6/6 on death.",
       "flavor": "Engineered for destruction.",
       "locked": true,
       "unlockPrice": 10
@@ -774,7 +723,6 @@
       "hp": 18,
       "cost": 14,
       "effect": "Honor:6",
-      "effectDesc": "HONOR: 0/+6 to other friendly cards on death.",
       "flavor": "Feeds the whole team.",
       "locked": true,
       "unlockPrice": 10
@@ -789,7 +737,6 @@
       "hp": 11,
       "cost": 18,
       "effect": "Solo:8",
-      "effectDesc": "SOLO: Gain +8/+8 if there are no other Cosmics.",
       "flavor": "Devours starlight.",
       "locked": true,
       "unlockPrice": 10
@@ -804,7 +751,6 @@
       "hp": 13,
       "cost": 16,
       "effect": "Cheap:3",
-      "effectDesc": "CHEAP: -3 to cost in shop.",
       "flavor": "Armor that keeps fighting.",
       "locked": true,
       "unlockPrice": 10
@@ -819,7 +765,6 @@
       "hp": 12,
       "cost": 16,
       "effect": "Solo:10",
-      "effectDesc": "SOLO: +10/+10 if there are no other Beasts.",
       "flavor": "Monarch of the wild.",
       "locked": true,
       "unlockPrice": 25
@@ -834,7 +779,6 @@
       "hp": 16,
       "cost": 15,
       "effect": "Team:8",
-      "effectDesc": "TEAM: +8/0 to each other friendly Human.",
       "flavor": "Strategic brilliance.",
       "locked": true,
       "unlockPrice": 25
@@ -849,7 +793,6 @@
       "hp": 14,
       "cost": 18,
       "effect": "Anger:8",
-      "effectDesc": "ANGER: +8/0 to other friendly cards on death.",
       "flavor": "Unstoppable force.",
       "locked": true,
       "unlockPrice": 25
@@ -864,7 +807,6 @@
       "hp": 20,
       "cost": 14,
       "effect": "Extra:10/10",
-      "effectDesc": "EXTRA: Spawn a 10/10 on death.",
       "flavor": "The land fights back.",
       "locked": true,
       "unlockPrice": 25
@@ -879,7 +821,6 @@
       "hp": 13,
       "cost": 19,
       "effect": "Weak:8",
-      "effectDesc": "WEAK: -8/-8 to enemy random card on death.",
       "flavor": "Tear in reality.",
       "locked": true,
       "unlockPrice": 25
@@ -894,7 +835,6 @@
       "hp": 15,
       "cost": 17,
       "effect": "Twin",
-      "effectDesc": "TWIN: Merge with 2 instead of 3.",
       "flavor": "Colossus of steel.",
       "locked": true,
       "unlockPrice": 25
@@ -909,7 +849,6 @@
       "hp": 3,
       "cost": 9,
       "effect": "Crit:35",
-      "effectDesc": "CRIT: 35% chance to deal double damage.",
       "flavor": "Explodes with starlight.",
       "locked": true,
       "unlockPrice": 10
@@ -924,7 +863,6 @@
       "hp": 5,
       "cost": 10,
       "effect": "Echo:45",
-      "effectDesc": "ECHO: 45% chance to attack again immediately.",
       "flavor": "Laughs as it strikes twice.",
       "locked": true,
       "unlockPrice": 10
@@ -939,7 +877,6 @@
       "hp": 4,
       "cost": 4,
       "effect": "Recruit:2",
-      "effectDesc": "RECRUIT: +2/+2 when bought.",
       "flavor": "Loyal for the right price.",
       "locked": true,
       "unlockPrice": 10
@@ -954,7 +891,6 @@
       "hp": 8,
       "cost": 11,
       "effect": "Aura:2",
-      "effectDesc": "AURA: Adjacent allies gain +2 Attack.",
       "flavor": "Commands the line.",
       "locked": true,
       "unlockPrice": 10
@@ -969,7 +905,6 @@
       "hp": 7,
       "cost": 6,
       "effect": "Bounty:4",
-      "effectDesc": "BOUNTY: +4 gold when this dies.",
       "flavor": "Sweet even in sacrifice.",
       "locked": true,
       "unlockPrice": 10
@@ -984,7 +919,6 @@
       "hp": 15,
       "cost": 15,
       "effect": "LastStand",
-      "effectDesc": "LASTSTAND: Survives with 1 HP once per combat.",
       "flavor": "For the crew!",
       "locked": true,
       "unlockPrice": 10
@@ -2065,5 +1999,115 @@
         "h4"
       ]
     }
-  ]
+  ],
+  "keywords": {
+    "Team": {
+      "color": "var(--gold-color)",
+      "desc": "Stats to allies of same type at start of battle.",
+      "template": "TEAM: +{X}/0 to each other friendly {Type}."
+    },
+    "Shield": {
+      "color": "#3498db",
+      "desc": "Blocks the first damage instance.",
+      "template": "SHIELD: Blocks the first instance of damage."
+    },
+    "Thorn": {
+      "color": "#e74c3c",
+      "desc": "Damage back to attacker when hit.",
+      "template": "THORN: Deal {X} damage back when hit."
+    },
+    "Anger": {
+      "color": "var(--beast-color)",
+      "desc": "Attack to allies when this dies.",
+      "template": "ANGER: +{X}/0 to other friendly cards on death."
+    },
+    "Honor": {
+      "color": "var(--nature-color)",
+      "desc": "HP to allies when this dies.",
+      "template": "HONOR: 0/+{X} to other friendly cards on death."
+    },
+    "Twin": {
+      "color": "var(--human-color)",
+      "desc": "Only 1 duplicate needed to Merge.",
+      "template": "TWIN: Merge with 2 instead of 3."
+    },
+    "Vampire": {
+      "color": "var(--health-color)",
+      "desc": "Heal on hit (up to max HP).",
+      "template": "VAMPIRE: Heal up to {X} HP on hit."
+    },
+    "Fury": {
+      "color": "var(--beast-color)",
+      "desc": "Gain stats when an ally dies.",
+      "template": "FURY: Gain +{X}/+{X} when a friendly card dies."
+    },
+    "Taunt": {
+      "color": "#3498db",
+      "desc": "Enemies MUST attack this unit first.",
+      "template": "TAUNT: Enemies MUST attack this unit first."
+    },
+    "Poison": {
+      "color": "var(--genetic-color)",
+      "desc": "Deals damage over time each clash.",
+      "template": "POISON: Deals {X} damage over time each clash."
+    },
+    "Regen": {
+      "color": "var(--nature-color)",
+      "desc": "Heals at start of each clash.",
+      "template": "REGEN: Heals {X} HP at the start of each clash."
+    },
+    "Extra": {
+      "color": "var(--cosmic-color)",
+      "desc": "Spawns token on death.",
+      "template": "EXTRA: Spawn a {X}/{Y} on death."
+    },
+    "Weak": {
+      "color": "var(--health-color)",
+      "desc": "Nerf random enemy permanently on death.",
+      "template": "WEAK: -{X}/-{X} to enemy random card on death."
+    },
+    "Solo": {
+      "color": "var(--genetic-color)",
+      "desc": "Start-of-battle buff if unique type.",
+      "template": "SOLO: +{X}/+{X} if there are no other {Type}s."
+    },
+    "Crit": {
+      "color": "var(--gold-color)",
+      "desc": "Attacks have {X}% chance to deal double damage.",
+      "template": "CRIT: Attacks have {X}% chance to deal double damage.",
+      "default": 25
+    },
+    "Echo": {
+      "color": "#e74c3c",
+      "desc": "After attacking, {X}% chance to attack again immediately.",
+      "template": "ECHO: After attacking, {X}% chance to attack again immediately.",
+      "default": 30
+    },
+    "Recruit": {
+      "color": "var(--human-color)",
+      "desc": "When bought: gain +{X}/+{X}.",
+      "template": "RECRUIT: When bought: gain +{X}/+{X}.",
+      "default": 2
+    },
+    "Aura": {
+      "color": "var(--mech-color)",
+      "desc": "Adjacent allies gain +{X} {Y}.",
+      "template": "AURA: Adjacent allies gain +{X} {Y}."
+    },
+    "Bounty": {
+      "color": "var(--gold-color)",
+      "desc": "When this dies (or is sold): gain {X} gold.",
+      "template": "BOUNTY: When this dies (or is sold): gain {X} gold."
+    },
+    "LastStand": {
+      "color": "var(--health-color)",
+      "desc": "If this would die, survive with 1 HP once per combat.",
+      "template": "LASTSTAND: Survive with 1 HP once per combat."
+    },
+    "Cheap": {
+      "color": "var(--gold-color)",
+      "desc": "-{X} to cost in shop.",
+      "template": "CHEAP: -{X} to cost in shop."
+    }
+  }
 }
