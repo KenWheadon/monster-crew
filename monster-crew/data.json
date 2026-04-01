@@ -2109,5 +2109,105 @@
       "desc": "-{X} to cost in shop.",
       "template": "CHEAP: -{X} to cost in shop."
     }
-  }
+  },
+  "items": [
+    {
+      "id": "triangle",
+      "name": "Triangle Charm",
+      "icon": "▲",
+      "desc": "After surviving a hit, all your monsters gain +1/+1.",
+      "effect": "surviveHitBuff"
+    },
+    {
+      "id": "circle",
+      "name": "Circle Amulet",
+      "icon": "●",
+      "desc": "Gain 1 gold every time one of your monsters dies.",
+      "effect": "deathGold"
+    },
+    {
+      "id": "rectangle",
+      "name": "Rectangle Plate",
+      "icon": "■",
+      "desc": "Your monsters heal 2 HP each time they survive a hit.",
+      "effect": "surviveHitHeal"
+    }
+  ],
+  "areas": [
+    {
+      "id": "crew_area",
+      "name": "Crew Area",
+      "background": "images/crew_area_bg.jpg",
+      "captainId": "vance",
+      "nodes": [
+        { "id": "n1", "type": "monster_shop", "x": 120, "y": 200, "branchTo": ["n2"] },
+        { "id": "n2", "type": "genetic_library", "x": 350, "y": 180, "branchTo": ["n3", "n4"] },
+        { "id": "n3", "type": "armory", "x": 500, "y": 120, "branchTo": ["n5"] },
+        { "id": "n4", "type": "item_shop", "x": 500, "y": 240, "branchTo": ["n5"] },
+        { "id": "n5", "type": "boss", "x": 650, "y": 180 }
+      ]
+    },
+    {
+      "id": "engineering",
+      "name": "Engineering",
+      "background": "images/engineering_bg.jpg",
+      "captainId": "pancake",
+      "nodes": [
+        { "id": "n1", "type": "crew_quarters", "x": 100, "y": 250, "branchTo": ["n2"] },
+        { "id": "n2", "type": "monster_shop", "x": 300, "y": 150, "branchTo": ["n3", "n4"] },
+        { "id": "n3", "type": "armory", "x": 500, "y": 100, "branchTo": ["n5"] },
+        { "id": "n4", "type": "genetic_library", "x": 500, "y": 200, "branchTo": ["n5"] },
+        { "id": "n5", "type": "boss", "x": 700, "y": 150 }
+      ]
+    },
+    {
+      "id": "cargo_hold",
+      "name": "Cargo Hold",
+      "background": "images/cargo_hold_bg.jpg",
+      "captainId": "dread",
+      "nodes": [
+        { "id": "n1", "type": "monster_shop", "x": 150, "y": 200, "branchTo": ["n2", "n3"] },
+        { "id": "n2", "type": "item_shop", "x": 350, "y": 100, "branchTo": ["n4"] },
+        { "id": "n3", "type": "crew_quarters", "x": 350, "y": 300, "branchTo": ["n4"] },
+        { "id": "n4", "type": "boss", "x": 600, "y": 200 }
+      ]
+    },
+    {
+      "id": "science_lab",
+      "name": "Science Lab",
+      "background": "images/science_lab_bg.jpg",
+      "captainId": "brain",
+      "nodes": [
+        { "id": "n1", "type": "genetic_library", "x": 100, "y": 150, "branchTo": ["n2"] },
+        { "id": "n2", "type": "monster_shop", "x": 300, "y": 150, "branchTo": ["n3", "n4"] },
+        { "id": "n3", "type": "armory", "x": 500, "y": 100, "branchTo": ["n5"] },
+        { "id": "n4", "type": "crew_quarters", "x": 500, "y": 200, "branchTo": ["n5"] },
+        { "id": "n5", "type": "boss", "x": 700, "y": 150 }
+      ]
+    },
+    {
+      "id": "botanical_gardens",
+      "name": "Botanical Gardens",
+      "background": "images/botanical_gardens_bg.jpg",
+      "captainId": "pete",
+      "nodes": [
+        { "id": "n1", "type": "monster_shop", "x": 100, "y": 200, "branchTo": ["n2", "n3"] },
+        { "id": "n2", "type": "crew_quarters", "x": 350, "y": 100, "branchTo": ["n4"] },
+        { "id": "n3", "type": "item_shop", "x": 350, "y": 300, "branchTo": ["n4"] },
+        { "id": "n4", "type": "boss", "x": 600, "y": 200 }
+      ]
+    },
+    {
+      "id": "bestiary",
+      "name": "Bestiary",
+      "background": "images/bestiary_bg.jpg",
+      "captainId": "mrat",
+      "nodes": [
+        { "id": "n1", "type": "monster_shop", "x": 100, "y": 150, "branchTo": ["n2", "n3"] },
+        { "id": "n2", "type": "genetic_library", "x": 300, "y": 100, "branchTo": ["n4"] },
+        { "id": "n3", "type": "armory", "x": 300, "y": 200, "branchTo": ["n4"] },
+        { "id": "n4", "type": "boss", "x": 500, "y": 150 }
+      ]
+    }
+  ]
 }
